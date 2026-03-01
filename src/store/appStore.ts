@@ -75,7 +75,7 @@ export const useAppStore = defineStore('app', () => {
   const encoding = ref<Encoding>('auto');
   const appTitle = ref('FindDeep');
   
-  const userName = ref('Zheng');
+  const userName = ref('Finder');
   const userAvatar = ref<string | null>(null);
   const userAvatarColor = ref<string | null>(null);
   

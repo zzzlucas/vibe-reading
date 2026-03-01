@@ -10,7 +10,6 @@
           <icon-material-symbols-menu />
         </button>
         <span class="logo-text top-logo" @dblclick="store.toggleBossMode()">{{ store.appTitle }}</span>
-        <span class="current-chat-title" :class="{ 'gemini-center-title': store.style === 'gemini' }" v-show="store.settings.showNovelTitle && !(store.style === 'gemini' && store.activeNovelIndex === null)">{{ chatTitle }}</span>
       </div>
       <div class="top-bar-right">
         <button v-if="!store.isPro" class="top-btn" @click="store.showActivateModal = true">
@@ -1959,26 +1958,6 @@ watch(() => store.activeNovelIndex, (newIdx) => {
 }
 
 
-.current-chat-title {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-left: 8px;
-  
-  &.gemini-center-title {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--text-primary);
-    max-width: 40%;
-    text-align: center;
-  }
-}
 
 .top-bar-right {
   display: flex;
@@ -3150,7 +3129,6 @@ watch(() => store.activeNovelIndex, (newIdx) => {
 
 
 @media (max-width: 1024px) {
-  .current-chat-title { display: none; }
   .top-btn-extra { display: none; }
 }
 
