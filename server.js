@@ -15,6 +15,19 @@ const isProd = fs.existsSync(distDir);
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
+
+// ===== PWA Service Worker must NOT be cached by the browser =====
+// If the browser caches sw.js, it will never detect the new version after a build.
+app.use((req, res, next) => {
+  const swFiles = ['/sw.js', '/workbox-', '/registerSW.js'];
+  if (swFiles.some(f => req.path.startsWith(f))) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+  next();
+});
+
 app.use(express.static(staticDir));
 
 // ===== Card Key System =====
