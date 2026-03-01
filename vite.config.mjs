@@ -51,8 +51,8 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: 'DeepReader',
-        short_name: 'DeepReader',
+        name: 'FindDeep',
+        short_name: 'FindDeep',
         description: 'AI Assistant — Local Document Reader',
         theme_color: '#1a1a2e',
         background_color: '#1a1a2e',

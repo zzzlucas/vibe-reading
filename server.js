@@ -160,7 +160,7 @@ app.post('/api/feedback', async (req, res) => {
   try {
     const htmlContent = `
       <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #efefef; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-        <h2 style="color: #4285f4; border-bottom: 2px solid #4285f4; padding-bottom: 10px;">📬 DeepReader 用户反馈</h2>
+        <h2 style="color: #4285f4; border-bottom: 2px solid #4285f4; padding-bottom: 10px;">📬 FindDeep 用户反馈</h2>
         
         <div style="margin: 16px 0;">
           <span style="background: #f1f3f4; padding: 4px 12px; border-radius: 20px; font-size: 13px; color: #5f6368; font-weight: bold;">
@@ -190,7 +190,7 @@ app.post('/api/feedback', async (req, res) => {
     `;
 
     await transporter.sendMail({
-      from: '"DeepReader Bot" <lucasishere@163.com>',
+      from: '"FindDeep Bot" <lucasishere@163.com>',
       to: 'zehcoid@foxmail.com',
       subject: `[${typeLabels[type] || '反馈'}] ${message.substring(0, 40)}${message.length > 40 ? '...' : ''}`,
       html: htmlContent
@@ -210,7 +210,7 @@ app.get('*', (req, res) => {
 
 // ===== Start =====
 app.listen(PORT, () => {
-  console.log(`\n  🚀 DeepReader Server is running`);
+  console.log(`\n  🚀 FindDeep Server is running`);
   console.log(`  📖 Open http://localhost:${PORT} to start reading`);
   console.log(`  🔑 Card key system: ENABLED`);
   if (isProd) {

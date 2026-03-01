@@ -2,10 +2,10 @@ import type { StyleConfig, StyleName } from '../types';
 
 export const STYLE_CONFIG: Record<StyleName, StyleConfig> = {
   gemini: {
-    logo: 'DeepReader',
-    title: 'DeepReader',
-    placeholder: '问问 DeepReader',
-    disclaimer: 'DeepReader 是一款内部协作工具，信息仅供参考。',
+    logo: 'FindDeep',
+    title: 'FindDeep',
+    placeholder: '问问 FindDeep',
+    disclaimer: 'FindDeep 是一款内部协作工具，信息仅供参考。',
     modelLabel: 'Pro',
     welcomeTitle: '你好呀',
     welcomeSubtitle: '有什么我可以帮忙的吗？',
