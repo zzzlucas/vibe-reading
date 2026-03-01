@@ -1,0 +1,13 @@
+dist/
+typings
+eploy_versions/
+.temp/
+.rn_temp/
+node_modules/
+.DS_Store
+resume-miniprogram-master/
+taro-sample-weapp-next/
+taro-yanxuan-master/
+xingzuo-master/
+chat-uikit-wechat-main/
+resource/

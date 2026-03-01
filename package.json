@@ -1,0 +1,44 @@
+{
+  "name": "gemini-reader",
+  "version": "1.0.0",
+  "description": "Gemini-style novel reader with multi-theme support",
+  "main": "server.js",
+  "scripts": {
+    "dev": "npm run build && kill-port 3000 && nodemon server.js",
+    "dev:client": "vite",
+    "dev:server": "kill-port 3000 && nodemon server.js",
+    "start": "kill-port 3000 && node server.js",
+    "build": "vite build --config vite.config.mjs",
+    "build:full": "vite build --config vite.config.mjs && node obfuscate.js",
+    "preview": "vite preview --config vite.config.mjs",
+    "serve": "node server.js"
+  },
+  "dependencies": {
+    "@types/dompurify": "^3.2.0",
+    "@types/marked": "^6.0.0",
+    "cors": "^2.8.5",
+    "dompurify": "^3.3.1",
+    "express": "^4.18.2",
+    "highlight.js": "^11.11.1",
+    "marked": "^17.0.3",
+    "nodemailer": "^6.9.8",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.29",
+    "vue-router": "^5.0.3"
+  },
+  "devDependencies": {
+    "@iconify-json/material-symbols": "^1.2.58",
+    "@types/node": "^25.3.0",
+    "@vitejs/plugin-vue": "^6.0.4",
+    "javascript-obfuscator": "^4.1.1",
+    "kill-port": "^2.0.1",
+    "less": "^4.5.1",
+    "nodemon": "^3.1.14",
+    "terser": "^5.28.0",
+    "typescript": "^5.9.3",
+    "unplugin-icons": "^23.0.1",
+    "unplugin-vue-components": "^31.0.0",
+    "vite": "^5.1.0",
+    "vue-tsc": "^3.2.5"
+  }
+}

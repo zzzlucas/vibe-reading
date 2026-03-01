@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark" data-style="gemini">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini</title>
+  <meta name="description" content="AI Assistant">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="https://www.gstatic.com/lamda/images/gemini_favicon_f069958c85030456e93de685481c559f160ea06b.png" type="image/png" id="favicon">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <button class="icon-btn sidebar-menu-btn" id="sidebarToggleBtn" title="主菜单">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="sidebar-logo">
+          <span class="logo-text" id="logoText">Gemini</span>
+        </div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="new-chat-btn" id="newChatBtn">
+          <span class="material-symbols-outlined">add</span>
+          <span class="btn-text">发起新对话</span>
+        </button>
+      </div>
+
+      <div class="sidebar-nav">
+        <button class="nav-item" id="navExplore">
+          <span class="material-symbols-outlined">explore</span>
+          <span class="nav-text">探索内容</span>
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-header">
+          <span class="section-title">Gem</span>
+          <span class="material-symbols-outlined section-toggle">chevron_right</span>
+        </div>
+        <div class="section-items gem-list">
+          <button class="nav-item sub-item">
+            <span class="material-symbols-outlined">auto_stories</span>
+            <span class="nav-text">Storybook</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-section chat-section">
+        <div class="section-header">
+          <span class="section-title">对话</span>
+        </div>
+        <div class="section-items" id="chapterList"></div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <button class="nav-item" id="settingsBtn">
+          <span class="material-symbols-outlined">settings</span>
+          <span class="nav-text">设置和新功能</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          <span class="current-chat-title" id="currentTitle">Gemini</span>
+        </div>
+        <div class="top-bar-right">
+          <button class="icon-btn" id="themeToggleBtn" title="切换主题">
+            <span class="material-symbols-outlined">light_mode</span>
+          </button>
+          <button class="icon-btn" title="分享">
+            <span class="material-symbols-outlined">share</span>
+          </button>
+          <button class="icon-btn" title="更多选项">
+            <span class="material-symbols-outlined">more_vert</span>
+          </button>
+          <div class="avatar" id="avatarBtn" title="账号">
+            <span>Z</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Chat Content Area -->
+      <div class="chat-area" id="chatArea">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcomeScreen">
+          <div class="welcome-gradient-text" id="welcomeTitle">你好呀</div>
+          <div class="welcome-subtitle" id="welcomeSubtitle">有什么我可以帮忙的吗？</div>
+          <div class="welcome-cards">
+            <div class="welcome-card" data-action="load">
+              <span class="material-symbols-outlined card-icon">menu_book</span>
+              <span class="card-text">加载作品文件</span>
+            </div>
+            <div class="welcome-card" data-action="settings">
+              <span class="material-symbols-outlined card-icon">settings</span>
+              <span class="card-text">打开设置</span>
+            </div>
+            <div class="welcome-card" data-action="recent">
+              <span class="material-symbols-outlined card-icon">history</span>
+              <span class="card-text">最近阅读</span>
+            </div>
+            <div class="welcome-card" data-action="help">
+              <span class="material-symbols-outlined card-icon">help</span>
+              <span class="card-text">使用帮助</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reading Content (hidden initially) -->
+        <div class="reading-content" id="readingContent" style="display: none;">
+          <div class="message-container">
+            <div class="user-message" id="userMessage"></div>
+            <div class="ai-response">
+              <div class="ai-avatar">
+                <div class="ai-sparkle" id="aiSparkle"></div>
+              </div>
+              <div class="ai-text" id="novelContent"></div>
+            </div>
+            <div class="response-actions">
+              <button class="action-btn" title="好评">
+                <span class="material-symbols-outlined">thumb_up</span>
+              </button>
+              <button class="action-btn" title="差评">
+                <span class="material-symbols-outlined">thumb_down</span>
+              </button>
+              <button class="action-btn" title="复制">
+                <span class="material-symbols-outlined">content_copy</span>
+              </button>
+              <button class="action-btn" title="转发">
+                <span class="material-symbols-outlined">forward</span>
+              </button>
+              <button class="action-btn" title="更多">
+                <span class="material-symbols-outlined">more_vert</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Input Bar -->
+      <div class="input-area">
+        <div class="input-container" id="inputContainer">
+          <div class="input-wrapper">
+            <input type="text" class="chat-input" id="chatInput" placeholder="问问 Gemini 3" />
+            <div class="input-actions-inline">
+              <button class="icon-btn input-icon" title="添加">
+                <span class="material-symbols-outlined">add_circle</span>
+              </button>
+              <button class="icon-btn input-icon" title="深入研究">
+                <span class="material-symbols-outlined">explore</span>
+              </button>
+              <button class="icon-btn input-icon" title="工具">
+                <span class="material-symbols-outlined">construction</span>
+              </button>
+            </div>
+            <div class="input-right-actions">
+              <div class="model-selector" id="modelSelector">
+                <span>Pro</span>
+                <span class="material-symbols-outlined" style="font-size:16px">expand_more</span>
+              </div>
+              <button class="icon-btn send-btn" id="sendBtn" title="发送">
+                <span class="material-symbols-outlined">mic</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="input-disclaimer" id="inputDisclaimer">
+          Gemini 是一款 AI 工具，回答可能并不总是准确的。
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>设置</h2>
+        <button class="icon-btn modal-close" id="closeSettingsBtn">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Appearance -->
+        <div class="settings-section">
+          <h3>外观</h3>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="material-symbols-outlined">palette</span>
+              <span>主题模式</span>
+            </div>
+            <div class="setting-control">
+              <div class="theme-switch-group">
+                <button class="theme-opt" data-theme="dark" title="深色">
+                  <span class="material-symbols-outlined">dark_mode</span>
+                  <span>深色</span>
+                </button>
+                <button class="theme-opt" data-theme="light" title="浅色">
+                  <span class="material-symbols-outlined">light_mode</span>
+                  <span>浅色</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="material-symbols-outlined">style</span>
+              <span>界面风格</span>
+            </div>
+            <div class="setting-control style-selector-wrap">
+              <div class="style-selector" id="styleSelector">
+                <button class="style-opt" data-style="gemini">
+                  <div class="style-icon gemini-dot"></div>
+                  <span>Gemini</span>
+                </button>
+                <button class="style-opt" data-style="wenxin">
+                  <div class="style-icon wenxin-dot"></div>
+                  <span>文心一言</span>
+                </button>
+                <button class="style-opt" data-style="qianwen">
+                  <div class="style-icon qianwen-dot"></div>
+                  <span>通义千问</span>
+                </button>
+                <button class="style-opt" data-style="doubao">
+                  <div class="style-icon doubao-dot"></div>
+                  <span>豆包</span>
+                </button>
+                <button class="style-opt" data-style="chatgpt">
+                  <div class="style-icon chatgpt-dot"></div>
+                  <span>ChatGPT</span>
+                  <span style="margin-left:auto;font-size:10px;background:var(--accent);color:#fff;padding:2px 6px;border-radius:10px;font-weight:bold">Pro</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Management -->
+        <div class="settings-section">
+          <h3>作品文件管理</h3>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="material-symbols-outlined">folder_open</span>
+              <span>选择作品文件 (.txt)</span>
+            </div>
+            <div class="setting-control">
+              <input type="file" id="novelFileInput" accept=".txt" multiple style="display:none">
+              <button class="setting-btn" id="selectFileBtn">选择文件</button>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="material-symbols-outlined">translate</span>
+              <span>文件编码</span>
+            </div>
+            <div class="setting-control">
+              <select class="setting-select" id="encodingSelect">
+                <option value="auto">自动检测</option>
+                <option value="utf-8">UTF-8</option>
+                <option value="gbk">GBK / GB2312</option>
+                <option value="big5">Big5 (繁体)</option>
+              </select>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="material-symbols-outlined">save</span>
+              <span>已保存的作品</span>
+            </div>
+            <div class="saved-novels-list" id="savedNovelsList">
+              <div class="empty-state">暂无已保存的作品</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reading Settings -->
+        <div class="settings-section">
+          <h3>阅读设置</h3>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="material-symbols-outlined">view_agenda</span>
+              <span>阅读模式</span>
+            </div>
+            <div class="setting-control">
+              <div class="theme-switch-group">
+                <button class="reading-mode-opt" data-mode="page" title="分页">
+                  <span class="material-symbols-outlined">auto_stories</span>
+                  <span>分页</span>
+                </button>
+                <button class="reading-mode-opt" data-mode="scroll" title="长文">
+                  <span class="material-symbols-outlined">view_day</span>
+                  <span>长文</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="material-symbols-outlined">text_fields</span>
+              <span>字体大小</span>
+            </div>
+            <div class="setting-control">
+              <input type="range" id="fontSizeSlider" min="14" max="24" value="16" class="slider">
+              <span id="fontSizeValue">16px</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="material-symbols-outlined">format_line_spacing</span>
+              <span>行间距</span>
+            </div>
+            <div class="setting-control">
+              <input type="range" id="lineHeightSlider" min="14" max="28" value="18" class="slider">
+              <span id="lineHeightValue">1.8</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="material-symbols-outlined">auto_stories</span>
+              <span>每页字数</span>
+            </div>
+            <div class="setting-control setting-control-col">
+              <div class="slider-row">
+                <input type="range" id="charsPerPageSlider" min="500" max="15000" value="2000" step="100" class="slider">
+                <span id="charsPerPageValue">2000</span>
+              </div>
+              <div class="preset-btns">
+                <button class="preset-btn" data-chars="2000">2千</button>
+                <button class="preset-btn" data-chars="5000">5千</button>
+                <button class="preset-btn" data-chars="10000">1万</button>
+                <button class="preset-btn" data-chars="15000">1.5万</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pro Upgrade -->
+        <div class="settings-section" id="proUpgradeSection">
+          <h3>升级 Pro</h3>
+          <div class="setting-item pro-banner" style="display:flex;flex-direction:column;align-items:flex-start;background:var(--bg-input);padding:16px;border-radius:12px;border:1px solid var(--border-color);gap:12px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="material-symbols-outlined" style="color:var(--text-link)">workspace_premium</span>
+              <span style="font-weight:500">Gemini Reader Pro</span>
+            </div>
+            <p style="font-size:13px;color:var(--text-secondary);margin:0;line-height:1.5">激活卡密以解锁完整功能，并在多设备体验沉浸式阅读。</p>
+            <button class="setting-btn" id="openActivateBtn" style="background:var(--text-primary);color:var(--bg-primary);border:none;margin-top:4px">输入卡密升级</button>
+          </div>
+        </div>
+
+        <!-- Feedback -->
+        <div class="settings-section">
+          <h3>反馈意见</h3>
+          <div class="feedback-form" id="feedbackForm">
+            <textarea class="feedback-textarea" id="feedbackText" placeholder="请输入您的意见或建议..." rows="4"></textarea>
+            <input type="text" class="feedback-contact" id="feedbackContact" placeholder="联系方式（选填，如邮箱）">
+            <div class="feedback-actions">
+              <button class="setting-btn feedback-submit-btn" id="feedbackSubmitBtn">
+                <span class="material-symbols-outlined">send</span>
+                发送反馈
+              </button>
+              <span class="feedback-status" id="feedbackStatus"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="settings-section">
+          <h3>数据管理</h3>
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="material-symbols-outlined">delete_sweep</span>
+              <span>清除所有缓存</span>
+            </div>
+            <div class="setting-control">
+              <button class="setting-btn danger" id="clearCacheBtn">清除</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOC Overlay -->
+
+  <div class="modal-overlay" id="tocModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>目录</h2>
+        <button class="icon-btn modal-close" id="closeTocBtn">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 0;">
+        <div class="toc-list" id="tocList">
+          <!-- Chapters will be rendered here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>使用帮助</h2>
+        <button class="icon-btn modal-close" id="closeHelpBtn">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body" style="line-height:1.8;color:var(--text-primary)">
+        <p><strong>📖 加载作品</strong><br>
+        1. 在侧边栏或欢迎页点击“加载作品文件”<br>
+        2. 选择您本地的 <code>.txt</code> 格式的文本文件即可开始阅读。<br>
+        <em>提示：所有文件数据仅保存在您的浏览器本地，不会上传服务器。</em></p>
+        
+        <p style="margin-top:20px"><strong>🎮 快捷键操作</strong></p>
+        <ul style="padding-left:24px;border-left:3px solid var(--border-color);margin:8px 0;list-style:none">
+          <li><code>空格键</code> / <code>→</code> / <code>↓</code>：下一页</li>
+          <li><code>←</code> / <code>↑</code>：上一页</li>
+          <li><code>Esc</code>：关闭任意活动窗口</li>
+        </ul>
+
+        <p style="margin-top:20px"><strong>💼 摸鱼老板键 (Boss Mode)</strong><br>
+        当有人经过时，您可以瞬间将阅读器伪装成工作界面。触发方式：<br>
+        - 键盘任意键入 <strong>反引号 <code>`</code></strong>（Esc键下方）<br>
+        - 或 <strong>双击</strong> 左上角 <code>Gemini</code> 标志<br>
+        <em>再次触发即可恢复阅读。</em></p>
+
+        <p style="margin-top:20px"><strong>✨ 阅读设置</strong><br>
+        您可以在“设置”中随心更改主题色（提供深/浅色可选）、调整文字大小及行间距，还可修改应用风格语言。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boss Key Overlay -->
+  <div class="boss-overlay" id="bossOverlay">
+    <div class="boss-content">
+      <div class="boss-chat">
+        <div class="boss-user-msg">
+          <div class="user-msg-bubble">帮我整理一下 Q2 季度项目进展报告的要点，包括完成的里程碑和下一步计划</div>
+        </div>
+        <div class="boss-ai-msg">
+          <div class="ai-avatar"><div class="ai-sparkle"></div></div>
+          <div class="boss-ai-text">
+            <p>好的，我来帮你整理 Q2 季度项目进展报告的要点：</p>
+            <p><strong>一、已完成的里程碑</strong></p>
+            <p>1. 核心模块重构完成，性能提升 40%</p>
+            <p>2. 用户管理系统 v2.0 上线，支持多租户架构</p>
+            <p>3. 完成第三方支付系统对接（支付宝、微信支付）</p>
+            <p>4. 自动化测试覆盖率从 45% 提升至 82%</p>
+            <p><strong>二、关键数据指标</strong></p>
+            <p>• 日活用户: 12.5 万 → 18.3 万 (↑46.4%)</p>
+            <p>• 系统可用性: 99.95%</p>
+            <p>• 平均响应时间: 从 320ms 降至 180ms</p>
+            <p><strong>三、下一步计划</strong></p>
+            <p>1. 启动微服务拆分第二阶段</p>
+            <p>2. 引入 AI 智能推荐模</p>
+            <span class="boss-cursor"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context Menu -->
+  <div class="context-menu" id="contextMenu">
+    <button class="context-menu-item" data-action="rename">
+      <span class="material-symbols-outlined">edit</span>
+      <span>重命名</span>
+    </button>
+    <button class="context-menu-item" data-action="delete">
+      <span class="material-symbols-outlined">delete</span>
+      <span>删除</span>
+    </button>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Card Key Activation Gate -->
+  <div class="activate-overlay hidden" id="activateOverlay" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);">
+    <div class="activate-card" style="position:relative">
+      <button class="icon-btn modal-close" id="closeActivateBtn" style="position:absolute;top:16px;right:16px;z-index:10;color:var(--text-secondary);background:var(--bg-surface-hover)">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      <div class="activate-header">
+        <div class="activate-sparkle">
+          <span class="material-symbols-outlined">workspace_premium</span>
+        </div>
+        <h1 class="activate-title" id="activateBrandName">升级 Gemini Reader Pro</h1>
+        <p class="activate-subtitle">请输入卡密以解锁高级专属权益</p>
+      </div>
+
+      <div class="activate-body">
+        <div class="activate-input-wrap">
+          <span class="material-symbols-outlined activate-key-icon">key</span>
+          <input
+            type="text"
+            id="cardKeyInput"
+            class="activate-input"
+            placeholder="XXXX-XXXX-XXXX"
+            maxlength="32"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <button class="activate-btn" id="activateBtn">
+          <span class="material-symbols-outlined">lock_open</span>
+          立即激活
+        </button>
+
+        <div class="activate-status" id="activateStatus"></div>
+      </div>
+
+      <div class="activate-footer">
+        <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle">shield</span>
+        激活后可在此设备长期使用 · 每个卡密仅限一次激活
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+
+</body>
+</html>
