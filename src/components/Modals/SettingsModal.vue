@@ -632,15 +632,7 @@ watch(() => store.showSettings, (newVal) => {
   border-radius: 50%;
   flex-shrink: 0;
 
-  &.gemini-dot { background: linear-gradient(135deg, #4285f4, #d96570); }
-  &.vscode-dot { background: linear-gradient(135deg, #0066b8, #007acc); }
-  &.terminal-dot { background: linear-gradient(135deg, #000000, #16c60c); }
-  &.idea-dot { background: linear-gradient(135deg, #fe2857, #087cfa); }
-  &.webstorm-dot { background: linear-gradient(135deg, #00cdba, #087cfa); }
-  &.juejin-dot { background: linear-gradient(135deg, #1E80FF, #005ce6); }
-  &.mdn-dot { background: linear-gradient(135deg, #15141A, #555555); }
-  &.stackoverflow-dot { background: linear-gradient(135deg, #F48024, #D66D14); }
-  &.chatgpt-dot { background: linear-gradient(135deg, #10a37f, #1a7f64); }
+
 }
 
 .pro-tag {
