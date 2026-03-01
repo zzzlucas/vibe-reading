@@ -98,26 +98,6 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        passes: 3,
-        pure_funcs: ['console.log', 'console.info', 'console.warn', 'console.debug'],
-        unsafe: false,
-        toplevel: true,
-        dead_code: true
-      },
-      mangle: {
-        toplevel: true,
-        properties: false
-      },
-      format: {
-        comments: false,
-        ascii_only: true
-      }
-    },
     rollupOptions: {
       input: 'index.html',
       output: {
