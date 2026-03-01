@@ -103,7 +103,21 @@ export default defineConfig({
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            // Vue 及 Pinia 相关核心库
+            if (id.includes('vue') || id.includes('pinia')) {
+              return 'vendor-vue';
+            }
+            // Markdown 相关沉重依赖（代码高亮、消毒、防 XSS）
+            if (id.includes('marked') || id.includes('dompurify') || id.includes('highlight.js')) {
+              return 'vendor-markdown';
+            }
+            // 其余第三方库
+            return 'vendor-core';
+          }
+        }
       }
     }
   }
