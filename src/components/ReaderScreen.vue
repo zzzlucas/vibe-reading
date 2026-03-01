@@ -78,7 +78,7 @@
             <h1 class="greeting-h1">
               <div class="greeting-name">
                 <span class="gemini-welcome-sparkle">
-                  <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" alt="Gemini" style="width: 32px; height: 32px; pointer-events: none;" />
+                  <FindDeepSparkle size="32px" />
                 </span>
                 <span class="greeting-text">{{ store.userName }}，你好</span>
               </div>
@@ -132,7 +132,8 @@
           
           <div class="ai-response" v-show="!isDummyChat || getAiResponseRaw(pageContent).trim() || (isActiveStreaming && index === pagesToRender.length - 1)">
             <div class="ai-avatar" :class="{ 'breathing': isActiveStreaming && isAiWaitingFirstToken && index === pagesToRender.length - 1 }">
-              <img v-if="currentStyle.favicon" :src="currentStyle.favicon" alt="AI" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
+              <FindDeepSparkle v-if="currentStyle.favicon === 'fd-sparkle'" size="100%" />
+              <img v-else-if="currentStyle.favicon" :src="currentStyle.favicon" alt="AI" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
               <div class="ai-sparkle" v-else></div>
             </div>
             <div class="ai-text" :style="{ 
@@ -377,6 +378,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import FindDeepSparkle from '@/components/FindDeepSparkle.vue';
 import { useAppStore } from '@/store/appStore';
 import { STYLE_CONFIG } from '@/config/constants';
 import { ContentDB } from '@/utils/db'; // Make sure you import this if we add novel processing here
@@ -2245,10 +2247,11 @@ watch(() => store.activeNovelIndex, (newIdx) => {
   position: relative;
 }
 
-.gemini-welcome-sparkle img {
+.gemini-welcome-sparkle svg {
   vertical-align: middle;
   margin-top: -4px;
 }
+
 
 .greeting-text {
   color: var(--text-primary);

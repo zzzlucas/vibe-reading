@@ -21,6 +21,7 @@ declare module 'vue' {
     CustomTextSettings: typeof import('./src/components/Modals/Settings/Advanced/CustomTextSettings.vue')['default']
     EngineSettings: typeof import('./src/components/Modals/Settings/Advanced/EngineSettings.vue')['default']
     FeedbackSettings: typeof import('./src/components/Modals/Settings/Advanced/FeedbackSettings.vue')['default']
+    FindDeepSparkle: typeof import('./src/components/FindDeepSparkle.vue')['default']
     HelpModal: typeof import('./src/components/Modals/HelpModal.vue')['default']
     IconMaterialSymbolsAdd: typeof import('~icons/material-symbols/add')['default']
     IconMaterialSymbolsAddCircle: typeof import('~icons/material-symbols/add-circle')['default']
