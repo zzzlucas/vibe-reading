@@ -39,6 +39,7 @@
       </div>
     </div>
 
+    <!-- Response actions (feedback, copy) - Always visible/hoverable -->
     <div class="response-actions" v-show="!isDummyChat || aiResponseRaw.trim() || (isActiveStreaming && isLast)">
       <button class="action-btn" title="好反馈" @click="store.showToast('感谢您的反馈')">
         <icon-material-symbols-thumb-up />
@@ -54,25 +55,32 @@
       </button>
     </div>
     
-    <div class="page-nav" v-if="!isDummyChat && isLast">
-      <button class="page-nav-btn" @click="store.showToc = true" title="目录">
-        <icon-material-symbols-menu-book /> 目录
-      </button>
-      <button class="page-nav-btn" @click="store.prevPage" :disabled="store.currentPage <= 0">
-        <icon-material-symbols-chevron-left /> 上一页
-      </button>
-      <div class="page-info" @click="$emit('jump')" title="点击跳转页码" style="cursor:pointer;text-decoration:underline dashed;text-underline-offset:4px;min-width:80px;text-align:center">
-        {{ store.currentPage + 1 }} / {{ store.totalPages }}
+    <!-- Page navigation - Protected by safety reveal loop -->
+    <div 
+      v-if="!isDummyChat && isLast"
+      class="footer-safety-wrapper" 
+      :class="{ 'revealed': isFooterRevealed }"
+    >
+      <div class="page-nav">
+        <button class="page-nav-btn" @click="store.showToc = true" title="目录">
+          <icon-material-symbols-menu-book /> 目录
+        </button>
+        <button class="page-nav-btn" @click="store.prevPage" :disabled="store.currentPage <= 0">
+          <icon-material-symbols-chevron-left /> 上一页
+        </button>
+        <div class="page-info" @click="$emit('jump')" title="点击跳转页码" style="cursor:pointer;text-decoration:underline dashed;text-underline-offset:4px;min-width:80px;text-align:center">
+          {{ store.currentPage + 1 }} / {{ store.totalPages }}
+        </div>
+        <button class="page-nav-btn" @click="store.nextPage" :disabled="store.currentPage >= store.totalPages - 1">
+          下一页 <icon-material-symbols-chevron-right />
+        </button>
       </div>
-      <button class="page-nav-btn" @click="store.nextPage" :disabled="store.currentPage >= store.totalPages - 1">
-         下一页 <icon-material-symbols-chevron-right />
-      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useAppStore } from '@/store/appStore';
 import { STYLE_CONFIG } from '@/config/constants';
 import FindDeepSparkle from '@/components/FindDeepSparkle.vue';
@@ -106,6 +114,7 @@ const emit = defineEmits(['copy', 'jump']);
 
 const store = useAppStore();
 const reasoningOpen = ref(false);
+const isFooterRevealed = ref(false);
 
 const currentStyle = computed(() => STYLE_CONFIG[store.style]);
 
@@ -134,6 +143,52 @@ const showThinking = computed(() => {
 function onReasoningToggle(e: Event) {
   reasoningOpen.value = (e.target as HTMLDetailsElement).open;
 }
+
+// Safety Scroll Logic
+let scrollContainer: HTMLElement | null = null;
+
+function handleWheel(e: WheelEvent) {
+  if (props.isDummyChat || isFooterRevealed.value) return;
+  if (!scrollContainer) return;
+
+  const atBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 5;
+  if (atBottom && e.deltaY > 0) {
+    // Reveal footer on extra scroll effort at bottom
+    isFooterRevealed.value = true;
+  }
+}
+
+function handleTouchMove(e: TouchEvent) {
+  if (props.isDummyChat || isFooterRevealed.value) return;
+  if (!scrollContainer) return;
+
+  const atBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 5;
+  // Note: Touch direction detection could be more precise but scroll end + move is usually enough
+  if (atBottom) {
+    isFooterRevealed.value = true;
+  }
+}
+
+onMounted(() => {
+    // Find the shared scroll container
+    scrollContainer = document.querySelector('.chat-area');
+    if (scrollContainer) {
+        scrollContainer.addEventListener('wheel', handleWheel, { passive: true });
+        scrollContainer.addEventListener('touchmove', handleTouchMove, { passive: true });
+    }
+});
+
+onUnmounted(() => {
+    if (scrollContainer) {
+        scrollContainer.removeEventListener('wheel', handleWheel);
+        scrollContainer.removeEventListener('touchmove', handleTouchMove);
+    }
+});
+
+// Reset safety when content changes (new page)
+watch(() => props.content, () => {
+  isFooterRevealed.value = false;
+});
 </script>
 
 <style scoped lang="less">
@@ -461,13 +516,25 @@ function onReasoningToggle(e: Event) {
   40% { transform: scale(1); opacity: 0.6; }
 }
 
+.footer-safety-wrapper {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  margin-top: 40px;
+  
+  &.revealed {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
 .response-actions {
   display: flex;
   gap: 4px;
   margin-left: 44px;
   margin-bottom: 24px;
-  opacity: 0;
-  transition: opacity 0.2s;
 }
 
 .message-container:hover .response-actions {
@@ -502,7 +569,7 @@ function onReasoningToggle(e: Event) {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin: 40px 0 20px 0;
+  margin: 0 0 20px 0;
   margin-left: 44px;
   padding: 16px;
 }
