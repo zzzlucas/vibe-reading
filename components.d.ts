@@ -96,8 +96,6 @@ declare module 'vue' {
     IconMaterialSymbolsTranslate: typeof import('~icons/material-symbols/translate')['default']
     IconMaterialSymbolsTune: typeof import('~icons/material-symbols/tune')['default']
     IconMaterialSymbolsUploadFile: typeof import('~icons/material-symbols/upload-file')['default']
-    IconMaterialSymbolsViewAgenda: typeof import('~icons/material-symbols/view-agenda')['default']
-    IconMaterialSymbolsViewDay: typeof import('~icons/material-symbols/view-day')['default']
     IconMaterialSymbolsVisibility: typeof import('~icons/material-symbols/visibility')['default']
     IconMaterialSymbolsVisibilityOff: typeof import('~icons/material-symbols/visibility-off')['default']
     IconMaterialSymbolsWifi: typeof import('~icons/material-symbols/wifi')['default']

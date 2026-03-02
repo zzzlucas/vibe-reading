@@ -51,6 +51,7 @@
     <!-- Chat Content Area -->
     <div class="chat-area" 
          ref="chatArea"
+         @scroll="handleScroll"
          @dragover.prevent="isDragging = true"
          @dragleave.prevent="isDragging = false"
          @drop.prevent="handleDrop">
@@ -120,8 +121,8 @@
         <div 
           class="message-container" 
           v-for="(pageContent, index) in pagesToRender" 
-          :key="isDummyChat ? `dummy-${index}` : `page-${store.currentPage}`"
-          :style="isDummyChat && index < pagesToRender.length - 1 ? 'margin-bottom: 32px;' : ''"
+          :key="isDummyChat ? `dummy-${index}` : `page-${store.settings.readingMode === 'scroll' ? renderedScrollPages[index] : store.currentPage}`"
+          :style="isDummyChat && index < pagesToRender.length - 1 ? 'margin-bottom: 32px;' : (store.settings.readingMode === 'scroll' && !isDummyChat && index < pagesToRender.length - 1 ? 'margin-bottom: 40px; border-bottom: 1px dashed var(--border-color); padding-bottom: 40px;' : '')"
         >
           <div class="user-message">
             <div class="user-img-row" v-if="getUserImages(pageContent).length > 0">
@@ -443,7 +444,49 @@ const isRealAiChat = computed(() => {
   return !!novel && novel.type === 'ai';
 });
 
-// 首屏模式下（boss 模式 + 非末轮），只渲染第一页，保持"AI 正在回复第一轮"的视觉完整性
+const renderedScrollPages = ref<number[]>([]);
+
+watch(() => store.currentPage, (newPage) => {
+  if (store.settings.readingMode === 'scroll') {
+    if (renderedScrollPages.value[renderedScrollPages.value.length - 1] !== newPage && 
+        renderedScrollPages.value[0] !== newPage) {
+      renderedScrollPages.value = [newPage];
+    }
+  } else {
+    renderedScrollPages.value = [newPage];
+  }
+}, { immediate: true });
+
+watch(() => store.activeNovelIndex, () => {
+    if (store.currentPage !== undefined) {
+      renderedScrollPages.value = [store.currentPage];
+    }
+}, { immediate: true });
+
+watch(() => store.settings.readingMode, () => {
+  if (store.currentPage !== undefined) {
+    renderedScrollPages.value = [store.currentPage];
+  }
+});
+
+function handleScroll(e: Event) {
+  const target = e.target as HTMLElement;
+  if (store.settings.readingMode === 'scroll' && !isDummyChat.value && store.activeNovelIndex !== null) {
+    // Load next page when approaching bottom
+    if (target.scrollHeight - target.scrollTop - target.clientHeight < 400) {
+      const lastRendered = renderedScrollPages.value[renderedScrollPages.value.length - 1];
+      if (lastRendered !== undefined && lastRendered < store.totalPages - 1) {
+        const next = lastRendered + 1;
+        if (!renderedScrollPages.value.includes(next)) {
+          renderedScrollPages.value.push(next);
+          store.currentPage = next;
+          store._syncNovelPage();
+        }
+      }
+    }
+  }
+}
+
 const pagesToRender = computed(() => {
   if (store.activeNovelIndex === null) return [];
   if (isDummyChat.value) {
@@ -452,6 +495,9 @@ const pagesToRender = computed(() => {
       return [store.pages[0] || ''];
     }
     return store.pages;
+  }
+  if (store.settings.readingMode === 'scroll') {
+    return [renderedScrollPages.value.map(idx => store.pages[idx] || '').join('\n\n')];
   }
   return [store.pages[store.currentPage] || ''];
 });
@@ -561,14 +607,24 @@ function formatContent(text: string) {
   let lines = tmp.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   
   // 隐藏章节名：移除第一行（通常是标题），该功能仅对作品类型生效
-  if (!store.settings.showChapterName && lines.length > 0 && !isDummyChat.value) {
+  // 但在长文（scroll）模式下，如果开启了显示章节名，我们保留它并视觉弱化，如果它碰巧是首行，依然可以由后面的正则弱化，所以不需要移除了
+  if (!store.settings.showChapterName && lines.length > 0 && !isDummyChat.value && store.settings.readingMode !== 'scroll') {
     lines.shift();
   }
   
   tmp = applySecondaryObfuscation(lines);
 
   const rawHtml = marked.parse(tmp) as string;
-  return DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['open'] });
+  let finalHtml = DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['open'] });
+  
+  // 弱化长文模式下的章节标题，提升沉浸感
+  if (store.settings.readingMode === 'scroll' && !isDummyChat.value) {
+    const fadeStyle = 'style="opacity: 0.4; font-size: 0.85em; font-weight: normal; color: inherit; margin: 1.5em 0; user-select: none;" class="chapter-fade"';
+    finalHtml = finalHtml.replace(/<p>\s*(第[零一二三四五六七八九十百千万0-9]+[章回卷集节部][\s\S]*?)<\/p>/g, `<p ${fadeStyle}>$1</p>`);
+    finalHtml = finalHtml.replace(/<h[1-6]>\s*(第[零一二三四五六七八九十百千万0-9]+[章回卷集节部][\s\S]*?)<\/h[1-6]>/g, `<div ${fadeStyle}>$1</div>`);
+  }
+  
+  return finalHtml;
 }
 
 function applySecondaryObfuscation(lines: string[]) {
@@ -810,6 +866,7 @@ function stopTypewriter() {
 // Typewriter effect: ONLY for novels (never dummy chats)
 const useTypewriterEffect = computed(() => {
   if (isDummyChat.value) return false;
+  if (store.settings.readingMode === 'scroll') return false;
   return store.settings.typewriterMode;
 });
 
@@ -1889,8 +1946,8 @@ watch(() => store.currentPage, (newVal, oldVal) => {
       store._saveNovelsMeta();
     }
     
-    // Reset scroll to top when page changes
-    if (chatArea.value) {
+    // Reset scroll to top when page changes, but disable it in scroll mode
+    if (chatArea.value && store.settings.readingMode !== 'scroll') {
       chatArea.value.scrollTop = 0;
     }
   }

@@ -14,18 +14,33 @@
           <div class="setting-item">
             <div class="setting-label">
               <icon-material-symbols-import-contacts />
-              <span>阅读模式</span>
+              <span>翻页模式</span>
             </div>
             <div class="setting-control">
-              <div class="theme-switch-group">
-                <button class="reading-mode-opt" :class="{ active: store.settings.readingMode === 'page' }" @click="setReadingMode('page')">
-                  <icon-material-symbols-view-agenda />
-                  <span>翻页</span>
-                </button>
-                <button class="reading-mode-opt" :class="{ active: store.settings.readingMode === 'scroll' }" @click="setReadingMode('scroll')">
-                  <icon-material-symbols-view-day />
-                  <span>长文</span>
-                </button>
+              <div class="segmented-control">
+                <button class="segment-btn" :class="{ active: store.settings.readingMode === 'page' }" @click="setReadingMode('page')">章节翻页</button>
+                <button class="segment-btn" :class="{ active: store.settings.readingMode === 'scroll' }" @click="setReadingMode('scroll')">滚动翻页</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="setting-item" style="border-top: 1px dashed rgba(128,128,128,0.1); padding-top: 12px; margin-top: -4px;">
+            <div class="setting-label">
+              <icon-material-symbols-auto-stories />
+              <div class="label-with-desc">
+                <span>每页加载字数</span>
+                <span class="desc-text">影响分页速度，建议 2k~5k</span>
+              </div>
+            </div>
+            <div class="setting-control setting-control-col">
+              <div class="slider-row">
+                <input type="range" v-model.number="charsPerPageLocal" @change="debouncedCharsChange" min="500" max="15000" step="100" class="slider">
+                <span>{{ charsPerPageLocal }}</span>
+              </div>
+              <div class="preset-btns">
+                <button class="preset-btn" :class="{ active: charsPerPageLocal === 2000 }" @click="setChars(2000)">2k</button>
+                <button class="preset-btn" :class="{ active: charsPerPageLocal === 5000 }" @click="setChars(5000)">5k</button>
+                <button class="preset-btn" :class="{ active: charsPerPageLocal === 10000 }" @click="setChars(10000)">1w</button>
               </div>
             </div>
           </div>
@@ -353,7 +368,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useAppStore } from '@/store/appStore';
 import PageNavKeySettings from './Advanced/PageNavKeySettings.vue';
 import EngineSettings from './Advanced/EngineSettings.vue';
@@ -361,6 +376,16 @@ import BossKeySettings from './Advanced/BossKeySettings.vue';
 import SampleChatSettings from './Advanced/SampleChatSettings.vue';
 
 const store = useAppStore();
+
+const charsPerPageLocal = ref(store.settings.charsPerPage);
+watch(() => store.settings.charsPerPage, (val) => {
+  charsPerPageLocal.value = val;
+});
+
+function debouncedCharsChange() {
+  store.settings.charsPerPage = charsPerPageLocal.value;
+  reloadCurrentNovel();
+}
 
 const pickerColor = computed({
   get: () => store.settings.fontColor || getThemeDefaultColor(),
@@ -423,11 +448,6 @@ function toggleFakeSidebarType(type: string) {
 
 function setReadingMode(mode: 'page' | 'scroll') {
   store.settings.readingMode = mode;
-  if (mode === 'scroll') {
-    setChars(10000);
-  } else {
-    setChars(2000);
-  }
 }
 
 </script>
