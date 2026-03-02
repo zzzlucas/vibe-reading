@@ -46,7 +46,7 @@
                     @click="setStyle(key as StyleName)">
               <div class="style-icon" :style="{ background: config.dotBg }"></div>
               <span>{{ config.uiName }}</span>
-              <span :class="['tag', getTagClass(config)]">{{ config.betaText || (config.tagType === 'pro' ? 'Pro' : 'Beta') }}</span>
+              <span :class="['tag', getTagClass(config)]">{{ config.betaText || (config.tagType === 'pro' ? 'Pro' : '未上线') }}</span>
             </button>
           </div>
         </div>
@@ -82,7 +82,7 @@ function setStyle(style: StyleName) {
     store.style = style;
     store.showSettings = false; 
     store.previewTimer = 5;
-    store.showToast('✨ 正在为您开启 Beta 风格预览', 'preview');
+    store.showToast('✨ 正在为您开启风格预览', 'preview');
     
     const interval = setInterval(() => {
       store.previewTimer--;

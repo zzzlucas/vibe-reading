@@ -51,6 +51,7 @@ export const useAppStore = defineStore('app', () => {
   const toastMessage = ref('');
   const toastVisible = ref(false);
   const toastType = ref<'info' | 'preview' | 'achievement' | 'action'>('info');
+  const toastHasIcon = ref(false);
   const toastActionText = ref('');
   let toastActionCallback: (() => void) | null = null;
   const previewTimer = ref(0);
@@ -444,6 +445,7 @@ export const useAppStore = defineStore('app', () => {
   function showToast(msg: string, type: 'info' | 'preview' | 'achievement' | 'action' = 'info') {
     toastMessage.value = msg;
     toastType.value = type;
+    toastHasIcon.value = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Extended_Pictographic})/u.test(msg.trim());
     toastVisible.value = true;
     if (type === 'info' || type === 'achievement') {
       setTimeout(() => {
@@ -455,6 +457,7 @@ export const useAppStore = defineStore('app', () => {
   function showActionToast(msg: string, actionText: string, callback: () => void) {
     toastMessage.value = msg;
     toastType.value = 'action';
+    toastHasIcon.value = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Extended_Pictographic})/u.test(msg.trim());
     toastActionText.value = actionText;
     toastActionCallback = callback;
     toastVisible.value = true;
@@ -726,7 +729,7 @@ export const useAppStore = defineStore('app', () => {
     initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, resolveConfirmDialog,
     generateUid, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
     confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmDefaultValue, confirmPlaceholder,
-    toastVisible, toastMessage, toastType, toastActionText, previewTimer,
+    toastVisible, toastMessage, toastType, toastHasIcon, toastActionText, previewTimer,
     _saveNovelsMeta, _syncNovelPage
   };
 });

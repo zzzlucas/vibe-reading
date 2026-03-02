@@ -14,9 +14,11 @@
 
 
   <div class="toast" :class="[store.toastVisible ? 'show' : '', store.toastType === 'preview' ? 'preview-toast' : '', store.toastType === 'achievement' ? 'achievement-toast' : '', store.toastType === 'action' ? 'action-toast' : '', store.toastType === 'info' ? 'info-toast' : '']">
-    <icon-material-symbols-auto-awesome v-if="store.toastType === 'preview'" />
-    <icon-material-symbols-military-tech v-else-if="store.toastType === 'achievement'" />
-    <icon-material-symbols-info v-else-if="store.toastType === 'action' || store.toastType === 'info'" />
+    <template v-if="!store.toastHasIcon">
+      <icon-material-symbols-auto-awesome v-if="store.toastType === 'preview'" />
+      <icon-material-symbols-military-tech v-else-if="store.toastType === 'achievement'" />
+      <icon-material-symbols-info v-else-if="store.toastType === 'action' || store.toastType === 'info'" />
+    </template>
     <span v-if="store.toastType === 'info'">{{ store.toastMessage }}</span>
     <div v-else-if="store.toastType === 'preview'" class="preview-toast-content">
       <span>{{ store.toastMessage }} <b style="margin-left:4px">{{ store.previewTimer }}s</b></span>

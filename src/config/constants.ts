@@ -1,4 +1,4 @@
-import type { StyleConfig, StyleName } from '../types';
+import type { StyleConfig, StyleName } from '../types'
 
 export const STYLE_CONFIG: Record<StyleName, StyleConfig> = {
   gemini: {
@@ -34,11 +34,37 @@ export const STYLE_CONFIG: Record<StyleName, StyleConfig> = {
     welcomeTitle: '最新博文流',
     welcomeSubtitle: '记录技术的点点滴滴',
     favicon: '',
-    uiName: '经典博客1',
+    uiName: '经典博客-α',
     dotBg: 'linear-gradient(135deg, #cc2b5e, #753a88)',
     isBeta: true,
     betaText: '限免',
     tagType: 'free'
+  },
+  classic_blog2: {
+    logo: '李四的随笔',
+    title: 'Thoughts',
+    placeholder: '查找读书笔记与随写...',
+    disclaimer: '仅供互相学习交流使用。',
+    modelLabel: 'ThoughtBot',
+    welcomeTitle: '读书笔记',
+    welcomeSubtitle: '分享每一次思想的碰撞',
+    favicon: '',
+    uiName: '经典博客-β',
+    dotBg: 'linear-gradient(135deg, #42275a, #734b6d)',
+    isBeta: true
+  },
+  classic_blog3: {
+    logo: '王五的成长空间',
+    title: 'Daily Logs',
+    placeholder: '记录每一天的进步...',
+    disclaimer: '勤学如春起之苗，不见其增，日有所长。',
+    modelLabel: 'GrowthAI',
+    welcomeTitle: '成长记录',
+    welcomeSubtitle: '沉淀技术，感悟生活',
+    favicon: '',
+    uiName: '经典博客-γ',
+    dotBg: 'linear-gradient(135deg, #3f2b96, #a8c0ff)',
+    isBeta: true
   },
   classic_doc1: {
     logo: '研发文档',
@@ -49,11 +75,37 @@ export const STYLE_CONFIG: Record<StyleName, StyleConfig> = {
     welcomeTitle: '文档中心',
     welcomeSubtitle: '请查阅相关规范和指引',
     favicon: '',
-    uiName: '经典文档1',
+    uiName: '经典文档-α',
     dotBg: 'linear-gradient(135deg, #2b5876, #4e4376)',
     isBeta: true,
     betaText: '限免',
     tagType: 'free'
+  },
+  classic_doc2: {
+    logo: '设计规范',
+    title: 'UI Design System',
+    placeholder: '搜索组件及规范...',
+    disclaimer: '所有设计产物均属公司资产，请勿外传。',
+    modelLabel: 'DesignAI',
+    welcomeTitle: '探索设计系统',
+    welcomeSubtitle: '构建统一的用户体验',
+    favicon: '',
+    uiName: '经典文档-β',
+    dotBg: 'linear-gradient(135deg, #614385, #516395)',
+    isBeta: true
+  },
+  classic_doc3: {
+    logo: '核心技术文档',
+    title: 'Internal Wiki',
+    placeholder: '搜索技术白皮书...',
+    disclaimer: '核心业务资产，请严格遵守安全审计规范。',
+    modelLabel: 'CoreBot',
+    welcomeTitle: '技术中台文档',
+    welcomeSubtitle: '掌握全栈核心架构逻辑',
+    favicon: '',
+    uiName: '经典文档-γ',
+    dotBg: 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)',
+    isBeta: true
   },
   mdn: {
     logo: 'MDN',
@@ -68,6 +120,45 @@ export const STYLE_CONFIG: Record<StyleName, StyleConfig> = {
     dotBg: 'linear-gradient(135deg, #15141A, #555555)',
     isBeta: true
   },
+  wiki: {
+    logo: 'Wikipedia',
+    title: '公司内网 Wiki',
+    placeholder: 'Search Wiki...',
+    disclaimer: '内容由全体员工共同维护。',
+    modelLabel: 'WikiBot',
+    welcomeTitle: '企业知识库',
+    welcomeSubtitle: '欢迎贡献词条和内容',
+    favicon: '',
+    uiName: 'WiKi',
+    dotBg: 'linear-gradient(135deg, #BEBEBE, #4B4B4B)',
+    isBeta: true
+  },
+  stackoverflow: {
+    logo: 'Stack Overflow',
+    title: 'Stack Overflow',
+    placeholder: 'Search for questions...',
+    disclaimer: 'Answers are provided by the community.',
+    modelLabel: 'OverflowAI',
+    welcomeTitle: 'Every developer has a tab open to Stack Overflow',
+    welcomeSubtitle: 'Where developers learn, share, and build careers.',
+    favicon: 'https://cdn.sstatic.net/Sites/stackoverflow/Img/apple-touch-icon.png',
+    uiName: 'Stack Overflow',
+    dotBg: 'linear-gradient(135deg, #F48024, #D66D14)',
+    isBeta: true
+  },
+  juejin: {
+    logo: 'IT技术社区',
+    title: 'IT技术社区',
+    placeholder: '搜索前端、后端、架构...',
+    disclaimer: 'IT文章和评论均由用户提供，请注意甄别信息的准确性',
+    modelLabel: 'IT酱',
+    welcomeTitle: 'IT一下',
+    welcomeSubtitle: '发现全网优质技术内容',
+    favicon: '',
+    uiName: 'IT技术社区',
+    dotBg: 'linear-gradient(135deg, #1E80FF, #005ce6)',
+    isBeta: true
+  }
   // vscode: {
   //   logo: 'VS Code',
   //   title: 'Visual Studio Code',
@@ -119,83 +210,5 @@ export const STYLE_CONFIG: Record<StyleName, StyleConfig> = {
   //   uiName: 'WebStorm',
   //   dotBg: 'linear-gradient(135deg, #00cdba, #087cfa)',
   //   isBeta: true
-  // },
-  wiki: {
-    logo: 'Wikipedia',
-    title: '公司内网 Wiki',
-    placeholder: 'Search Wiki...',
-    disclaimer: '内容由全体员工共同维护。',
-    modelLabel: 'WikiBot',
-    welcomeTitle: '企业知识库',
-    welcomeSubtitle: '欢迎贡献词条和内容',
-    favicon: '',
-    uiName: 'WiKi',
-    dotBg: 'linear-gradient(135deg, #BEBEBE, #4B4B4B)',
-    isBeta: true
-  },
-    stackoverflow: {
-    logo: 'Stack Overflow',
-    title: 'Stack Overflow',
-    placeholder: 'Search for questions...',
-    disclaimer: 'Answers are provided by the community.',
-    modelLabel: 'OverflowAI',
-    welcomeTitle: 'Every developer has a tab open to Stack Overflow',
-    welcomeSubtitle: 'Where developers learn, share, and build careers.',
-    favicon: 'https://cdn.sstatic.net/Sites/stackoverflow/Img/apple-touch-icon.png',
-    uiName: 'Stack Overflow',
-    dotBg: 'linear-gradient(135deg, #F48024, #D66D14)',
-    isBeta: true
-  },
-  juejin: {
-    logo: '稀土掘金',
-    title: 'IT技术社区',
-    placeholder: '搜索前端、后端、架构...',
-    disclaimer: '掘金文章和评论均由用户提供，请注意甄别信息的准确性',
-    modelLabel: '掘金酱',
-    welcomeTitle: '掘金一下',
-    welcomeSubtitle: '发现全网优质技术内容',
-    favicon: 'https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/e08da34488b114bd4c665ba2fa520a31.svg',
-    uiName: 'IT技术社区',
-    dotBg: 'linear-gradient(135deg, #1E80FF, #005ce6)',
-    isBeta: true
-  },
-  classic_doc2: {
-    logo: '设计规范',
-    title: 'UI Design System',
-    placeholder: '搜索组件及规范...',
-    disclaimer: '所有设计产物均属公司资产，请勿外传。',
-    modelLabel: 'DesignAI',
-    welcomeTitle: '探索设计系统',
-    welcomeSubtitle: '构建统一的用户体验',
-    favicon: '',
-    uiName: '经典文档2',
-    dotBg: 'linear-gradient(135deg, #614385, #516395)',
-    isBeta: true
-  },
-  classic_doc3: {
-    logo: '架构分析',
-    title: '系统架构详解',
-    placeholder: '搜索架构白皮书...',
-    disclaimer: '核心业务文档，请妥善保管。',
-    modelLabel: 'ArchBot',
-    welcomeTitle: '系统架构图',
-    welcomeSubtitle: '掌握底层核心逻辑',
-    favicon: '',
-    uiName: '经典文档3',
-    dotBg: 'linear-gradient(135deg, #1e3c72, #2a5298)',
-    isBeta: true
-  },
-  classic_blog2: {
-    logo: '李四的随笔',
-    title: 'Thoughts',
-    placeholder: '查找读书笔记与随写...',
-    disclaimer: '仅供互相学习交流使用。',
-    modelLabel: 'ThoughtBot',
-    welcomeTitle: '读书笔记',
-    welcomeSubtitle: '分享每一次思想的碰撞',
-    favicon: '',
-    uiName: '经典博客2',
-    dotBg: 'linear-gradient(135deg, #42275a, #734b6d)',
-    isBeta: true
-  }
-};
+  // }
+}

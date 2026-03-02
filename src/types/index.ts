@@ -82,4 +82,4 @@ export interface StyleConfig {
 
 export type Theme = 'dark' | 'light';
 export type Encoding = 'auto' | 'utf-8' | 'gbk' | 'utf-16le' | 'utf-16be' | 'big5';
-export type StyleName = 'gemini' | 'chatgpt' | 'vscode' | 'terminal' | 'idea' | 'webstorm' | 'juejin' | 'mdn' | 'stackoverflow' | 'classic_doc1' | 'classic_doc2' | 'classic_doc3' | 'classic_blog1' | 'classic_blog2' | 'wiki';
+export type StyleName = 'gemini' | 'chatgpt' | 'vscode' | 'terminal' | 'idea' | 'webstorm' | 'juejin' | 'mdn' | 'stackoverflow' | 'classic_doc1' | 'classic_doc2' | 'classic_doc3' | 'classic_blog1' | 'classic_blog2' | 'classic_blog3' | 'wiki';
