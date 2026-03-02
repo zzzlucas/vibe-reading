@@ -168,7 +168,7 @@ export const useAppStore = defineStore('app', () => {
       if (savedTheme) theme.value = savedTheme as Theme;
       
       const savedStyle = _loadFromStorage('style');
-      const validStyles = ['gemini', 'chatgpt', 'vscode', 'terminal', 'idea', 'webstorm', 'juejin', 'mdn', 'stackoverflow', 'classic_blog1'];
+      const validStyles = ['gemini', 'chatgpt', 'classic_blog1', 'classic_blog2', 'classic_blog3', 'classic_doc1', 'classic_doc2', 'classic_doc3', 'mdn', 'wiki', 'stackoverflow', 'juejin'];
       if (savedStyle && validStyles.includes(savedStyle)) {
         style.value = savedStyle as StyleName;
       } else if (savedStyle) {

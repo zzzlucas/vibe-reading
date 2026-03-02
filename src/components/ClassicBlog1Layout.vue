@@ -117,12 +117,18 @@
         <div class="blog1-widget" v-if="store.novels.length > 0">
           <h3 class="blog1-widget-title">随笔分类</h3>
           <div class="blog1-widget-content blog1-links">
-            <a v-for="(novel, idx) in store.novels.slice(0, 10)"
-               :key="novel.id"
-               :class="{ 'blog1-active': store.activeNovelIndex === idx }"
-               @click.prevent="store.openNovel(idx)">
-              {{ getDisplayName(novel) }}({{ fakeCount(idx) }})
+            <a v-for="item in displayedNovels"
+               :key="item.novel.id"
+               :class="{ 'blog1-active': store.activeNovelIndex === item.globalIdx }"
+               @click.prevent="store.openNovel(item.globalIdx)">
+              {{ getDisplayName(item.novel) }}({{ fakeCount(item.globalIdx) }})
             </a>
+          </div>
+          <!-- Pagination -->
+          <div class="blog1-widget-pagination" v-if="totalNovelPages > 1">
+            <a @click.prevent="prevNovelPage" :class="{ disabled: novelPageIdx === 0 }">« 上一页</a>
+            <span class="blog1-page-info">{{ novelPageIdx + 1 }} / {{ totalNovelPages }}</span>
+            <a @click.prevent="nextNovelPage" :class="{ disabled: novelPageIdx >= totalNovelPages - 1 }">下一页 »</a>
           </div>
         </div>
 
@@ -200,6 +206,22 @@ const calWeeks = computed(() => {
 });
 
 const searchText = ref('');
+
+// Sidebar Novel Pagination
+const novelPageIdx = ref(0);
+const NOVEL_PAGE_SIZE = 12;
+const totalNovelPages = computed(() => Math.ceil(store.novels.length / NOVEL_PAGE_SIZE));
+
+const displayedNovels = computed(() => {
+  const start = novelPageIdx.value * NOVEL_PAGE_SIZE;
+  return store.novels.slice(start, start + NOVEL_PAGE_SIZE).map((novel, i) => ({
+    novel,
+    globalIdx: start + i
+  }));
+});
+
+function prevNovelPage() { if (novelPageIdx.value > 0) novelPageIdx.value--; }
+function nextNovelPage() { if (novelPageIdx.value < totalNovelPages.value - 1) novelPageIdx.value++; }
 </script>
 
 <style scoped lang="less">
@@ -506,6 +528,35 @@ const searchText = ref('');
   }
 }
 
+.blog1-widget-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  border-top: 1px dashed var(--blog1-border, #ddd);
+  background: var(--blog1-widget-title-bg, #f9f9f9);
+  font-size: 11px;
+  
+  a {
+    color: var(--blog1-link, #1a6496);
+    text-decoration: none;
+    cursor: pointer;
+    &:hover:not(.disabled) { text-decoration: underline; }
+    &.disabled { color: #ccc; cursor: default; }
+  }
+  
+  .blog1-page-info {
+    color: #666;
+  }
+}
+
+.blog1-links {
+  max-height: 240px;
+  overflow-y: auto;
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+}
+
 /* ===== Main Content Area ===== */
 .blog1-main {
   flex: 1;
@@ -675,6 +726,11 @@ const searchText = ref('');
   .blog1-blog-name:focus { background: rgba(255,255,255,0.05); }
   .blog1-subnav-stats { color: #888; }
   .blog1-sidebar::-webkit-scrollbar-thumb { background: #444; }
+  .blog1-links::-webkit-scrollbar-thumb { background: #444; }
+  .blog1-widget-pagination {
+    a.disabled { color: #555; }
+    .blog1-page-info { color: #888; }
+  }
   .blog1-profile-row { color: #aaa; span { color: #ddd; } }
   .blog1-sidebar-input { background: #2a2a2a; border-color: #444; color: #ddd; }
   .blog1-sidebar-btn { background: #333; border-color: #444; color: #ccc; &:hover { background: #444; } }

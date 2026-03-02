@@ -82,6 +82,8 @@ import { ref } from 'vue';
 import { useAppStore } from '@/store/appStore';
 import { ContentDB } from '@/utils/db';
 
+import { DUMMY_TITLES_IT, DUMMY_TITLES_GENERAL, DUMMY_TITLES_DESIGN } from '@/config/dummyPools';
+
 const store = useAppStore();
 const isAddingDummy = ref(false);
 
@@ -108,38 +110,7 @@ const itLanguages = ref([
   { label: '安全/加固', value: 'security', checked: false }
 ]);
 
-const TITLES_BY_LANG: Record<string, string[]> = {
-  javascript: [
-    "Vue3 组件生命周期与 Composition API", "React 18 并发渲染机制解析", "Webpack 5 到 Vite 的迁移指南", 
-    "Node.js 内存泄漏排查技巧", "TypeScript 泛型高级应用场景", "浏览器渲染原理与性能优化", 
-    "Micro-frontend 微前端架构原理解析", "响应式系统底层原理解析：从 Proxy 到依赖收集", "现代前端脚手架工具链的工程化实践"
-  ],
-  go: [
-    "Golang 协程与 Channel 通信机制", "基于 Go 的高并发网关架构设计", "K8s Operator 模式开发与 CRD 自定义资源管理",
-    "Go 并发场景下的死锁检测与预警系统", "微服务架构下的分布式事务一致性设计", "Nginx 反向代理与负载均衡配置进阶"
-  ],
-  rust: [
-    "Rust 所有权机制与内存安全深度剖析", "基于 Rust 的高性能中间件开发实战", "移动端 WebAssembly 高性能计算落地案例",
-    "基于 eBPF 的内核态网络流量观测实践", "Rust 异步运行时 tokio 内部原理解析"
-  ],
-  python: [
-    "大模型 RAG 架构下的知识库向量化检索调优", "深度学习模型在边缘侧的量化与压缩策略", "Python 异步生态 asyncio 源码浅析",
-    "Pandas 在 GB 级日志处理中的性能瓶颈", "FastAPI 与 Django 的性能与架构选型对比"
-  ],
-  java: [
-    "JVM 垃圾回收算法演进与 G1 调优", "Spring Boot 核心加载流程与 AOP 应用", "基于 Redis 的分布式锁高可用方案对比",
-    "TCP/IP 协议栈与高并发 Netty 实践", "MySQL 索引优化与执行计划分析", "ElasticSearch 倒排索引与全文检索深度拆解",
-    "Kafka 副本同步机制与性能吞吐调优", "RocketMQ 消息事务与高可用架构", "MyBatis 缓存机制与 SQL 注入防范"
-  ],
-  devops: [
-    "Docker 容器化部署与镜像精简实践", "Kubernetes 集群资源调度与 HPA 自动扩缩容", "CI/CD 自动化流水线 Jenkins 与 GitLab CI 对比",
-    "Terraform IaC 基础设施即代码演进过程", "Prometheus 与 Grafana 全链路监控体系构建", "Service Mesh 网格技术 Istio 核心原理解析"
-  ],
-  security: [
-    "OWASP Top 10 漏洞防护与 Web 安全加固", "零信任架构下的身份验证与动态授权实践", "RSA 与 AES 混合加密算法在敏感数据中的应用",
-    "SQL 注入与 XSS 攻击的攻防实战解析", "渗透测试 SOP 流程与合规审计报告撰写", "基于国密算法的身份鉴权体系设计"
-  ]
-};
+const TITLES_BY_LANG = DUMMY_TITLES_IT;
 
 const CODE_SNIPPETS_BY_LANG: Record<string, Record<'low'|'medium'|'high', string[]>> = {
   javascript: {
@@ -208,23 +179,6 @@ const CODE_SNIPPETS_BY_LANG: Record<string, Record<'low'|'medium'|'high', string
     ]
   }
 };
-
-const DUMMY_TITLES_GENERAL = [
-  "Q3 季度营销增长策划案初稿", "关于优化新员工入职流程的建议", "竞品分析报告：市场份额与用户画像", 
-  "年度总结大会演讲 PPT 大纲", "如何撰写爆款公众号推文", "产品需求文档 (PRD) 模板分享", 
-  "跨部门沟通协作技巧与难点", "客户留存率提升方案探讨", "商务谈判技巧与经典案例分析", 
-  "周报日报自动生成提示词", "OKR 目标制定与关键结果对齐", "危机公关处理预案与声明",
-  "ToB 获客渠道盘点与转化率", "Figma 设计稿切图与标注", "UI/UX 设计规范与用户体验",
-  "跨平台协同开发文档同步机制", "企业级云原生成熟度评估模型", "敏捷开发 Scrum Master 每日站会指南",
-  "基于 AI Agent 的知识库智能问答系统构建", "全球业务部署中的低延迟加速方案", "企业级私有化大模型微调数据合规方案"
-];
-
-const DUMMY_TITLES_DESIGN = [
-  "移动端交互设计规范 v3.0", "关于提升 B 端系统操作效率的设计提案", "竞品 UI 设计风格演进分析", 
-  "从视觉直觉到品牌调性的色彩心理学应用", "Figma 变量 (Variables) 在设计系统中的进阶用法", 
-  "如何通过微动效提升用户的认知体验", "设计稿转代码 (Design to Code) 的自动化链路探索",
-  "无障碍设计 (Accessibility) 的实施准则与 Checklists", "针对银发人群的适老化改造设计方案"
-];
 
 const DUMMY_CONTENT_TEMPLATES = [
   `针对您询问的关于 “{{title}}” 的问题，我已经整理了以下核心要点、深度技术解析及未来演进趋势：\n\n### 一、 核心概念与架构逻辑\n在现代工程实践中，深刻理解 “{{title}}” 的底层逻辑是构建稳定系统的基石。通常我们需要从以下三个关键维度进行拆解：\n\n1. **设计哲学（Design Philosophy）**：任何成熟的方案都有其特定的权衡。我们需要关注其在 CAP 定理中的偏移，以及对资源利用率和吞吐量的优先级考虑。\n2. **执行模型（Execution Model）**：深入分析其在内存分配、线程绑定以及 IO 复用方面的表现。现代高并发系统倾向于减少上下文切换的开销，采用无锁队列或协程模型来提升处理极限。\n3. **扩展性边界（Scalability Boundaries）**：在业务逻辑增长到原始设计的 10 倍甚至 100 倍时，我们需要识别潜在的单点故障和性能瓶颈。\n\n### 二、 常见挑战与工程规避方案\n在落地过程中，工程师经常容易在以下场景遇到由于复杂性带来的“隐形陷阱”：\n\n- **状态同步不一致**：多节点间的竞态条件（Race Condition）是导致脏数据的元凶。建议通过版本号控制（Optimistic Locking）或分布式共识算法来确保原子性。\n- **异常传递与熔断隔离**：当下游服务出现雪崩时，缺乏保护机制会导致全局资源耗尽。实现严格的断路器（Circuit Breaker）模式是保障韧性的关键。\n\n### 三、 进阶优化方案与生产建议\n当基础功能稳定后，为了进一步压榨性能红利，建议考虑以下方向：\n\n- **预处理与 JIT 思想**：对于高频访问的逻辑，可以通过静态编译或预热缓存来消除首次响应的延迟。\n- **自适应策略平衡**：根据实时的流量波动，动态调整线程池参数或流控策略。\n\n如果您需要针对某个具体生产环境的调优脚本或详细的失败案例复盘报告，请进一步详细描述您的场景。`,

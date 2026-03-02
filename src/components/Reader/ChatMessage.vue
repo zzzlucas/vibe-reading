@@ -135,6 +135,78 @@
         登录后才能查看或发表评论，立即 <a @click.prevent>登录</a> 或者 逛逛 <a @click.prevent="store.activeId = null">首页</a>
       </div>
     </div>
+
+    <!-- Classic Doc1 (Yuque-style) Footer -->
+    <div v-if="store.style === 'classic_doc1' && isLast" class="doc1-post-footer">
+      <!-- Like Section -->
+      <div class="doc1-like-section">
+        <div class="like-btn" @click="store.showToast('感谢鼓励！')">
+          <icon-material-symbols-thumb-up-outline />
+        </div>
+        <div class="like-text">若有收获，就点个赞吧</div>
+      </div>
+
+      <!-- Post Meta -->
+      <div class="doc1-meta-row">
+        <div class="meta-item author">
+            <icon-material-symbols-person-outline class="meta-icon" />
+            <span class="meta-val">用户2026</span>
+        </div>
+        <div class="meta-item time">
+            <icon-material-symbols-schedule-outline class="meta-icon" />
+            <span class="meta-val">2022-07-21 10:02</span>
+        </div>
+        <div class="meta-item views">
+            <icon-material-symbols-menu-book-outline class="meta-icon" />
+            <span class="meta-val">32</span>
+        </div>
+        <div class="meta-item comments">
+            <icon-material-symbols-chat-bubble-outline class="meta-icon" />
+            <span class="meta-val">0</span>
+        </div>
+      </div>
+
+      <!-- Comment Section -->
+      <div class="doc1-comment-box">
+        <div class="comment-user-avatar">
+          <FindDeepSparkle size="100%" />
+        </div>
+        <div class="comment-input-area">
+          <div class="comment-editor-placeholder">
+            <div class="editor-toolbar">
+              <button class="tool-btn"><icon-material-symbols-add-circle-outline /></button>
+              <span class="divider"></span>
+              <button class="tool-btn">正文 <icon-material-symbols-keyboard-arrow-down /></button>
+              <button class="tool-btn">B</button>
+              <button class="tool-btn"><icon-material-symbols-format-list-bulleted /></button>
+              <button class="tool-btn"><icon-material-symbols-format-list-numbered /></button>
+              <button class="tool-btn"><icon-material-symbols-link /></button>
+              <button class="tool-btn"><icon-material-symbols-sentiment-satisfied-outline /></button>
+              <div class="editor-tip">Ctrl + ⇧ + 8 无序列表</div>
+            </div>
+          </div>
+          <button class="btn-reply" @click="store.showToast('感谢您的评论！')">回复</button>
+        </div>
+      </div>
+
+      <!-- Footer Branding -->
+      <div class="doc1-site-footer">
+        <div class="footer-logo">
+          <span class="logo-icon">🍃</span> 文档
+        </div>
+        <div class="footer-links">
+          <a @click.prevent>关于文档</a>
+          <span class="dot">|</span>
+          <a @click.prevent>使用帮助</a>
+          <span class="dot">|</span>
+          <a @click.prevent>数据安全</a>
+          <span class="dot">|</span>
+          <a @click.prevent>服务协议</a>
+          <span class="dot">|</span>
+          <a @click.prevent>English</a>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -854,47 +926,198 @@ function scrollToTop() {
   }
 }
 
-/* Dark Mode Overrides for Classic Blog 1 Footer */
+/* Classic Doc 1 (Yuque-style) Footer Styles */
+.doc1-post-footer {
+  margin-top: 80px;
+  padding-bottom: 60px;
+  border-top: 1px solid #f0f0f0;
+  color: #262626;
+}
+
+.doc1-like-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40px;
+  margin-bottom: 40px;
+  
+  .like-btn {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #ff9d22;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff9d22;
+    cursor: pointer;
+    margin-bottom: 12px;
+    background: #fff;
+    transition: all 0.2s;
+    
+    svg { font-size: 24px; }
+    &:hover { background: #fffaf0; transform: scale(1.05); }
+  }
+  
+  .like-text {
+    font-size: 14px;
+    color: #8c8c8c;
+  }
+}
+
+.doc1-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  color: #8c8c8c;
+  font-size: 14px;
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    .meta-icon { font-size: 16px; opacity: 0.8; }
+  }
+}
+
+.doc1-comment-box {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 60px;
+  
+  .comment-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #f0f0f0;
+    flex-shrink: 0;
+  }
+  
+  .comment-input-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.comment-editor-placeholder {
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  min-height: 120px;
+  background: #fff;
+  padding: 8px;
+  
+  .editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+    position: relative;
+    height: 32px;
+    
+    .tool-btn {
+      background: none;
+      border: none;
+      color: #595959;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      &:hover { background: #f5f5f5; }
+      svg { font-size: 16px; }
+    }
+    
+    .divider {
+      width: 1px;
+      height: 14px;
+      background: #e8e8e8;
+      margin: 0 4px;
+    }
+    
+    .editor-tip {
+      margin-left: auto;
+      font-size: 12px;
+      color: #bfbfbf;
+    }
+  }
+}
+
+.btn-reply {
+  align-self: flex-start;
+  background: #00b96b;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.9; }
+}
+
+.doc1-site-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding-top: 40px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 13px;
+  
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #434343;
+    font-weight: 500;
+    .logo-icon { font-size: 18px; }
+  }
+  
+  .footer-links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #8c8c8c;
+    a { cursor: pointer; &:hover { color: #595959; } }
+    .dot { color: #d9d9d9; }
+  }
+}
+
+/* Dark Mode Overrides for Classic Doc1 Footer */
 [data-theme='dark'] {
-  .blog1-post-footer {
-    border-top-color: #333;
+  .doc1-post-footer {
+    border-top-color: #303030;
+    color: #d9d9d9;
   }
-  .blog1-disclaimer {
-    color: #666;
+  .doc1-like-section {
+    .like-btn {
+      background: #1f1f1f;
+      border-color: #ff9d22;
+      &:hover { background: #2b2111; }
+    }
+    .like-text { color: #bfbfbf; }
   }
-  .blog1-author-info {
-    background: #1a1a1a;
-    border-color: #333;
+  .doc1-meta-row { color: #a6a6a6; }
+  .comment-editor-placeholder {
+    background: #1f1f1f;
+    border-color: #303030;
+    .editor-toolbar {
+      border-bottom-color: #303030;
+      .tool-btn { color: #bfbfbf; &:hover { background: #303030; } }
+      .divider { background: #303030; }
+    }
   }
-  .author-avatar {
-    background: #222;
-    border-color: #444;
-  }
-  .author-name {
-    color: #ddd;
-  }
-  .author-stats {
-    color: #888;
-  }
-  .digg-num {
-    background: #2c2518;
-    border-color: #4d3d1a;
-    color: #e6a23c;
-  }
-  .digg-action {
-    color: #888;
-    &:hover { color: #5B9BD5; }
-  }
-  .author-digg-vip a, .blog1-prev-post a, .blog1-footer-links a, .blog1-comment-teaser a {
-    color: #5B9BD5;
-  }
-  .blog1-post-meta {
-    color: #666;
-  }
-  .blog1-comment-teaser {
-    background: #1a1a1a;
-    border-color: #333;
-    color: #ccc;
+  .doc1-site-footer {
+    border-top-color: #303030;
+    .footer-logo { color: #d9d9d9; }
+    .footer-links { color: #a6a6a6; a:hover { color: #d9d9d9; } .dot { color: #434343; } }
   }
 }
 </style>
