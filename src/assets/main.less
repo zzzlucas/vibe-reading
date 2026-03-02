@@ -261,6 +261,48 @@
   --sparkle-bg:linear-gradient(135deg,#10a37f,#1a7f64);
 }
 
+/* ---------- Classic Blog1 Light ---------- */
+[data-style="classic_blog1"][data-theme="light"] {
+  --bg-primary:#e8e8e8;--bg-secondary:#ffffff;--bg-surface:#f5f5f5;
+  --bg-surface-hover:#eaeaea;--bg-surface-active:#ddd;--bg-sidebar:#fff;
+  --bg-input:#fff;--bg-modal:#fff;
+  --text-primary:#333;--text-secondary:#666;--text-muted:#999;--text-link:#1a6496;
+  --border-color:#ddd;--border-color-light:#ccc;
+  --accent:#5B9BD5;--accent-secondary:#1a6496;--accent-pink:#c00;--accent-green:#008000;
+  --gradient-start:#5B9BD5;--gradient-mid:#7ECEF4;--gradient-end:#B8E4F9;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.12);--shadow-lg:0 8px 24px rgba(0,0,0,.15);
+  --modal-overlay:rgba(0,0,0,.35);--scrollbar-thumb:#ccc;--scrollbar-hover:#aaa;
+  --sparkle-bg:linear-gradient(135deg,#5B9BD5,#1a6496);
+  --blog1-page-bg:#e0e0e0;--blog1-nav-bg:#5B9BD5;--blog1-header-bg:linear-gradient(180deg,#7ECEF4 0%,#B8E4F9 100%);
+  --blog1-header-text:#333;--blog1-header-sub:#555;--blog1-subnav-bg:#D4EBF8;--blog1-subnav-active:#A6D4ED;
+  --blog1-card-bg:#fff;--blog1-border:#ddd;--blog1-link:#1a6496;--blog1-title-link:#275E8E;
+  --blog1-widget-title-bg:#f0f8ff;--blog1-widget-title-color:#4a7ea8;--blog1-text:#333;
+}
+
+/* ---------- Classic Blog1 Dark ---------- */
+[data-style="classic_blog1"][data-theme="dark"] {
+  --bg-primary:#1a1a1a;--bg-secondary:#242424;--bg-surface:#2a2a2a;
+  --bg-surface-hover:#333;--bg-surface-active:#3a3a3a;--bg-sidebar:#242424;
+  --bg-input:#2a2a2a;--bg-modal:#242424;
+  --text-primary:#d4d4d4;--text-secondary:#999;--text-muted:#666;--text-link:#6DB3F2;
+  --border-color:#3a3a3a;--border-color-light:#555;
+  --accent:#6DB3F2;--accent-secondary:#4a90c4;--accent-pink:#e06060;--accent-green:#5cb85c;
+  --gradient-start:#3a7bbf;--gradient-mid:#4a90c4;--gradient-end:#6DB3F2;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.4);--shadow-md:0 4px 12px rgba(0,0,0,.5);--shadow-lg:0 8px 24px rgba(0,0,0,.6);
+  --modal-overlay:rgba(0,0,0,.65);--scrollbar-thumb:#3a3a3a;--scrollbar-hover:#555;
+  --sparkle-bg:linear-gradient(135deg,#3a7bbf,#6DB3F2);
+  --blog1-page-bg:#141414;--blog1-nav-bg:#2a5f8f;--blog1-header-bg:linear-gradient(180deg,#1e3a5f 0%,#264a6e 100%);
+  --blog1-header-text:#d4d4d4;--blog1-header-sub:#999;--blog1-subnav-bg:#1e3650;--blog1-subnav-active:#2a4a6a;
+  --blog1-card-bg:#1e1e1e;--blog1-border:#333;--blog1-link:#6DB3F2;--blog1-title-link:#7DC4FF;
+  --blog1-widget-title-bg:#1a2a3a;--blog1-widget-title-color:#6DB3F2;--blog1-text:#d4d4d4;
+}
+
+/* ===== Blog1 Global Layout Override ===== */
+.app-container.blog1-mode {
+  display: block;
+  overflow: hidden;
+}
+
 /* ===== Common Variables ===== */
 :root{
   --sidebar-width:280px;--topbar-height:56px;--transition-speed:.2s;

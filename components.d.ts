@@ -19,6 +19,7 @@ declare module 'vue' {
     BossSidebar: typeof import('./src/components/Reader/BossSidebar.vue')['default']
     CareerSettings: typeof import('./src/components/Modals/Settings/Advanced/CareerSettings.vue')['default']
     ChatMessage: typeof import('./src/components/Reader/ChatMessage.vue')['default']
+    ClassicBlog1Layout: typeof import('./src/components/ClassicBlog1Layout.vue')['default']
     ConfirmModal: typeof import('./src/components/Modals/ConfirmModal.vue')['default']
     CustomTextSettings: typeof import('./src/components/Modals/Settings/Advanced/CustomTextSettings.vue')['default']
     EngineSettings: typeof import('./src/components/Modals/Settings/Advanced/EngineSettings.vue')['default']

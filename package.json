@@ -10,7 +10,9 @@
     "start": "kill-port 3000 && node server.js",
     "build": "vite build --config vite.config.mjs",
     "preview": "vite preview --config vite.config.mjs",
-    "serve": "node server.js"
+    "serve": "node server.js",
+    "generate-keys": "node generateKeys.js 10",
+    "generate-one-key": "node generateKeys.js 1"
   },
   "dependencies": {
     "@types/dompurify": "^3.2.0",
