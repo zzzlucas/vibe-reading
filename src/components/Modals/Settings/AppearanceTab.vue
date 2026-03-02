@@ -76,6 +76,14 @@ const betaStyles = Object.entries(STYLE_CONFIG).filter(([_, conf]) => conf.isBet
 
 function setStyle(style: StyleName) {
   const config = STYLE_CONFIG[style];
+
+  // Disable "Not Online" (未上线) styles
+  const isNotOnline = config.isBeta && !config.betaText && config.tagType !== 'pro' && config.tagType !== 'free';
+  if (isNotOnline) {
+    store.showToast('该风格正在开发中，敬请期待！');
+    return;
+  }
+
   if (config.isBeta && config.tagType !== 'free' && !store.isPro) {
     if (store.previewTimer > 0) return;
     const originalStyle = store.style;

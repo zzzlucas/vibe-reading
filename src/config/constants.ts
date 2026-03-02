@@ -35,7 +35,7 @@ export const STYLE_CONFIG: Record<StyleName, StyleConfig> = {
     welcomeSubtitle: '记录技术的点点滴滴',
     favicon: '',
     uiName: '经典博客-α',
-    dotBg: 'linear-gradient(135deg, #cc2b5e, #753a88)',
+    dotBg: 'linear-gradient(135deg, #5B9BD5, #275E8E)',
     isBeta: true,
     betaText: '限免',
     tagType: 'free'
@@ -76,7 +76,7 @@ export const STYLE_CONFIG: Record<StyleName, StyleConfig> = {
     welcomeSubtitle: '请查阅相关规范和指引',
     favicon: '',
     uiName: '经典文档-α',
-    dotBg: 'linear-gradient(135deg, #2b5876, #4e4376)',
+    dotBg: 'linear-gradient(135deg, #00b96b, #00a85d)',
     isBeta: true,
     betaText: '限免',
     tagType: 'free'

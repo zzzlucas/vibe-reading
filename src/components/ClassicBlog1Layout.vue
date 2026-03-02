@@ -179,7 +179,7 @@ function saveTitle2(e: Event) {
   localStorage.setItem('blog1_title_2', val);
 }
 
-const blogSubtitle = computed(() => '一名程序猿的探索和沉淀  微信公众号: ' + (store.userName || 'DeepSky'));
+const blogSubtitle = computed(() => '一名程序猿的探索和沉淀 - ' + (store.userName || 'DeepSky'));
 
 function goHome() { store.activeId = null; store.showWasteland = false; }
 function getDisplayName(novel: Novel) { return novel.displayName || novel.name.replace(/\.txt$/i, ''); }

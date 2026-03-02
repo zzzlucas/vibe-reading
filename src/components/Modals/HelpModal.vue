@@ -9,7 +9,7 @@
       </div>
       <div class="modal-body help-content">
         <p><strong>📖 加载作品</strong><br>
-        1. 在侧边栏或欢迎页点击“加载作品文件”<br>
+        1. 在侧边栏或欢迎页点击“加载阅读作品文件”<br>
         2. 选择您本地的 <code>.txt</code> 格式的文本文件即可开始阅读。<br>
         <span class="text-muted">提示：所有文件数据仅保存在您的浏览器本地，不会上传服务器。</span></p>
         

@@ -1092,6 +1092,32 @@ function scrollToTop() {
 
 /* Dark Mode Overrides for Classic Doc1 Footer */
 [data-theme='dark'] {
+  /* Dark Mode Overrides for Classic Blog1 Footer */
+  .blog1-post-footer {
+    border-top-color: #333;
+    .blog1-disclaimer { color: #666; }
+    .blog1-author-info {
+      background: #1a1a1a;
+      border-color: #333;
+      .author-avatar { background: #242424; border-color: #444; }
+      .author-name { color: #d4d4d4; }
+      .author-stats { color: #888; }
+      .digg-num { background: #2b2111; border-color: #443311; color: #e6a23c; }
+      .digg-action { color: #888; &:hover { color: #6DB3F2; } }
+      .author-digg-vip a { color: #6DB3F2; }
+    }
+    .blog1-prev-post a { color: #6DB3F2; &:hover { color: #ff6b6b; } }
+    .blog1-post-meta { color: #666; }
+    .blog1-footer-links a { color: #6DB3F2; }
+    .blog1-comment-teaser {
+      background: #1a1a1a;
+      border-color: #333;
+      color: #aaa;
+      a { color: #6DB3F2; }
+    }
+  }
+
+  /* Dark Mode Overrides for Classic Doc1 Footer */
   .doc1-post-footer {
     border-top-color: #303030;
     color: #d9d9d9;

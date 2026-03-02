@@ -23,7 +23,7 @@
         <div class="welcome-cards">
           <div class="welcome-card" @click="$emit('trigger-file')">
             <icon-material-symbols-menu-book class="card-icon" />
-            <span class="card-text">加载作品文件</span>
+            <span class="card-text">加载阅读作品文件</span>
           </div>
           <div class="welcome-card" @click="store.showSettings = true">
             <icon-material-symbols-settings class="card-icon" />
