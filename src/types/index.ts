@@ -58,6 +58,8 @@ export interface Settings {
   advancedSettingsCollapsed?: boolean;
   hasSeenVibeReadingTip?: boolean;
   hasSeenClassicBlogVibeTip?: boolean;
+  coffeeVibeMode?: boolean;
+  vibeQuickConfigCollapsed?: boolean;
   version?: number;
 }
 

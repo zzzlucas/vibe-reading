@@ -131,6 +131,8 @@ export const useAppStore = defineStore('app', () => {
     secondaryRenderContentBlocksRandom: false,
     hasSeenVibeReadingTip: false,
     hasSeenClassicBlogVibeTip: false,
+    coffeeVibeMode: false,
+    vibeQuickConfigCollapsed: false,
     version: 3
   });
 
@@ -685,7 +687,7 @@ export const useAppStore = defineStore('app', () => {
     settings.value.secondaryRenderObfuscationMode = 'none';
     settings.value.secondaryRenderContentBlocks = [];
     settings.value.hasSeenClassicBlogVibeTip = true;
-    showToast('✨ 中杯氛围配置成功！', 'info');
+    showToast(`✨ ${settings.value.coffeeVibeMode ? '中杯' : '基础'}氛围配置成功！`, 'info');
   }
 
   function applyAdvancedVibe() {
@@ -695,17 +697,19 @@ export const useAppStore = defineStore('app', () => {
     settings.value.secondaryRenderObfuscationMode = 'log_simple';
     settings.value.secondaryRenderContentBlocks = ['git_status']; // 轻度点缀
     settings.value.hasSeenClassicBlogVibeTip = true;
-    showToast('🔮 大杯氛围配置成功！', 'info');
+    showToast(`🔮 ${settings.value.coffeeVibeMode ? '大杯' : '进阶'}氛围配置成功！`, 'info');
   }
 
   function applyDeepVibe() {
     settings.value.showNovelTitle = false;
     settings.value.showChapterName = false;
     settings.value.secondaryRenderIndent = 0;
-    settings.value.secondaryRenderObfuscationMode = 'log'; // Complex log
-    settings.value.secondaryRenderContentBlocks = ['auth_stub', 'sys_log', 'import_section', 'data_structure'];
+    settings.value.secondaryRenderObfuscationMode = 'log'; // 复杂装饰模式
+    settings.value.secondaryRenderContentBlocks = ['git_status', 'auth_stub', 'sys_log', 'import_section', 'data_structure'];
+    settings.value.secondaryRenderEnablePunctuation = true;
+    settings.value.secondaryRenderRemovePunctuation = ['all'];
     settings.value.hasSeenClassicBlogVibeTip = true;
-    showToast('🚀 超大杯氛围配置已启动！', 'info');
+    showToast(`🚀 ${settings.value.coffeeVibeMode ? '超大杯' : '深度'}氛围配置已启动！`, 'info');
   }
 
   // 供外部 composable 标记刚导入的作品，使其能在首次打开时触发打字机动画

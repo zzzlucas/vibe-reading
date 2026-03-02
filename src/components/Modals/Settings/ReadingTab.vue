@@ -2,63 +2,93 @@
   <div class="settings-section">
     <div class="section-body">
         <div class="advanced-sub-group" style="margin-top: 0; margin-bottom: 20px;">
-          <div class="sub-group-title">
+          <div class="sub-group-title" style="cursor: pointer; justify-content: space-between; user-select: none;" @click="store.settings.vibeQuickConfigCollapsed = !store.settings.vibeQuickConfigCollapsed">
             <div style="display: flex; align-items: center; gap: 8px;">
               <icon-material-symbols-auto-fix />
               <span>一键排版</span>
-            </div>
-            <div class="vibe-info-trigger">
-              <icon-material-symbols-info-outline style="font-size: 18px;" />
-              <div class="vibe-info-card">
-                <div class="info-sections">
-                  <div class="info-section">
-                    <div class="info-title" style="color: #a8c7fa;">中杯氛围 (Tall)：</div>
-                    <div class="info-item"><span>作品与章节名</span><span>隐藏</span></div>
-                    <div class="info-item"><span>段落缩进</span><span>0 顶格</span></div>
-                  </div>
-                  <div class="info-divider"></div>
-                  <div class="info-section">
-                    <div class="info-title" style="color: #7baaf7;">大杯氛围 (Grande)：</div>
-                    <div class="info-item"><span>包含基础模式所有项</span></div>
-                    <div class="info-item"><span>内容引擎</span><span>简单 Log 模式</span></div>
-                    <div class="info-item"><span>前后文充实</span><span>注入 Git 状态模拟</span></div>
-                  </div>
-                  <div class="info-divider"></div>
-                  <div class="info-section">
-                    <div class="info-title" style="color: var(--accent);">超大杯氛围 (Venti)：</div>
-                    <div class="info-item"><span>包含基础模式所有项</span></div>
-                    <div class="info-item"><span>内容引擎</span><span>复杂 Log 模式</span></div>
-                    <div class="info-item"><span>前后文充实</span><span>注入鉴权/日志/导入项</span></div>
+              <div class="vibe-info-trigger" @click.stop>
+                <icon-material-symbols-info-outline style="font-size: 18px;" />
+                <div class="vibe-info-card">
+                  <div class="info-sections">
+                    <div class="info-section">
+                      <div class="info-title" style="color: #a8c7fa;">{{ store.settings.coffeeVibeMode ? '中杯氛围 (Tall)' : '基础氛围 (Simple Vibe)' }}：</div>
+                      <div class="info-item"><span>作品与章节名</span><span>隐藏</span></div>
+                      <div class="info-item"><span>段落缩进</span><span>0 顶格</span></div>
+                    </div>
+                    <div class="info-divider"></div>
+                    <div class="info-section">
+                      <div class="info-title" style="color: #7baaf7;">{{ store.settings.coffeeVibeMode ? '大杯氛围 (Grande)' : '进阶氛围 (Advanced Vibe)' }}：</div>
+                      <div class="info-item"><span>包含基础模式所有项</span></div>
+                      <div class="info-item"><span>内容引擎</span><span>简单 Log 模式</span></div>
+                      <div class="info-item"><span>前后文充实</span><span>注入 Git 状态模拟</span></div>
+                    </div>
+                    <div class="info-divider"></div>
+                    <div class="info-section">
+                      <div class="info-title" style="color: var(--accent);">{{ store.settings.coffeeVibeMode ? '超大杯氛围 (Venti)' : '深度氛围 (Deep Vibe)' }}：</div>
+                      <div class="info-item"><span>包含基础与进阶模式所有项</span></div>
+                      <div class="info-item"><span>标点擦除</span><span>启用 (全擦除)</span></div>
+                      <div class="info-item"><span>内容引擎</span><span>复杂 LOG 模式</span></div>
+                      <div class="info-item"><span>前后文充实</span><span>注入鉴权/日志/导入项</span></div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+            
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div v-if="store.settings.bossModeUnlocked" style="display: flex; align-items: center; gap: 6px;" @click.stop>
+                <span class="desc-text" style="font-size: 11px; text-transform: none; letter-spacing: normal;">换一换</span>
+                <label class="toggle-switch mini">
+                  <input type="checkbox" v-model="store.settings.coffeeVibeMode">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <icon-material-symbols-keyboard-arrow-down style="transition: transform 0.2s; color: var(--text-muted); font-size: 20px;" :style="{ transform: store.settings.vibeQuickConfigCollapsed ? 'rotate(-90deg)' : 'rotate(0)' }" />
+            </div>
           </div>
-          <div class="vibe-quick-config-wrap" style="padding: 10px 16px 16px;">
+          <div v-show="!store.settings.vibeQuickConfigCollapsed" class="vibe-quick-config-wrap" style="padding: 10px 16px 16px;">
             <div class="vibe-btns-row">
               <button class="vibe-btn quick" @click="store.applyBasicVibe()" title="快速优化基础排版">
-                <div class="steam-wrapper steam-1">
-                  <div class="steam-line s-mid"></div>
-                  <icon-material-symbols-local-cafe />
-                </div>
-                <span>中杯氛围</span>
+                <template v-if="store.settings.coffeeVibeMode">
+                  <div class="steam-wrapper steam-1">
+                    <div class="steam-line s-mid"></div>
+                    <icon-material-symbols-local-cafe />
+                  </div>
+                  <span>中杯氛围</span>
+                </template>
+                <template v-else>
+                  <icon-material-symbols-bolt />
+                  <span>基础氛围</span>
+                </template>
               </button>
-              <button class="vibe-btn advanced" @click="store.applyAdvancedVibe()" title="轻度代码伪装">
-                <div class="steam-wrapper steam-2">
-                  <div class="steam-line s-left"></div>
-                  <div class="steam-line s-right"></div>
-                  <icon-material-symbols-local-cafe />
-                </div>
-                <span>大杯氛围</span>
+              <button class="vibe-btn advanced" @click="store.applyAdvancedVibe()" title="轻度代码装饰">
+                <template v-if="store.settings.coffeeVibeMode">
+                  <div class="steam-wrapper steam-2">
+                    <div class="steam-line s-left"></div>
+                    <div class="steam-line s-right"></div>
+                    <icon-material-symbols-local-cafe />
+                  </div>
+                  <span>大杯氛围</span>
+                </template>
+                <template v-else>
+                  <icon-material-symbols-magic-button />
+                  <span>进阶氛围</span>
+                </template>
               </button>
-              <button class="vibe-btn deep" @click="store.applyDeepVibe()" title="启用全方位深度伪装">
-                <div class="steam-wrapper steam-3">
-                  <div class="steam-line s-left"></div>
-                  <div class="steam-line s-mid"></div>
-                  <div class="steam-line s-right"></div>
-                  <icon-material-symbols-local-cafe />
-                </div>
-                <span>超大杯氛围</span>
+              <button class="vibe-btn deep" @click="store.applyDeepVibe()" title="启用全方位深度装饰">
+                <template v-if="store.settings.coffeeVibeMode">
+                  <div class="steam-wrapper steam-3">
+                    <div class="steam-line s-left"></div>
+                    <div class="steam-line s-mid"></div>
+                    <div class="steam-line s-right"></div>
+                    <icon-material-symbols-local-cafe />
+                  </div>
+                  <span>超大杯氛围</span>
+                </template>
+                <template v-else>
+                  <icon-material-symbols-rocket-launch />
+                  <span>深度氛围</span>
+                </template>
               </button>
             </div>
           </div>
