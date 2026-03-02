@@ -1,14 +1,76 @@
 <template>
   <div class="settings-section">
     <div class="section-body">
-      <div class="advanced-sub-group" style="margin-top: 0;">
-        <div class="sub-group-title" style="cursor: pointer; justify-content: space-between; user-select: none;" @click="store.settings.basicSettingsCollapsed = !store.settings.basicSettingsCollapsed">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <icon-material-symbols-text-fields />
-            <span>基础排版</span>
+        <div class="advanced-sub-group" style="margin-top: 0; margin-bottom: 20px;">
+          <div class="sub-group-title">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <icon-material-symbols-auto-fix />
+              <span>一键排版</span>
+            </div>
+            <div class="vibe-info-trigger">
+              <icon-material-symbols-info-outline style="font-size: 18px;" />
+              <div class="vibe-info-card">
+                <div class="info-sections">
+                  <div class="info-section">
+                    <div class="info-title" style="color: #a8c7fa;">中杯氛围 (Tall)：</div>
+                    <div class="info-item"><span>作品与章节名</span><span>隐藏</span></div>
+                    <div class="info-item"><span>段落缩进</span><span>0 顶格</span></div>
+                  </div>
+                  <div class="info-divider"></div>
+                  <div class="info-section">
+                    <div class="info-title" style="color: #7baaf7;">大杯氛围 (Grande)：</div>
+                    <div class="info-item"><span>包含基础模式所有项</span></div>
+                    <div class="info-item"><span>内容引擎</span><span>简单 Log 模式</span></div>
+                    <div class="info-item"><span>前后文充实</span><span>注入 Git 状态模拟</span></div>
+                  </div>
+                  <div class="info-divider"></div>
+                  <div class="info-section">
+                    <div class="info-title" style="color: var(--accent);">超大杯氛围 (Venti)：</div>
+                    <div class="info-item"><span>包含基础模式所有项</span></div>
+                    <div class="info-item"><span>内容引擎</span><span>复杂 Log 模式</span></div>
+                    <div class="info-item"><span>前后文充实</span><span>注入鉴权/日志/导入项</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <icon-material-symbols-keyboard-arrow-down style="transition: transform 0.2s; color: var(--text-muted); font-size: 20px;" :style="{ transform: store.settings.basicSettingsCollapsed ? 'rotate(-90deg)' : 'rotate(0)' }" />
+          <div class="vibe-quick-config-wrap" style="padding: 10px 16px 16px;">
+            <div class="vibe-btns-row">
+              <button class="vibe-btn quick" @click="store.applyBasicVibe()" title="快速优化基础排版">
+                <div class="steam-wrapper steam-1">
+                  <div class="steam-line s-mid"></div>
+                  <icon-material-symbols-local-cafe />
+                </div>
+                <span>中杯氛围</span>
+              </button>
+              <button class="vibe-btn advanced" @click="store.applyAdvancedVibe()" title="轻度代码伪装">
+                <div class="steam-wrapper steam-2">
+                  <div class="steam-line s-left"></div>
+                  <div class="steam-line s-right"></div>
+                  <icon-material-symbols-local-cafe />
+                </div>
+                <span>大杯氛围</span>
+              </button>
+              <button class="vibe-btn deep" @click="store.applyDeepVibe()" title="启用全方位深度伪装">
+                <div class="steam-wrapper steam-3">
+                  <div class="steam-line s-left"></div>
+                  <div class="steam-line s-mid"></div>
+                  <div class="steam-line s-right"></div>
+                  <icon-material-symbols-local-cafe />
+                </div>
+                <span>超大杯氛围</span>
+              </button>
+            </div>
+          </div>
         </div>
+        <div class="advanced-sub-group" style="margin-top: 0;">
+          <div class="sub-group-title" style="cursor: pointer; justify-content: space-between; user-select: none;" @click="store.settings.basicSettingsCollapsed = !store.settings.basicSettingsCollapsed">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <icon-material-symbols-text-fields />
+              <span>基础排版</span>
+            </div>
+            <icon-material-symbols-keyboard-arrow-down style="transition: transform 0.2s; color: var(--text-muted); font-size: 20px;" :style="{ transform: store.settings.basicSettingsCollapsed ? 'rotate(-90deg)' : 'rotate(0)' }" />
+          </div>
         
         <div v-show="!store.settings.basicSettingsCollapsed" style="display: flex; flex-direction: column;">
           <div class="setting-item">
@@ -217,7 +279,8 @@
             <div class="setting-control">
                <select v-model="store.settings.secondaryRenderObfuscationMode" class="custom-text-input" style="width: 140px; padding: 2px 8px; font-size: 11px; height: 26px;">
                   <option value="none">原生排版 (无额外辅助)</option>
-                  <option value="log">Log 日志模式</option>
+                  <option value="log_simple">简单 Log 模式</option>
+                  <option value="log">复杂 Log 模式</option>
                   <option value="json">JSON 数据模式</option>
                   <option value="markdown_report">Markdown 报告风</option>
                   <option value="translation">防机翻翻译对照</option>
@@ -476,6 +539,197 @@ function setReadingMode(mode: 'page' | 'scroll') {
 </script>
 
 <style scoped lang="less">
+.vibe-quick-config-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px 20px;
+}
+
+.vibe-btns-row {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+}
+
+.vibe-btn {
+  flex: 1;
+  padding: 10px 8px;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+
+  &.quick {
+    background: linear-gradient(135deg, #c2e7ff, #a8c7fa);
+    color: #041e49;
+    box-shadow: 0 4px 12px rgba(168, 199, 250, 0.2);
+    &:hover { box-shadow: 0 6px 16px rgba(168, 199, 250, 0.3); }
+  }
+
+  &.advanced {
+    background: linear-gradient(135deg, #a8c7fa, #7baaf7);
+    color: #041e49;
+    box-shadow: 0 4px 12px rgba(123, 170, 247, 0.2);
+    &:hover { box-shadow: 0 6px 16px rgba(123, 170, 247, 0.3); }
+  }
+
+  &.deep {
+    background: linear-gradient(135deg, var(--accent), #4285f4);
+    color: white;
+    box-shadow: 0 4px 12px rgba(138, 180, 248, 0.3);
+    &:hover { box-shadow: 0 6px 16px rgba(138, 180, 248, 0.4); }
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  .steam-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+
+    .steam-line {
+      position: absolute;
+      bottom: 11px;
+      width: 2px;
+      height: 6px;
+      background: currentColor;
+      border-radius: 2px;
+      opacity: 0;
+      animation: steamRise 1.8s infinite ease-in-out;
+    }
+
+    &.steam-1 .s-mid { left: 8px; animation-delay: 0s; }
+
+    &.steam-2 .s-left { left: 5px; animation-delay: 0s; height: 5px; }
+    &.steam-2 .s-right { left: 11px; animation-delay: 0.6s; height: 7px; }
+
+    &.steam-3 .s-left { left: 4px; animation-delay: 0s; height: 5px; }
+    &.steam-3 .s-mid { left: 8px; animation-delay: 0.4s; height: 7px; }
+    &.steam-3 .s-right { left: 12px; animation-delay: 0.8s; height: 4px; }
+  }
+
+  @keyframes steamRise {
+    0% { transform: translateY(0) scaleX(0.8); opacity: 0; }
+    30% { opacity: 0.7; }
+    100% { transform: translateY(-7px) scaleX(1.1); opacity: 0; }
+  }
+
+  .material-symbols-outlined {
+    font-size: 18px;
+    z-index: 2;
+  }
+}
+
+.vibe-info-trigger {
+  position: relative;
+  cursor: help;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--accent);
+    .vibe-info-card {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+
+  .material-symbols-outlined {
+    font-size: 22px;
+  }
+}
+
+.vibe-info-card {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 240px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 4px;
+    width: 10px;
+    height: 10px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+    transform: rotate(45deg);
+  }
+
+  .info-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .info-divider {
+    height: 1px;
+    background: rgba(128,128,128,0.1);
+    margin: 4px 0;
+  }
+
+  .info-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-primary);
+    padding: 4px 0;
+    
+    span:last-child {
+      color: var(--accent);
+      font-weight: 600;
+    }
+  }
+}
+
 .bubble-settings-item {
   padding-bottom: 4px;
 }

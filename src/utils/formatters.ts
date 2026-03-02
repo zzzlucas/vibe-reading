@@ -91,14 +91,16 @@ export function applySecondaryObfuscation(lines: string[], store: any) {
     }
   }
 
-  if (mode === 'log') {
+  if (mode === 'log' || mode === 'log_simple') {
+    const isSimple = mode === 'log_simple';
     const dateStr = new Date().toISOString().split('T')[0];
     let html = '```log\n';
-    const logLevels = ['INFO', 'DEBUG', 'WARN', 'TRACE'];
+    const logLevels = isSimple ? ['INFO', 'DEBUG'] : ['INFO', 'DEBUG', 'WARN', 'TRACE'];
     mergedLines.forEach((line, idx) => {
        const level = logLevels[idx % logLevels.length];
        const ts = new Date(Date.now() + idx * 1000).toTimeString().split(' ')[0];
-       html += `[${dateStr} ${ts}] [${level}] [Worker-${idx}] ${line}\n`;
+       const prefix = isSimple ? `[${ts}] ` : `[${dateStr} ${ts}] [${level}] [Worker-${idx}] `;
+       html += `${prefix}${line}\n`;
     });
     html += '```\n';
     return html;

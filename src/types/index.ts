@@ -46,7 +46,7 @@ export interface Settings {
   fakeSidebarItemCount: number;
   fakeSidebarAutoAdjustCount: boolean;
   fakeSidebarShowForTypes: string[];
-  secondaryRenderObfuscationMode: 'none' | 'log' | 'json' | 'markdown_report' | 'translation';
+  secondaryRenderObfuscationMode: 'none' | 'log' | 'log_simple' | 'json' | 'markdown_report' | 'translation';
   secondaryRenderEnableReplace: boolean;
   secondaryRenderReplaceDict: string;
   secondaryRenderEnablePunctuation: boolean;
@@ -57,6 +57,7 @@ export interface Settings {
   basicSettingsCollapsed?: boolean;
   advancedSettingsCollapsed?: boolean;
   hasSeenVibeReadingTip?: boolean;
+  hasSeenClassicBlogVibeTip?: boolean;
   version?: number;
 }
 
@@ -71,6 +72,8 @@ export interface StyleConfig {
   favicon: string;
   uiName: string;
   isBeta?: boolean;
+  betaText?: string;
+  tagType?: 'beta' | 'free' | 'pro';
   dotBg: string;
 }
 

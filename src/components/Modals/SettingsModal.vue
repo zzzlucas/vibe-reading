@@ -635,14 +635,32 @@ watch(() => store.showSettings, (newVal) => {
 
 }
 
-.pro-tag {
+.tag {
   margin-left: auto;
   font-size: 10px;
-  background: var(--accent);
   color: #fff;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-weight: bold;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  transform: translateY(-0.5px);
+  user-select: none;
+}
+
+.tag-beta {
+  background: var(--accent);
+}
+
+.tag-free {
+  background: linear-gradient(135deg, #10a37f, #1a7f64);
+  box-shadow: 0 1px 3px rgba(16, 163, 127, 0.2);
+}
+
+.tag-pro {
+  background: linear-gradient(135deg, #fbbc05, #ea4335);
+  box-shadow: 0 1px 3px rgba(234, 67, 53, 0.2);
 }
 
 .slider {

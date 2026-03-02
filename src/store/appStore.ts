@@ -129,6 +129,8 @@ export const useAppStore = defineStore('app', () => {
     secondaryRenderIndent: 2,
     secondaryRenderContentBlocks: [],
     secondaryRenderContentBlocksRandom: false,
+    hasSeenVibeReadingTip: false,
+    hasSeenClassicBlogVibeTip: false,
     version: 3
   });
 
@@ -332,7 +334,17 @@ export const useAppStore = defineStore('app', () => {
 
   // Watchers to auto-save
   watch(theme, (val) => _saveToStorage('theme', val));
-  watch(style, (val) => _saveToStorage('style', val));
+  watch(style, (val) => {
+    _saveToStorage('style', val);
+    // Check if switching to classic_blog1 for the first time while on works
+    if (val === 'classic_blog1' && activeId.value && !settings.value.hasSeenClassicBlogVibeTip) {
+      const activeIdx = activeNovelIndex.value;
+      if (activeIdx !== null && novels.value[activeIdx]?.type === 'works') {
+        showSettings.value = true;
+        autoExpandReading.value = true;
+      }
+    }
+  });
   watch(encoding, (val) => _saveToStorage('encoding', val));
   watch(settings, (val) => _saveToStorage('settings', val), { deep: true });
   watch(aiSettings, (val) => _saveToStorage('aiSettings', val), { deep: true });
@@ -385,6 +397,14 @@ export const useAppStore = defineStore('app', () => {
     novel.lastRead = Date.now();
     showWasteland.value = false;
     _saveNovelsMeta();
+
+    // Trigger Reading configuration for classic blog on first switch
+    if (style.value === 'classic_blog1' && novel.type === 'works' && !settings.value.hasSeenClassicBlogVibeTip) {
+      setTimeout(() => {
+        showSettings.value = true;
+        autoExpandReading.value = true;
+      }, 500); // Wait for open novel animation to breathe
+    }
   }
 
   async function deleteNovel(index: number) {
@@ -658,6 +678,36 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
+  function applyBasicVibe() {
+    settings.value.showNovelTitle = false;
+    settings.value.showChapterName = false;
+    settings.value.secondaryRenderIndent = 0;
+    settings.value.secondaryRenderObfuscationMode = 'none';
+    settings.value.secondaryRenderContentBlocks = [];
+    settings.value.hasSeenClassicBlogVibeTip = true;
+    showToast('✨ 中杯氛围配置成功！', 'info');
+  }
+
+  function applyAdvancedVibe() {
+    settings.value.showNovelTitle = false;
+    settings.value.showChapterName = false;
+    settings.value.secondaryRenderIndent = 0;
+    settings.value.secondaryRenderObfuscationMode = 'log_simple';
+    settings.value.secondaryRenderContentBlocks = ['git_status']; // 轻度点缀
+    settings.value.hasSeenClassicBlogVibeTip = true;
+    showToast('🔮 大杯氛围配置成功！', 'info');
+  }
+
+  function applyDeepVibe() {
+    settings.value.showNovelTitle = false;
+    settings.value.showChapterName = false;
+    settings.value.secondaryRenderIndent = 0;
+    settings.value.secondaryRenderObfuscationMode = 'log'; // Complex log
+    settings.value.secondaryRenderContentBlocks = ['auth_stub', 'sys_log', 'import_section', 'data_structure'];
+    settings.value.hasSeenClassicBlogVibeTip = true;
+    showToast('🚀 超大杯氛围配置已启动！', 'info');
+  }
+
   // 供外部 composable 标记刚导入的作品，使其能在首次打开时触发打字机动画
   function markJustAdded(id: string) {
     _justAddedIds.add(id);
@@ -669,7 +719,7 @@ export const useAppStore = defineStore('app', () => {
     theme, style, encoding, settings, aiSettings, appTitle, userName, userAvatar, userAvatarColor, autoExpandAdvanced, autoExpandReading, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed, triggerSystemFileSignal,
     openNovel, deleteNovel, renameNovel, togglePinNovel, prevPage, nextPage, searchInNovel, toggleBossMode,
     initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, resolveConfirmDialog,
-    generateUid, markJustAdded,
+    generateUid, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
     confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmDefaultValue, confirmPlaceholder,
     toastVisible, toastMessage, toastType, toastActionText, previewTimer,
     _saveNovelsMeta, _syncNovelPage

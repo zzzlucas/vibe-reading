@@ -46,7 +46,7 @@
                     @click="setStyle(key as StyleName)">
               <div class="style-icon" :style="{ background: config.dotBg }"></div>
               <span>{{ config.uiName }}</span>
-              <span class="pro-tag">Beta</span>
+              <span :class="['tag', getTagClass(config)]">{{ config.betaText || (config.tagType === 'pro' ? 'Pro' : 'Beta') }}</span>
             </button>
           </div>
         </div>
@@ -65,11 +65,18 @@ const store = useAppStore();
 const isCollapsed = ref(false);
 let peekTimer: any = null;
 
+const getTagClass = (config: any) => {
+  if (config.tagType === 'free') return 'tag-free';
+  if (config.tagType === 'pro') return 'tag-pro';
+  return 'tag-beta';
+};
+
 const freeStyles = Object.entries(STYLE_CONFIG).filter(([_, conf]) => !conf.isBeta);
 const betaStyles = Object.entries(STYLE_CONFIG).filter(([_, conf]) => conf.isBeta);
 
 function setStyle(style: StyleName) {
-  if (STYLE_CONFIG[style].isBeta && !store.isPro) {
+  const config = STYLE_CONFIG[style];
+  if (config.isBeta && config.tagType !== 'free' && !store.isPro) {
     if (store.previewTimer > 0) return;
     const originalStyle = store.style;
     store.style = style;
