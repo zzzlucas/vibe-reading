@@ -4,6 +4,8 @@ import type { Novel, Chapter, Settings, Theme, StyleName, Encoding } from '../ty
 import { ContentDB } from '../utils/db';
 
 const STORAGE_PREFIX = 'deep_reader_';
+// 内存级集合：仅记录本次会话中刚导入的作品 ID，用于精确触发首次打开时的打字机动画
+const _justAddedIds = new Set<string>();
 
 export const useAppStore = defineStore('app', () => {
   // State
@@ -99,8 +101,8 @@ export const useAppStore = defineStore('app', () => {
     nextPageKeys: ['ArrowRight'],
     scrollUpKeys: ['ArrowUp'],
     scrollDownKeys: ['ArrowDown'],
-    typewriterMode: false,
-    typewriterSpeed: 50,
+    typewriterMode: true,
+    typewriterSpeed: 25,
     bossKeyStreamOutput: true,
     bossKeyTarget: 'template',
     bossKeySpecificTargetId: '',
@@ -124,9 +126,10 @@ export const useAppStore = defineStore('app', () => {
     secondaryRenderReplaceDict: '',
     secondaryRenderEnablePunctuation: false,
     secondaryRenderRemovePunctuation: [],
-    secondaryRenderIndent: 0,
+    secondaryRenderIndent: 2,
     secondaryRenderContentBlocks: [],
-    secondaryRenderContentBlocksRandom: false
+    secondaryRenderContentBlocksRandom: false,
+    version: 3
   });
 
   // Helpers
@@ -170,7 +173,20 @@ export const useAppStore = defineStore('app', () => {
       if (savedEncoding) encoding.value = savedEncoding as Encoding;
       
       const savedSettings = _loadFromStorage('settings');
-      if (savedSettings) settings.value = { ...settings.value, ...savedSettings };
+      if (savedSettings) {
+        settings.value = { ...settings.value, ...savedSettings };
+        
+        // Settings Migration for version 2/3 (new defaults)
+        if (!savedSettings.version || savedSettings.version < 3) {
+           if (!savedSettings.version || savedSettings.version < 2) {
+             settings.value.typewriterSpeed = 25;
+             settings.value.secondaryRenderIndent = 2;
+           }
+           settings.value.typewriterMode = true;
+           settings.value.version = 3;
+           _saveToStorage('settings', settings.value);
+        }
+      }
 
       const savedAppTitle = _loadFromStorage('appTitle');
       if (savedAppTitle) appTitle.value = savedAppTitle;
@@ -294,6 +310,8 @@ export const useAppStore = defineStore('app', () => {
         isPinned: false
       });
       
+      // 标记为"刚导入"，openNovel 时精确触发一次打字机动画
+      _justAddedIds.add(newId);
       await ContentDB.save(newId, content, 'works', fileName);
       _saveNovelsMeta();
     } catch (err) {
@@ -355,8 +373,14 @@ export const useAppStore = defineStore('app', () => {
     // simple split logic
     pages.value = _splitContent(content, settings.value.charsPerPage);
     totalPages.value = pages.value.length;
-    currentPage.value = novel.currentPage || 0;
-    if (currentPage.value >= totalPages.value) currentPage.value = 0;
+    const savedPage = novel.currentPage || 0;
+    currentPage.value = savedPage >= totalPages.value ? 0 : savedPage;
+    
+    // 仅当该作品是本次会话刚导入的（_justAddedIds 中有记录）才触发打字机，避免刷新/切换时误触发
+    if (settings.value.typewriterMode && _justAddedIds.has(novel.id)) {
+      _justAddedIds.delete(novel.id);
+      triggerTypewriter.value = true;
+    }
     
     novel.lastRead = Date.now();
     showWasteland.value = false;
@@ -519,18 +543,20 @@ export const useAppStore = defineStore('app', () => {
     chapters.value = [];
     const paragraphs = content.split(/\n+/).filter(p => p.trim());
     let cur = '';
+    let chapterCount = 0;
     const chapterRegex = /^\s*(第[0-9零一二三四五六七八九十百千万]+[章回节集卷部篇])(?:\s+.*)?$/;
 
     for (const para of paragraphs) {
       const isChapter = chapterRegex.test(para) || (para.length < 50 && para.startsWith('第') && (para.includes('章') || para.includes('节')));
       
-      if (isChapter && cur.length > 0) {
+      if (isChapter && cur.length > 0 && chapterCount > 0) {
         pgs.push(cur.trim());
         cur = '';
       }
 
       if (isChapter) {
         chapters.value.push({ title: para.trim().substring(0, 50), page: pgs.length });
+        chapterCount++;
       }
 
       if (cur.length + para.length > charsPerPage && cur.length > 0) {
@@ -632,13 +658,18 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
+  // 供外部 composable 标记刚导入的作品，使其能在首次打开时触发打字机动画
+  function markJustAdded(id: string) {
+    _justAddedIds.add(id);
+  }
+
   return {
     novels, activeId, activeNovelId, activeNovelIndex, currentPage, totalPages, pages, chapters, generatingContexts,
     sidebarOpen, showWasteland, isPro, hasNaggedPro, showHelp, showSettings, showProfileModal, showActivateModal, showToc, bossMode,
     theme, style, encoding, settings, aiSettings, appTitle, userName, userAvatar, userAvatarColor, autoExpandAdvanced, autoExpandReading, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed, triggerSystemFileSignal,
     openNovel, deleteNovel, renameNovel, togglePinNovel, prevPage, nextPage, searchInNovel, toggleBossMode,
     initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, resolveConfirmDialog,
-    generateUid,
+    generateUid, markJustAdded,
     confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmDefaultValue, confirmPlaceholder,
     toastVisible, toastMessage, toastType, toastActionText, previewTimer,
     _saveNovelsMeta, _syncNovelPage

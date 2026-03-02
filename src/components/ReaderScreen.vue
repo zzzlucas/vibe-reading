@@ -268,6 +268,15 @@ watch([() => store.currentPage, () => useTypewriterEffect.value], () => {
   }
 }, { immediate: true });
 
+// 专门监听 triggerTypewriter 的变化：处理 currentPage 没有变化时（如首次打开第0页）仍需触发打字机的情形
+watch(() => store.triggerTypewriter, (val) => {
+  if (val && !isDummyChat.value) {
+    nextTick(() => {
+      startTypewriter();
+    });
+  }
+});
+
 let bossModeTimeout: any = null;
 watch(() => store.bossMode, (isBoss, wasBoss) => {
   if (isBoss && !wasBoss && store.settings.bossKeyStreamOutput) {

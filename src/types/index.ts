@@ -57,6 +57,7 @@ export interface Settings {
   basicSettingsCollapsed?: boolean;
   advancedSettingsCollapsed?: boolean;
   hasSeenVibeReadingTip?: boolean;
+  version?: number;
 }
 
 export interface StyleConfig {

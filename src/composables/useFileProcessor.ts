@@ -49,6 +49,7 @@ export function useFileProcessor(attachedImages: Ref<string[]>) {
         });
         
         await ContentDB.save(newId, content, 'works', file.name);
+        store.markJustAdded(newId);
         store._saveNovelsMeta();
         
         const newIndex = store.novels.length - 1;
