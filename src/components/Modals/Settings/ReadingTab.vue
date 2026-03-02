@@ -96,10 +96,10 @@
         <div v-show="!store.settings.advancedSettingsCollapsed" style="display: flex; flex-direction: column;">
           <div class="setting-item">
             <div class="setting-label">
-              <icon-material-symbols-keyboard-double-arrow-right />
               <div class="label-with-desc">
                 <span>打字机模式</span>
                 <span class="desc-text">仅在阅读模式的翻页/跳转时触发，刷新与切换会话时不打字以保持高效</span>
+                <span class="desc-text" style="color: var(--text-muted); margin-top: 4px;">仅在 Gemini / ChatGPT 等 AI 对话类风格下生效</span>
               </div>
             </div>
             <div class="setting-control">
@@ -125,7 +125,6 @@
 
           <div class="setting-item bubble-settings-item">
             <div class="setting-label">
-              <icon-material-symbols-chat-bubble-outline />
               <div class="label-with-desc">
                 <span>用户气泡内容</span>
                 <span class="desc-text">自定义阅读时上方提问气泡的文案</span>
@@ -164,11 +163,10 @@
 
           <div class="setting-item">
             <div class="setting-label">
-               <icon-material-symbols-visibility />
-               <div class="label-with-desc">
-                 <span>界面元素显示</span>
-                 <span class="desc-text">控制顶部作品名与正文第一行章节名的可见性</span>
-               </div>
+                <div class="label-with-desc">
+                  <span>界面元素显示</span>
+                  <span class="desc-text">控制顶部作品名与正文第一行章节名的可见性</span>
+                </div>
             </div>
             <div class="setting-control visibility-settings">
               <label class="check-opt">
@@ -184,7 +182,7 @@
 
           <div class="setting-item">
             <div class="setting-label">
-              <span>段落合并开关</span>
+              <span>段落合并</span>
             </div>
             <div class="setting-control" style="gap: 12px;">
               <div v-if="store.settings.secondaryRenderMergeParagraphs" style="display: flex; align-items: center; gap: 6px;">
@@ -255,7 +253,7 @@
           <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div class="setting-label">
-                <span>标点符号替换/擦除</span>
+                <span>标点符号擦除</span>
               </div>
               <div class="setting-control">
                 <label class="toggle-switch">

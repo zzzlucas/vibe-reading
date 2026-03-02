@@ -21,6 +21,9 @@ export function useBossStream(chatArea: Ref<HTMLElement | null>, isDummyChat: Re
     bossStreamActive.value = false;
     bossStreamHtml.value = '';
 
+    // Only AI styles get the streaming effect
+    if (store.style !== 'gemini' && store.style !== 'chatgpt') return;
+
     const turn = store.settings.bossKeyStreamTurn || 'first';
     const pageIdx = turn === 'last' ? store.pages.length - 1 : 0;
     bossStreamPageIndex.value = pageIdx;

@@ -8,6 +8,7 @@ export function useTypewriter(isDummyChat: any, chatTitle: any) {
   let typewriterTimer: any = null;
 
   const useTypewriterEffect = computed(() => {
+    if (store.style !== 'gemini' && store.style !== 'chatgpt') return false;
     if (isDummyChat.value) return false;
     if (store.settings.readingMode === 'scroll') return false;
     return store.settings.typewriterMode;

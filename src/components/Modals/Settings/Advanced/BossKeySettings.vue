@@ -49,15 +49,20 @@
          </select>
       </div>
     </div>
-        <div class="setting-item no-border" style="margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(128,128,128,0.1);">
-      <div class="setting-label">
-        <span style="font-size: 12px; color: var(--text-secondary);">切换后对话流式呈现</span>
+    <div class="setting-item no-border" style="flex-direction: column; align-items: stretch; margin-top: 8px; padding-top: 12px; border-top: 1px dashed rgba(128,128,128,0.1); gap: 4px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="setting-label">
+          <span style="font-size: 12px; color: var(--text-secondary);">切换后对话流式呈现</span>
+        </div>
+        <div class="setting-control">
+          <label class="toggle-switch">
+            <input type="checkbox" v-model="store.settings.bossKeyStreamOutput">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
       </div>
-      <div class="setting-control">
-        <label class="toggle-switch">
-          <input type="checkbox" v-model="store.settings.bossKeyStreamOutput">
-          <span class="toggle-slider"></span>
-        </label>
+      <div style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+        仅在 Gemini / ChatGPT 等 AI 对话类风格下生效
       </div>
     </div>
     
@@ -77,7 +82,7 @@
         </div>
       </div>
       <div style="font-size: 11px; color: var(--text-muted); line-height: 1.5;">
-        ⚠️ 建议不超过目标对话单条回复的实际字数，否则无内容可打字
+        建议不超过目标对话单条回复的实际字数，否则无内容可打字
       </div>
     </div>
     
