@@ -10,6 +10,9 @@
           <icon-material-symbols-menu />
         </button>
         <span class="logo-text top-logo" @dblclick="store.toggleBossMode()">{{ store.appTitle }}</span>
+        <span class="top-bar-novel-title" v-if="store.settings.showNovelTitle && store.activeId">
+          {{ chatTitle }}
+        </span>
       </div>
       <div class="top-bar-right">
         <button v-if="!store.isPro" class="top-btn" @click="store.showActivateModal = true">
@@ -335,10 +338,11 @@
       <div class="gemini-suggestion-chips" v-if="store.style === 'gemini' && store.activeNovelIndex === null">
         <div class="gemini-chips-row">
           <button class="gemini-chip" @click="triggerFileInput">
-            <icon-material-symbols-image style="color: #fbbc05;" /> 制作图片
+            <icon-material-symbols-image style="color: #fbbc05;" />识别图片
           </button>
           <button class="gemini-chip" @click="store.showToast(store.comingSoonText)">
-            <icon-material-symbols-music-note style="color: #ea4335;" /> 创作音乐
+             <!-- <icon-material-symbols-music-note style="color: #ea4335;" /> -->
+            创作音乐
           </button>
           <button class="gemini-chip" @click="store.showToast(store.comingSoonText)">
             给我的一天注入活力
@@ -488,6 +492,20 @@ function handleScroll(e: Event) {
 }
 
 const pagesToRender = computed(() => {
+  // 显式添加辅助排版设置的依赖，确保设置变更时能实时刷新渲染预览
+  const _renderDeps = [
+    store.settings.showNovelTitle,
+    store.settings.showChapterName,
+    store.settings.secondaryRenderMergeParagraphs,
+    store.settings.secondaryRenderMergeCount,
+    store.settings.secondaryRenderIndent,
+    store.settings.secondaryRenderObfuscationMode,
+    store.settings.secondaryRenderEnablePunctuation,
+    store.settings.secondaryRenderRemovePunctuation,
+    store.settings.secondaryRenderEnableReplace,
+    store.settings.secondaryRenderReplaceDict
+  ];
+
   if (store.activeNovelIndex === null) return [];
   if (isDummyChat.value) {
     // BOSS 模式首屏模式：只显示第一轮，隐藏后续轮次（数据不删除，仅临时隐藏）
@@ -629,6 +647,13 @@ function formatContent(text: string) {
 
 function applySecondaryObfuscation(lines: string[]) {
   if (lines.length === 0) return lines.join('\n\n');
+  
+  // 进阶排版仅对“作品”类型的会话生效，不影响 AI 聊天或随机生成的 Dummy 会话
+  const activeNovel = store.activeNovelIndex !== null ? store.novels[store.activeNovelIndex] : null;
+  if (!activeNovel || activeNovel.type !== 'works') {
+    return lines.join('\n\n');
+  }
+
   const mode = store.settings.secondaryRenderObfuscationMode || 'none';
 
   // 1. apply string replacement first if requested
@@ -2014,6 +2039,30 @@ watch(() => store.activeNovelIndex, (newIdx) => {
   white-space: nowrap;
   user-select: none;
   margin: 0 4px 0 8px;
+}
+
+.top-bar-novel-title {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+  margin-left: 4px;
+  padding-left: 12px;
+  position: relative;
+}
+
+.top-bar-novel-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 12px;
+  width: 1px;
+  background-color: var(--border-color);
 }
 
 
