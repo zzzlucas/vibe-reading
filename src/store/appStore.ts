@@ -123,7 +123,9 @@ export const useAppStore = defineStore('app', () => {
     secondaryRenderReplaceDict: '',
     secondaryRenderEnablePunctuation: false,
     secondaryRenderRemovePunctuation: [],
-    secondaryRenderIndent: 0
+    secondaryRenderIndent: 0,
+    secondaryRenderContentBlocks: [],
+    secondaryRenderContentBlocksRandom: false
   });
 
   // Helpers

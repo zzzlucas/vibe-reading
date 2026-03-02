@@ -154,8 +154,10 @@
     </div>
 
     <!-- Default Bottom Area -->
-    <div class="sidebar-bottom" v-else>
+    <div class="sidebar-bottom" v-else v-show="(store.style as string) === 'gemini' || (store.style as string) === 'chatgpt'">
       <div class="nav-item" @click="store.showHelp = true">
+
+
         <icon-material-symbols-help />
         <span class="nav-text">帮助与支持</span>
       </div>

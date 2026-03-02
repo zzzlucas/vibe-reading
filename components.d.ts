@@ -106,6 +106,7 @@ declare module 'vue' {
     IconMaterialSymbolsWifi: typeof import('~icons/material-symbols/wifi')['default']
     IconMaterialSymbolsWorkspacePremium: typeof import('~icons/material-symbols/workspace-premium')['default']
     ImagePreviewModal: typeof import('./src/components/Reader/ImagePreviewModal.vue')['default']
+    MiniSettingsTrigger: typeof import('./src/components/MiniSettingsTrigger.vue')['default']
     NovelManagementSettings: typeof import('./src/components/Modals/Settings/Advanced/NovelManagementSettings.vue')['default']
     PageNavKeySettings: typeof import('./src/components/Modals/Settings/Advanced/PageNavKeySettings.vue')['default']
     ProfileModal: typeof import('./src/components/Modals/ProfileModal.vue')['default']

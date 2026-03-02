@@ -228,6 +228,31 @@
           </div>
 
           <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
+            <div class="setting-label">
+              <span>添加内容块 (充实前后文)</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: rgba(128,128,128,0.05); padding: 8px 10px; border-radius: 6px;">
+              <label class="check-opt mini-check"><input type="checkbox" v-model="store.settings.secondaryRenderContentBlocks" value="auth_stub"><span>鉴权存根</span></label>
+              <label class="check-opt mini-check"><input type="checkbox" v-model="store.settings.secondaryRenderContentBlocks" value="sys_log"><span>系统日志</span></label>
+              <label class="check-opt mini-check"><input type="checkbox" v-model="store.settings.secondaryRenderContentBlocks" value="license_meta"><span>开源证书</span></label>
+              <label class="check-opt mini-check"><input type="checkbox" v-model="store.settings.secondaryRenderContentBlocks" value="data_structure"><span>结构定义</span></label>
+              <label class="check-opt mini-check"><input type="checkbox" v-model="store.settings.secondaryRenderContentBlocks" value="import_section"><span>依赖导入</span></label>
+              <label class="check-opt mini-check"><input type="checkbox" v-model="store.settings.secondaryRenderContentBlocks" value="git_status"><span>Git信息</span></label>
+              <label class="check-opt mini-check"><input type="checkbox" v-model="store.settings.secondaryRenderContentBlocks" value="sql_query"><span>SQL 语句</span></label>
+              <label class="check-opt mini-check"><input type="checkbox" v-model="store.settings.secondaryRenderContentBlocks" value="unit_test"><span>单元测试</span></label>
+            </div>
+            
+            <!-- Random Switch below checkboxes -->
+            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 4px;">
+              <span class="desc-text" style="font-size: 11px;">在已选项中随机组合 (翻页自动更新)</span>
+              <label class="toggle-switch mini">
+                <input type="checkbox" v-model="store.settings.secondaryRenderContentBlocksRandom">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div class="setting-label">
                 <span>标点符号替换/擦除</span>

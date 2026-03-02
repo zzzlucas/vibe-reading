@@ -155,6 +155,93 @@ export function applySecondaryObfuscation(lines: string[], store: any) {
   }).join('\n\n');
 }
 
+const CONTENT_BLOCK_DATA: Record<string, { pre: string; post: string }[]> = {
+  auth_stub: [
+    {
+      pre: "> 📶 `[AUTH_SERVER]` Token verified successfully (scope: full_access). Session initialized.",
+      post: "> 📶 `[AUTH_SERVER]` Connection maintained. Heartbeat interval: 30s."
+    },
+    {
+      pre: "> 📶 `[AUTH_GATEWAY]` Mutual TLS handshake complete. Client certificate accepted.",
+      post: "> 📶 `[AUTH_GATEWAY]` Re-authenticating session... [SUCCESS]"
+    }
+  ],
+  sys_log: [
+    {
+      pre: "*`[SYSTEM]` Checking background services... [OK]*\n*`[SYSTEM]` Allocating virtual memory... [OK]*",
+      post: "*`[SYSTEM]` Garbage collection complete. System health: 98%.*"
+    },
+    {
+      pre: "*`[KERNEL]` Mounting file system: ext4 /dev/nvme0n1p2... [OK]*\n*`[KERNEL]` Initializing network drivers... [OK]*",
+      post: "*`[KERNEL]` System uptime: 142 days. No critical errors detected.*"
+    }
+  ],
+  license_meta: [
+    {
+      pre: "--- \n**Package Manifest: v4.2.0-stable** \n*License: MIT | Contributor: Global-Dev-Team*",
+      post: "**End of Manifest**\n---"
+    },
+    {
+      pre: "--- \n**Copyright (c) 2026 DeepReader Open Source Foundation** \n*Permission is hereby granted, free of charge...*",
+      post: "*Refer to LICENSE.md for core distribution details.* \n---"
+    }
+  ],
+  data_structure: [
+    {
+      pre: "```typescript\ntype ApiResponse<T> = { data: T; status: number; message: string; };\n```",
+      post: "```typescript\nconst initial_state = { loading: false, error: null, records: [] };\n```"
+    },
+    {
+      pre: "```typescript\ninterface UserProfile {\n  id: string; \n  metadata: Record<string, any>;\n  roles: ('admin' | 'user')[];\n}\n```",
+      post: "```typescript\nfunction validateProfile(p: UserProfile): boolean { return !!p.id; }\n```"
+    }
+  ],
+  import_section: [
+    {
+      pre: "```typescript\nimport { useState, useEffect, useMemo } from 'react';\nimport axios from 'axios';\nimport { useNavigate } from 'react-router-dom';\n```",
+      post: "```typescript\nexport default MainContainer;\n```"
+    },
+    {
+      pre: "```typescript\nimport { defineComponent, ref, watch } from 'vue';\nimport { useAppStore } from '@/store/appStore';\nimport Sidebar from './components/Sidebar.vue';\n```",
+      post: "```typescript\napp.mount('#mount-point');\n```"
+    }
+  ],
+  git_status: [
+    {
+      pre: "> 🌲 `[GIT]` On branch `main` | Your branch is up to date with 'origin/main'.",
+      post: "> 🌲 `[GIT]` Last commit: `a7f2e1 - UI(Settings): Improved rendering efficiency`"
+    },
+    {
+      pre: "> 🌲 `[GIT]` Changes not staged for commit: (use \"git add <file>...\" to update)",
+      post: "> 🌲 `[GIT]` 12 files modified. Local build: [SUCCESS]"
+    }
+  ],
+  sql_query: [
+    {
+      pre: "```sql\nSELECT u.username, p.profile_id FROM users u\nLEFT JOIN profiles p ON u.user_id = p.user_id\nWHERE u.active = 1;\n```",
+      post: "```sql\n-- Query executed in 14ms. Updated 0 records.\n```"
+    },
+    {
+      pre: "```sql\nUPDATE orders SET status = 'shipped' \nWHERE order_date < DATE_SUB(NOW(), INTERVAL 7 DAY) \nAND status = 'processing';\n```",
+      post: "```sql\n-- 1,402 rows affected. Transaction committed. (0.42s)\n```"
+    },
+    {
+      pre: "```sql\nCREATE INDEX idx_user_activity ON user_logs (created_at DESC);\n```",
+      post: "```sql\n-- Index creation background task initialized. Task ID: BK_9918\n```"
+    }
+  ],
+  unit_test: [
+    {
+      pre: "*`[TEST]` Running test suite: CORE_AUTH_WORKFLOW...*",
+      post: "*`[TEST]` PASS: 24 tests. (100% coverage)*"
+    },
+    {
+      pre: "*`[JEST]` Found 18 changed files. Resolving test dependencies...*",
+      post: "*`[JEST]` Test results: 142 passing, 0 failed. Time: 4.82s*"
+    }
+  ]
+};
+
 export function formatContent(text: string, store: any, isDummyChat: boolean, chatTitle: string) {
   if (!text) return '';
   
@@ -173,6 +260,40 @@ export function formatContent(text: string, store: any, isDummyChat: boolean, ch
   }
   
   tmp = applySecondaryObfuscation(lines, store);
+  
+  // Add Content Blocks if selected
+  const blocks = store.settings.secondaryRenderContentBlocks || [];
+  if (blocks.length > 0 && store.activeNovelIndex !== null && store.novels[store.activeNovelIndex]?.type === 'works') {
+    let activeBlocks = blocks;
+    
+    // If random mode is on, pick a subset seeded by currentPage
+    if (store.settings.secondaryRenderContentBlocksRandom) {
+      const seed = store.currentPage;
+      // Filter the pool based on a simple deterministic logic using seed and item index
+      // This will pick roughly 50-60% of checkboxes randomly per page
+      activeBlocks = blocks.filter((_: string, i: number) => {
+        // A simple linear congruential generator-ish filter
+        return ((seed * 11 + i * 7 + 3) % 10) < 6; 
+      });
+      // Ensure at least one shows up if the pool is not empty
+      if (activeBlocks.length === 0 && blocks.length > 0) {
+        activeBlocks = [blocks[seed % blocks.length]];
+      }
+    }
+
+    let preText = '';
+    let postText = '';
+    activeBlocks.forEach((blockKey: string) => {
+      const variants = CONTENT_BLOCK_DATA[blockKey];
+      if (variants && variants.length > 0) {
+        // Pick a variant based on page number to ensure variety but consistency on same page
+        const variant = variants[store.currentPage % variants.length];
+        preText += variant.pre + '\n\n';
+        postText = '\n\n' + variant.post + postText;
+      }
+    });
+    tmp = preText + tmp + postText;
+  }
 
   const rawHtml = marked.parse(tmp) as string;
   let finalHtml = DOMPurify.sanitize(rawHtml, { ADD_ATTR: ['open'] });

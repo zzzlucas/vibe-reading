@@ -10,6 +10,8 @@
   <TocModal />
   <HelpModal />
   <ConfirmModal />
+  <MiniSettingsTrigger />
+
 
   <div class="toast" :class="[store.toastVisible ? 'show' : '', store.toastType === 'preview' ? 'preview-toast' : '', store.toastType === 'achievement' ? 'achievement-toast' : '', store.toastType === 'action' ? 'action-toast' : '', store.toastType === 'info' ? 'info-toast' : '']">
     <icon-material-symbols-auto-awesome v-if="store.toastType === 'preview'" />
@@ -41,6 +43,7 @@ import ActivatePro from '@/components/Modals/ActivatePro.vue';
 import TocModal from '@/components/Modals/TocModal.vue';
 import HelpModal from '@/components/Modals/HelpModal.vue';
 import ConfirmModal from '@/components/Modals/ConfirmModal.vue';
+import MiniSettingsTrigger from '@/components/MiniSettingsTrigger.vue';
 
 const store = useAppStore();
 const router = useRouter();

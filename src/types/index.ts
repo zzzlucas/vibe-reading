@@ -52,6 +52,8 @@ export interface Settings {
   secondaryRenderEnablePunctuation: boolean;
   secondaryRenderRemovePunctuation: string[];
   secondaryRenderIndent: number;
+  secondaryRenderContentBlocks: string[];
+  secondaryRenderContentBlocksRandom: boolean;
   basicSettingsCollapsed?: boolean;
   advancedSettingsCollapsed?: boolean;
   hasSeenVibeReadingTip?: boolean;
