@@ -106,11 +106,11 @@ const shouldShow = computed(() => {
 
 [data-style="classic_blog1"] .mini-settings-trigger {
   border-radius: 8px;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
+  background-color: transparent;
+  border: 1px solid rgba(128, 128, 128, 0.3);
   color: #1a6496;
   box-shadow: none;
-  &:hover { background-color: #fff; border-color: #1a6496; }
+  &:hover { background-color: rgba(255,255,255,0.1); border-color: #1a6496; }
 }
 </style>
 

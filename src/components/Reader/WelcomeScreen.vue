@@ -22,19 +22,19 @@
       <div class="welcome-cards-container">
         <div class="welcome-cards">
           <div class="welcome-card" @click="$emit('trigger-file')">
-            <icon-material-symbols-menu-book class="card-icon" style="color:#4285f4;background:rgba(66,133,244,0.1)" />
+            <icon-material-symbols-menu-book class="card-icon" />
             <span class="card-text">加载作品文件</span>
           </div>
           <div class="welcome-card" @click="store.showSettings = true">
-            <icon-material-symbols-settings class="card-icon" style="color:#ea4335;background:rgba(234,67,53,0.1)" />
+            <icon-material-symbols-settings class="card-icon" />
             <span class="card-text">打开设置查看更多选项</span>
           </div>
           <div class="welcome-card" @click="openRecent">
-            <icon-material-symbols-history class="card-icon" style="color:#fbbc05;background:rgba(251,188,5,0.1)" />
+            <icon-material-symbols-history class="card-icon" />
             <span class="card-text">继续阅读最近打开的对话</span>
           </div>
           <div class="welcome-card" @click="store.showHelp = true">
-            <icon-material-symbols-help class="card-icon" style="color:#34a853;background:rgba(52,168,83,0.1)" />
+            <icon-material-symbols-help class="card-icon" />
             <span class="card-text">查看快捷操作及使用指南</span>
           </div>
         </div>
@@ -124,8 +124,7 @@ function openRecent() {
 
   .card-icon {
     font-size: 24px;
-    padding: 8px;
-    border-radius: 12px;
+    color: var(--text-secondary);
   }
 
   .card-text {

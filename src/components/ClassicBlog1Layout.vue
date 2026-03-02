@@ -4,7 +4,12 @@
     <nav class="blog1-navbar">
       <div class="blog1-navbar-inner">
         <div class="blog1-navbar-left">
-          <a class="blog1-logo" @click.prevent><span>🏠</span> 博客园</a>
+          <a class="blog1-logo" 
+             contenteditable="true" 
+             @blur="saveTitle1" 
+             @keydown.enter.prevent="($event.target as HTMLElement).blur()"
+             @click.stop
+             title="点击编辑标题"><span>🏠</span> {{ title1 }}</a>
           <a class="blog1-nav-link" @click.prevent>会员</a>
           <a class="blog1-nav-link" @click.prevent>周边</a>
           <a class="blog1-nav-link" @click.prevent>新闻</a>
@@ -12,7 +17,6 @@
           <a class="blog1-nav-link" @click.prevent>闪存</a>
           <a class="blog1-nav-link" @click.prevent>公包</a>
           <a class="blog1-nav-link" @click.prevent>赞助商</a>
-          <a class="blog1-nav-link blog1-highlight" @click.prevent>Chat2DB</a>
         </div>
         <div class="blog1-navbar-right">
           <div class="blog1-nav-search">
@@ -20,27 +24,34 @@
             <button class="blog1-nav-search-btn">🔍</button>
           </div>
           <a class="blog1-nav-link" @click.prevent>注册</a>
-          <a class="blog1-nav-link" @click.prevent @click="store.showSettings = true">登录</a>
+          <a class="blog1-nav-link" @click.prevent>登录</a>
         </div>
       </div>
     </nav>
 
     <!-- Blog Header -->
     <div class="blog1-header">
-      <h1 class="blog1-blog-name" @dblclick="store.toggleBossMode()">{{ blogName }}</h1>
-      <p class="blog1-blog-subtitle">{{ blogSubtitle }}</p>
+      <div class="blog1-header-inner">
+        <h1 class="blog1-blog-name" 
+            contenteditable="true" 
+            @blur="saveTitle2" 
+            @keydown.enter.prevent="($event.target as HTMLElement).blur()"
+            @click.stop
+            @dblclick="store.toggleBossMode()"
+            title="点击编辑标题">{{ title2 }}</h1>
+        <p class="blog1-blog-subtitle">{{ blogSubtitle }}</p>
+      </div>
     </div>
 
     <!-- Sub Navigation -->
     <div class="blog1-subnav">
       <div class="blog1-subnav-inner">
         <div class="blog1-subnav-links">
-          <a @click.prevent="goHome" :class="{ active: !store.activeId }">博客园</a>
-          <a @click.prevent="goHome">首页</a>
+          <a @click.prevent="goHome" :class="{ active: !store.activeId }">🏠 首页</a>
           <a @click.prevent>新随笔</a>
-          <a @click.prevent @click="store.showSettings = true">联系</a>
+          <a @click.prevent>联系</a>
           <a @click.prevent>订阅</a>
-          <a @click.prevent @click="store.showSettings = true">管理</a>
+          <a @click.prevent>管理</a>
         </div>
         <div class="blog1-subnav-stats">
           随笔 - {{ store.novels.length || 14 }}&nbsp;&nbsp;文章 - 0&nbsp;&nbsp;评论 - 14&nbsp;&nbsp;阅读 - 13645
@@ -145,6 +156,23 @@ const store = useAppStore();
 const currentStyle = computed(() => STYLE_CONFIG[store.style]);
 
 const blogName = computed(() => currentStyle.value?.logo || 'deep-sky');
+
+// Persistent editable titles
+const title1 = ref(localStorage.getItem('blog1_title_1') || blogName.value);
+const title2 = ref(localStorage.getItem('blog1_title_2') || blogName.value);
+
+function saveTitle1(e: Event) {
+  const val = (e.target as HTMLElement).innerText.replace('🏠', '').trim();
+  title1.value = val;
+  localStorage.setItem('blog1_title_1', val);
+}
+
+function saveTitle2(e: Event) {
+  const val = (e.target as HTMLElement).innerText.trim();
+  title2.value = val;
+  localStorage.setItem('blog1_title_2', val);
+}
+
 const blogSubtitle = computed(() => '一名程序猿的探索和沉淀  微信公众号: ' + (store.userName || 'DeepSky'));
 
 function goHome() { store.activeId = null; store.showWasteland = false; }
@@ -216,8 +244,13 @@ const searchText = ref('');
   font-size: 14px;
   text-decoration: none;
   margin-right: 8px;
-  cursor: pointer;
+  cursor: text;
   white-space: nowrap;
+  border: 1px transparent dashed;
+  outline: none;
+  padding: 0 4px;
+  &:hover { border-color: rgba(255,255,255,0.5); }
+  &:focus { border-color: #fff; background: rgba(255,255,255,0.1); }
 }
 .blog1-nav-link {
   color: rgba(255,255,255,0.9);
@@ -228,7 +261,6 @@ const searchText = ref('');
   white-space: nowrap;
   &:hover { color: #fff; text-decoration: underline; }
 }
-.blog1-highlight { color: #FFD700; }
 .blog1-nav-search {
   display: flex;
   align-items: center;
@@ -254,22 +286,27 @@ const searchText = ref('');
   padding: 2px 4px;
 }
 
-/* ===== Blog Header ===== */
 .blog1-header {
   background: var(--blog1-header-bg, linear-gradient(180deg, #7ECEF4 0%, #B8E4F9 100%));
-  padding: 14px 20px 10px;
   flex-shrink: 0;
-  text-align: left;
-  max-width: 1100px;
   width: 100%;
+}
+.blog1-header-inner {
+  max-width: 1100px;
   margin: 0 auto;
+  padding: 14px 20px 10px;
+  text-align: left;
 }
 .blog1-blog-name {
   font-size: 22px;
   font-weight: bold;
   color: var(--blog1-header-text, #333);
   margin: 0;
-  cursor: pointer;
+  cursor: text;
+  border: 1px transparent dashed;
+  outline: none;
+  &:hover { border-color: rgba(0,0,0,0.2); }
+  &:focus { border-color: var(--blog1-nav-bg, #5B9BD5); background: rgba(255,255,255,0.5); }
 }
 .blog1-blog-subtitle {
   font-size: 12px;
@@ -427,6 +464,7 @@ const searchText = ref('');
 }
 .blog1-sidebar-input {
   flex: 1;
+  min-width: 0;
   height: 22px;
   border: 1px solid #ccc;
   padding: 0 4px;
@@ -436,13 +474,14 @@ const searchText = ref('');
   color: #333;
 }
 .blog1-sidebar-btn {
-  padding: 0 8px;
+  padding: 0 4px;
   height: 22px;
   font-size: 11px;
   background: #f5f5f5;
   border: 1px solid #ccc;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
   &:hover { background: #e8e8e8; }
 }
 
@@ -458,7 +497,12 @@ const searchText = ref('');
     cursor: pointer;
     padding: 1px 0;
     &:hover { text-decoration: underline; color: #0d4f7e; }
-    &.blog1-active { font-weight: bold; color: #c00; }
+    &.blog1-active { font-weight: bold; color: #333; border-left: 3px solid #5B9BD5; padding-left: 6px; }
+    
+    // Handle overflowing titles
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -605,5 +649,51 @@ const searchText = ref('');
 @media (max-width: 600px) {
   .blog1-sidebar { display: none; }
   .blog1-body { margin: 4px; }
+}
+
+/* Dark Mode Overrides for Classic Blog 1 */
+[data-theme='dark'] {
+  .blog1-page {
+    background: #121212;
+    color: #ccc;
+    --blog1-page-bg: #121212;
+    --blog1-nav-bg: #162431;
+    --blog1-header-bg: linear-gradient(180deg, #1C3341 0%, #264B5D 100%);
+    --blog1-header-text: #eee;
+    --blog1-header-sub: #aaa;
+    --blog1-subnav-bg: #202d38;
+    --blog1-border: #333;
+    --blog1-link: #5B9BD5;
+    --blog1-subnav-active: #304152;
+    --blog1-card-bg: #1e1e1e;
+    --blog1-widget-title-bg: #273440;
+    --blog1-widget-title-color: #8bbce6;
+  }
+  
+  .blog1-logo:focus { background: rgba(255,255,255,0.05); }
+  .blog1-nav-search input { background: rgba(255,255,255,0.05); }
+  .blog1-blog-name:focus { background: rgba(255,255,255,0.05); }
+  .blog1-subnav-stats { color: #888; }
+  .blog1-sidebar::-webkit-scrollbar-thumb { background: #444; }
+  .blog1-profile-row { color: #aaa; span { color: #ddd; } }
+  .blog1-sidebar-input { background: #2a2a2a; border-color: #444; color: #ddd; }
+  .blog1-sidebar-btn { background: #333; border-color: #444; color: #ccc; &:hover { background: #444; } }
+  .blog1-cal-table th { color: #666; }
+
+  .blog1-main {
+    :deep(.user-msg-bubble) { color: #8bbce6 !important; }
+    :deep(.ai-text) { color: #ccc !important; }
+    :deep(.page-nav) { border-top-color: #333; }
+    :deep(.page-nav-btn) { background: #273440; border-color: #333; color: #8bbce6; &:hover:not(:disabled) { background: #304152; } }
+    :deep(.page-info) { color: #888; }
+    :deep(.code-block) { background: #2a2a2a !important; border-color: #444 !important; }
+    :deep(.code-header) { background: #333 !important; border-bottom-color: #444 !important; }
+    :deep(.code-lang-label) { color: #aaa !important; }
+    :deep(.hljs), :deep(pre code) { color: #ddd !important; }
+    :deep(.hljs-keyword) { color: #569cd6 !important; }
+    :deep(.hljs-string) { color: #ce9178 !important; }
+    :deep(.hljs-comment) { color: #6a9955 !important; }
+    :deep(.hljs-number) { color: #b5cea8 !important; }
+  }
 }
 </style>

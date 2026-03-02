@@ -76,6 +76,65 @@
         </button>
       </div>
     </div>
+
+    <!-- Classic Blog Post Footer -->
+    <div v-if="store.style === 'classic_blog1'" class="blog1-post-footer">
+      <div class="blog1-disclaimer">
+        免责声明：本内容由 AI 助手生成或来自第三方创作者，仅供参考，不代表本站任何正式立场。
+      </div>
+      
+      <div class="blog1-digg-row">
+        <div class="blog1-digg-buttons">
+          <button class="digg-btn item-top" @click="store.showToast('推荐成功')">好文要顶</button>
+          <button class="digg-btn item-follow" @click="store.showToast('关注成功')">关注我</button>
+          <button class="digg-btn item-fav" @click="store.showToast('已加入收藏')">收藏该文</button>
+          <button class="digg-btn item-share" @click="store.showToast('微信二维码已生成')">微信分享</button>
+        </div>
+      </div>
+
+      <div class="blog1-author-info">
+        <div class="author-avatar">
+          <FindDeepSparkle v-if="currentStyle.favicon === 'fd-sparkle'" size="100%" />
+          <img v-else :src="currentStyle.favicon || 'https://via.placeholder.com/64'" alt="Avatar" />
+        </div>
+        <div class="author-meta">
+          <div class="author-name">{{ store.userName || 'DeepSky' }}</div>
+          <div class="author-stats">粉丝 - 9 关注 - 1</div>
+          <button class="author-follow-btn" @click="store.showToast('已关注')">+加关注</button>
+        </div>
+        <div class="author-digg">
+          <div class="author-digg-item">
+            <div class="digg-num">1</div>
+            <button class="digg-action" @click="store.showToast('推荐成功')">👍 推荐</button>
+          </div>
+          <div class="author-digg-item">
+            <div class="digg-num">0</div>
+            <button class="digg-action" @click="store.showToast('踩中..')">👎 反对</button>
+          </div>
+          <div class="author-digg-vip">
+            <a @click.prevent>升级成为会员</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="blog1-prev-post">
+        <a @click.prevent>« 上一篇：让 Agent 越来越“懂你”：长期记忆的原理与工程实现</a>
+      </div>
+
+      <div class="blog1-post-meta">
+        posted @ {{ new Date().toISOString().slice(0, 16).replace('T', ' ') }} {{ store.userName || 'DeepSky' }} 阅读(47) 评论(0) 收藏 举报
+      </div>
+
+      <div class="blog1-footer-links">
+        <a @click.prevent="refreshPage">刷新页面</a>
+        <a @click.prevent="scrollToTop">返回顶部</a>
+      </div>
+
+      <div class="blog1-comment-teaser">
+        <icon-material-symbols-chat-bubble-outline style="font-size: 14px; margin-right: 4px; vertical-align: middle; color: #1a6496;" />
+        登录后才能查看或发表评论，立即 <a @click.prevent>登录</a> 或者 逛逛 <a @click.prevent="store.activeId = null">首页</a>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -189,6 +248,14 @@ onUnmounted(() => {
 watch(() => props.content, () => {
   isFooterRevealed.value = false;
 });
+
+function refreshPage() {
+  window.location.reload();
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 </script>
 
 <style scoped lang="less">
@@ -600,5 +667,226 @@ watch(() => props.content, () => {
 .page-info {
   font-size: 14px;
   color: var(--text-secondary);
+}
+
+/* Classic Blog 1 Footer Styles */
+.blog1-post-footer {
+  margin-top: 40px;
+  padding: 10px 0;
+  border-top: 1px dashed #ddd;
+}
+
+.blog1-disclaimer {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.blog1-digg-row {
+  margin-bottom: 25px;
+}
+
+.blog1-digg-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.digg-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  
+  &.item-top { background: linear-gradient(180deg, #42b983 0%, #2f8e65 100%); }
+  &.item-follow { background: linear-gradient(180deg, #d35400 0%, #b34700 100%); }
+  &.item-fav { background: linear-gradient(180deg, #f39c12 0%, #e67e22 100%); }
+  &.item-share { background: linear-gradient(180deg, #27ae60 0%, #219150 100%); }
+  
+  &:hover { opacity: 0.9; transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+}
+
+.blog1-author-info {
+  display: flex;
+  background: #fdfdfd;
+  border: 1px dashed #eee;
+  padding: 15px;
+  margin-bottom: 20px;
+  gap: 15px;
+  align-items: center;
+}
+
+.author-avatar {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  border: 1px solid #ddd;
+  padding: 2px;
+  background: #fff;
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.author-meta {
+  flex: 1;
+}
+
+.author-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.author-stats {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.author-follow-btn {
+  padding: 2px 8px;
+  font-size: 11px;
+  background: #5B9BD5;
+  color: #fff;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.author-digg {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.author-digg-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.digg-num {
+  width: 42px;
+  height: 28px;
+  background: #fdf6ec;
+  border: 1px solid #faecc5;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #e6a23c;
+}
+
+.digg-action {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 12px;
+  cursor: pointer;
+  &:hover { color: #5B9BD5; text-decoration: underline; }
+}
+
+.author-digg-vip {
+  font-size: 12px;
+  a {
+    color: #1a6496;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
+.blog1-prev-post {
+  font-size: 13px;
+  margin-bottom: 30px;
+  a {
+    color: #1a6496;
+    text-decoration: none;
+    &:hover { text-decoration: underline; color: #c00; }
+  }
+}
+
+.blog1-post-meta {
+  font-size: 12px;
+  color: #999;
+  text-align: right;
+  margin-bottom: 15px;
+}
+
+.blog1-footer-links {
+  text-align: right;
+  font-size: 12px;
+  margin-bottom: 25px;
+  a {
+    color: #1a6496;
+    margin-left: 10px;
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.blog1-comment-teaser {
+  background: #fff;
+  border: 1px dashed #ddd;
+  padding: 20px;
+  font-size: 13px;
+  color: #333;
+  a {
+    color: #1a6496;
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+/* Dark Mode Overrides for Classic Blog 1 Footer */
+[data-theme='dark'] {
+  .blog1-post-footer {
+    border-top-color: #333;
+  }
+  .blog1-disclaimer {
+    color: #666;
+  }
+  .blog1-author-info {
+    background: #1a1a1a;
+    border-color: #333;
+  }
+  .author-avatar {
+    background: #222;
+    border-color: #444;
+  }
+  .author-name {
+    color: #ddd;
+  }
+  .author-stats {
+    color: #888;
+  }
+  .digg-num {
+    background: #2c2518;
+    border-color: #4d3d1a;
+    color: #e6a23c;
+  }
+  .digg-action {
+    color: #888;
+    &:hover { color: #5B9BD5; }
+  }
+  .author-digg-vip a, .blog1-prev-post a, .blog1-footer-links a, .blog1-comment-teaser a {
+    color: #5B9BD5;
+  }
+  .blog1-post-meta {
+    color: #666;
+  }
+  .blog1-comment-teaser {
+    background: #1a1a1a;
+    border-color: #333;
+    color: #ccc;
+  }
 }
 </style>
