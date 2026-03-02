@@ -61,6 +61,7 @@ export const useAppStore = defineStore('app', () => {
   const skipNextTypewriter = ref(false);
   const triggerTypewriter = ref(false);
   const fakeSidebarRefreshSeed = ref(0);
+  const triggerSystemFileSignal = ref(0);
   // Custom Modal States
   const confirmVisible = ref(false);
   const confirmMessage = ref('');
@@ -150,83 +151,153 @@ export const useAppStore = defineStore('app', () => {
 
   // Actions
   async function initStore() {
-    await ContentDB.open();
-    
-    // Load config
-    const savedTheme = _loadFromStorage('theme');
-    if (savedTheme) theme.value = savedTheme as Theme;
-    
-    const savedStyle = _loadFromStorage('style');
-    const validStyles = ['gemini', 'chatgpt', 'vscode', 'terminal', 'idea', 'webstorm', 'juejin', 'mdn', 'stackoverflow', 'classic_blog1'];
-    if (savedStyle && validStyles.includes(savedStyle)) {
-      style.value = savedStyle as StyleName;
-    } else if (savedStyle) {
-      style.value = 'gemini'; // Default fallback for old or invalid styles
-    }
-    
-    const savedEncoding = _loadFromStorage('encoding');
-    if (savedEncoding) encoding.value = savedEncoding as Encoding;
-    
-    const savedSettings = _loadFromStorage('settings');
-    if (savedSettings) settings.value = { ...settings.value, ...savedSettings };
-
-    const savedAppTitle = _loadFromStorage('appTitle');
-    if (savedAppTitle) appTitle.value = savedAppTitle;
-
-    const savedAutoPreview = _loadFromStorage('autoPreview');
-    if (savedAutoPreview !== null) autoPreview.value = !!savedAutoPreview;
-
-    const savedComingSoon = _loadFromStorage('comingSoonText');
-    if (savedComingSoon) comingSoonText.value = savedComingSoon;
-
-    const savedUserName = _loadFromStorage('userName');
-    if (savedUserName) userName.value = savedUserName;
-
-    const savedUserAvatar = _loadFromStorage('userAvatar');
-    if (savedUserAvatar) userAvatar.value = savedUserAvatar;
-
-    const savedUserAvatarColor = _loadFromStorage('userAvatarColor');
-    if (savedUserAvatarColor) userAvatarColor.value = savedUserAvatarColor;
-
-    const savedAiSettings = _loadFromStorage('aiSettings');
-    if (savedAiSettings) {
-      aiSettings.value = { ...aiSettings.value, ...savedAiSettings };
-    }
-
-    // Load novels
-    const savedNovels = _loadFromStorage('novels_meta');
-    if (savedNovels && Array.isArray(savedNovels)) {
-      novels.value = savedNovels;
+    try {
+      await ContentDB.open();
       
-      let modified = false;
-      const toRemove: number[] = [];
+      // Load config
+      const savedTheme = _loadFromStorage('theme');
+      if (savedTheme) theme.value = savedTheme as Theme;
       
-      for (let i = 0; i < novels.value.length; i++) {
-        const novel = novels.value[i];
+      const savedStyle = _loadFromStorage('style');
+      const validStyles = ['gemini', 'chatgpt', 'vscode', 'terminal', 'idea', 'webstorm', 'juejin', 'mdn', 'stackoverflow', 'classic_blog1'];
+      if (savedStyle && validStyles.includes(savedStyle)) {
+        style.value = savedStyle as StyleName;
+      } else if (savedStyle) {
+        style.value = 'gemini'; // Default fallback for old or invalid styles
+      }
+      
+      const savedEncoding = _loadFromStorage('encoding');
+      if (savedEncoding) encoding.value = savedEncoding as Encoding;
+      
+      const savedSettings = _loadFromStorage('settings');
+      if (savedSettings) settings.value = { ...settings.value, ...savedSettings };
+
+      const savedAppTitle = _loadFromStorage('appTitle');
+      if (savedAppTitle) appTitle.value = savedAppTitle;
+
+      const savedAutoPreview = _loadFromStorage('autoPreview');
+      if (savedAutoPreview !== null) autoPreview.value = !!savedAutoPreview;
+
+      const savedComingSoon = _loadFromStorage('comingSoonText');
+      if (savedComingSoon) comingSoonText.value = savedComingSoon;
+
+      const savedUserName = _loadFromStorage('userName');
+      if (savedUserName) userName.value = savedUserName;
+
+      const savedUserAvatar = _loadFromStorage('userAvatar');
+      if (savedUserAvatar) userAvatar.value = savedUserAvatar;
+
+      const savedUserAvatarColor = _loadFromStorage('userAvatarColor');
+      if (savedUserAvatarColor) userAvatarColor.value = savedUserAvatarColor;
+
+      const savedAiSettings = _loadFromStorage('aiSettings');
+      if (savedAiSettings) {
+        aiSettings.value = { ...aiSettings.value, ...savedAiSettings };
+      }
+
+      // Load novels
+      const savedNovels = _loadFromStorage('novels_meta');
+      if (savedNovels && Array.isArray(savedNovels)) {
+        novels.value = savedNovels;
         
-        // Ensure meta has ID and Type (basic structure integrity)
-        if (!novel.id || !novel.type) {
-           toRemove.push(i);
-           continue;
+        let modified = false;
+        const toRemove: number[] = [];
+        
+        for (let i = 0; i < novels.value.length; i++) {
+          const novel = novels.value[i];
+          
+          if (!novel.id || !novel.type) {
+             toRemove.push(i);
+             continue;
+          }
+
+          const exists = await ContentDB.has(novel.id);
+          if (!exists) {
+            toRemove.push(i);
+          }
         }
 
-        // Only keep if content exists in IndexedDB (keyed by ID)
-        const exists = await ContentDB.has(novel.id);
-        if (!exists) {
-          toRemove.push(i);
+        if (toRemove.length > 0) {
+          for (let i = toRemove.length - 1; i >= 0; i--) {
+            novels.value.splice(toRemove[i], 1);
+          }
+          modified = true;
+        }
+        
+        if (modified) {
+          _saveNovelsMeta();
         }
       }
 
-      if (toRemove.length > 0) {
-        for (let i = toRemove.length - 1; i >= 0; i--) {
-          novels.value.splice(toRemove[i], 1);
+      // Default book onboarding: Load if list is empty or we are upgrading from broken version
+      const hasOldInit = _loadFromStorage('has_init_default');
+      const hasNewInit = _loadFromStorage('has_init_default_v2');
+      
+      // Auto-fix for users who got scrambled text in the previous attempt
+      if (hasOldInit && !hasNewInit && novels.value.length > 0) {
+        const brokenIdx = novels.value.findIndex(n => n.name === '《海底两万里》（示例作品）.txt' && n.type === 'works');
+        if (brokenIdx !== -1) {
+          // Find and delete the broken one to allow fresh import
+          const brokenId = novels.value[brokenIdx].id;
+          await ContentDB.delete(brokenId);
+          novels.value.splice(brokenIdx, 1);
+          _saveNovelsMeta();
         }
-        modified = true;
+      }
+
+      if (novels.value.length === 0 && !hasNewInit) {
+        await _loadDefaultBook();
+        _saveToStorage('has_init_default_v2', true);
+        
+        // Auto-open the default book after a short delay to ensure UI stability
+        if (novels.value.length > 0) {
+          setTimeout(() => {
+             openNovel(0);
+          }, 100);
+        }
+      }
+    } catch (err) {
+      console.error('Store Init failed:', err);
+    }
+  }
+
+  async function _loadDefaultBook() {
+    try {
+      // Use full URL or relative path based on environment, for dev/prod flexibility
+      const response = await fetch('./《海底两万里》（示例作品）.txt');
+      if (!response.ok) return;
+      
+      const buffer = await response.arrayBuffer();
+      let content = '';
+      
+      try {
+        // Try UTF-8 first
+        const utf8Decoder = new TextDecoder('utf-8', { fatal: true });
+        content = utf8Decoder.decode(buffer);
+      } catch (err) {
+        // Fallback to GBK if UTF-8 fails
+        const gbkDecoder = new TextDecoder('gbk', { fatal: false });
+        content = gbkDecoder.decode(buffer);
       }
       
-      if (modified) {
-        _saveNovelsMeta();
-      }
+      const newId = generateUid();
+      const fileName = '《海底两万里》（示例作品）.txt';
+      
+      novels.value.push({
+        id: newId,
+        type: 'works',
+        name: fileName,
+        size: content.length,
+        lastRead: Date.now(),
+        currentPage: 0,
+        displayName: '海底两万里（示例）',
+        isPinned: false
+      });
+      
+      await ContentDB.save(newId, content, 'works', fileName);
+      _saveNovelsMeta();
+    } catch (err) {
+      console.warn('Failed to load default book:', err);
     }
   }
 
@@ -391,6 +462,14 @@ export const useAppStore = defineStore('app', () => {
         triggerTypewriter.value = true;
         currentPage.value++;
         _syncNovelPage();
+    } else {
+      // 检查是否为示例作品且已到达末尾
+      const activeIdx = activeNovelIndex.value;
+      if (activeIdx !== null && novels.value[activeIdx].name === '《海底两万里》（示例作品）.txt') {
+        showActionToast('示例缓冲区已结束，请上传本地 .txt 文件继续渲染', '立即上传', () => {
+          triggerSystemFileSignal.value++;
+        });
+      }
     }
   }
   function _syncNovelPage() {
@@ -421,7 +500,9 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  function _splitContent(content: string, charsPerPage: number) {
+  function _splitContent(content: string, charsPerPageRaw: number) {
+    const charsPerPage = Math.max(charsPerPageRaw || 2000, 100); // Safety floor to prevent infinite loops
+
     // Explicit page breaks for dummy chats or special formatting
     if (content.includes('[PAGE_BREAK]')) {
       return content.split('[PAGE_BREAK]')
@@ -463,9 +544,13 @@ export const useAppStore = defineStore('app', () => {
         while (remaining.length > charsPerPage) {
           let splitPos = charsPerPage;
           const se = remaining.lastIndexOf('。', charsPerPage);
-          if (se > charsPerPage * 0.5) splitPos = se + 1;
+          // Ensure splitPos is at least 1 to avoid infinite loop
+          if (se > charsPerPage * 0.5) {
+             splitPos = Math.max(se + 1, 1);
+          }
           pgs.push(remaining.substring(0, splitPos).trim());
           remaining = remaining.substring(splitPos);
+          if (splitPos === 0) break; // Emergency break
         }
         if (remaining.trim()) cur = remaining + '\n\n';
       } else {
@@ -550,7 +635,7 @@ export const useAppStore = defineStore('app', () => {
   return {
     novels, activeId, activeNovelId, activeNovelIndex, currentPage, totalPages, pages, chapters, generatingContexts,
     sidebarOpen, showWasteland, isPro, hasNaggedPro, showHelp, showSettings, showProfileModal, showActivateModal, showToc, bossMode,
-    theme, style, encoding, settings, aiSettings, appTitle, userName, userAvatar, userAvatarColor, autoExpandAdvanced, autoExpandReading, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed,
+    theme, style, encoding, settings, aiSettings, appTitle, userName, userAvatar, userAvatarColor, autoExpandAdvanced, autoExpandReading, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed, triggerSystemFileSignal,
     openNovel, deleteNovel, renameNovel, togglePinNovel, prevPage, nextPage, searchInNovel, toggleBossMode,
     initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, resolveConfirmDialog,
     generateUid,

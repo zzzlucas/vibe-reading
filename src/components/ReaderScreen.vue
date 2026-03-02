@@ -238,6 +238,11 @@ const pagesToRender = computed(() => {
   return [store.pages[store.currentPage] || ''];
 });
 
+// Watch for store signal to trigger file selection
+watch(() => store.triggerSystemFileSignal, () => {
+    triggerFileInput();
+});
+
 async function jumpPage() {
   const input = await store.promptDialog(
     `跳转到第几页？(1 - ${store.totalPages})\n(当前第 ${store.currentPage + 1} 页)`,

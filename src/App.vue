@@ -149,18 +149,6 @@ onMounted(async () => {
     if (index >= 0) {
       await store.openNovel(index);
     }
-  } else {
-    // 2. Fallback to localStorage
-    const lastActiveId = localStorage.getItem('deep_reader_last_active_id');
-    if (lastActiveId) {
-      try {
-        const id = JSON.parse(lastActiveId);
-        const index = store.novels.findIndex(n => n.id === id);
-        if (index >= 0) {
-          await store.openNovel(index);
-        }
-      } catch {}
-    }
   }
 });
 </script>

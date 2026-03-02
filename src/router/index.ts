@@ -19,8 +19,8 @@ const router = createRouter({
 
 // Since the whole app is inside App.vue and managed by Pinia, 
 // we use the router mainly to sync the URL state.
-router.beforeEach((to, from, next) => {
-  next();
+router.beforeEach((to, from) => {
+  return true;
 });
 
 export default router;
