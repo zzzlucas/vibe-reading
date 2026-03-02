@@ -12,7 +12,8 @@
                   <div class="info-sections">
                     <div class="info-section">
                       <div class="info-title" style="color: #a8c7fa;">{{ store.settings.coffeeVibeMode ? '中杯氛围 (Tall)' : '基础氛围 (Simple Vibe)' }}：</div>
-                      <div class="info-item"><span>作品与章节名</span><span>隐藏</span></div>
+                      <div class="info-item"><span>作品标题</span><span>显示</span></div>
+                      <div class="info-item"><span>章节名</span><span>隐藏</span></div>
                       <div class="info-item"><span>段落缩进</span><span>0 顶格</span></div>
                     </div>
                     <div class="info-divider"></div>
@@ -26,6 +27,7 @@
                     <div class="info-section">
                       <div class="info-title" style="color: var(--accent);">{{ store.settings.coffeeVibeMode ? '超大杯氛围 (Venti)' : '深度氛围 (Deep Vibe)' }}：</div>
                       <div class="info-item"><span>包含基础与进阶模式所有项</span></div>
+                      <div class="info-item"><span>作品标题</span><span>隐藏</span></div>
                       <div class="info-item"><span>标点擦除</span><span>启用 (全擦除)</span></div>
                       <div class="info-item"><span>内容引擎</span><span>复杂 LOG 模式</span></div>
                       <div class="info-item"><span>前后文充实</span><span>注入鉴权/日志/导入项</span></div>
@@ -203,7 +205,6 @@
           </div>
           <div class="setting-item" v-if="store.settings.typewriterMode">
             <div class="setting-label">
-              <icon-material-symbols-speed />
               <div class="label-with-desc">
                 <span>打字速度 (ms)</span>
                 <span class="desc-text">越小越快，建议 20~80ms</span>
@@ -257,7 +258,7 @@
             <div class="setting-label">
                 <div class="label-with-desc">
                   <span>界面元素显示</span>
-                  <span class="desc-text">控制顶部作品名与正文第一行章节名的可见性</span>
+                  <span class="desc-text">控制顶部作品名、正文标题与装饰标识的可见性</span>
                 </div>
             </div>
             <div class="setting-control visibility-settings">

@@ -3,7 +3,7 @@
     class="message-container" 
     :style="isDummyChat && index < totalItems - 1 ? 'margin-bottom: 32px;' : (store.settings.readingMode === 'scroll' && !isDummyChat && index < totalItems - 1 ? 'margin-bottom: 40px; border-bottom: 1px dashed var(--border-color); padding-bottom: 40px;' : '')"
   >
-    <div class="user-message">
+    <div class="user-message" v-if="shouldShowUserMessage">
       <div class="user-img-row" v-if="userImages.length > 0">
         <img v-for="(src, i) in userImages" :src="src" :key="i" />
       </div>
@@ -191,6 +191,14 @@ const formattedStreamingResponse = computed(() => {
 
 const isTypewriterActive = computed(() => props.useTypewriterEffect && props.typewriterHtml && props.isLast);
 const isBossStreamActive = computed(() => props.bossStreamActive && props.index === props.bossStreamPageIndex);
+
+const shouldShowUserMessage = computed(() => {
+  if (props.isDummyChat) return true;
+  const isAiStyle = ['gemini', 'chatgpt'].includes(store.style);
+  if (isAiStyle) return true; 
+  if (store.style.startsWith('classic_blog')) return store.settings.showNovelTitle; 
+  return false; 
+});
 
 const showThinking = computed(() => {
   if (props.isActiveStreaming && props.isLast && props.isAiWaitingMainResponse) return true;

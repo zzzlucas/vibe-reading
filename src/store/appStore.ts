@@ -113,6 +113,7 @@ export const useAppStore = defineStore('app', () => {
     fontColor: '',
     showChapterName: true,
     showNovelTitle: true,
+    showUserBubble: true,
     secondaryRenderMergeParagraphs: false,
     secondaryRenderMergeCount: 3,
     showFakeSidebar: false,
@@ -681,7 +682,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function applyBasicVibe() {
-    settings.value.showNovelTitle = false;
+    settings.value.showNovelTitle = true;
     settings.value.showChapterName = false;
     settings.value.secondaryRenderIndent = 0;
     settings.value.secondaryRenderObfuscationMode = 'none';
@@ -691,7 +692,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function applyAdvancedVibe() {
-    settings.value.showNovelTitle = false;
+    settings.value.showNovelTitle = true;
     settings.value.showChapterName = false;
     settings.value.secondaryRenderIndent = 0;
     settings.value.secondaryRenderObfuscationMode = 'log_simple';

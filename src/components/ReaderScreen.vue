@@ -431,6 +431,11 @@ async function handleGlobalClick(e: MouseEvent) {
   }
 
   if (store.settings.tripleClickBossKey && e.detail === 3) {
+    // 弹窗打开时，不触发老板键连击
+    if (store.showSettings || store.showProfileModal || store.showActivateModal || store.showHelp) {
+      return;
+    }
+
     const wasBossMode = store.bossMode;
     await store.toggleBossMode();
     

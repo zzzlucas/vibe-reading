@@ -38,6 +38,7 @@ export interface Settings {
   fontColor: string;
   showChapterName: boolean;
   showNovelTitle: boolean;
+  showUserBubble: boolean;
   secondaryRenderMergeParagraphs: boolean;
   secondaryRenderMergeCount: number;
   showFakeSidebar: boolean;
