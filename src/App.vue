@@ -152,7 +152,25 @@ onMounted(async () => {
       await store.openNovel(index);
     }
   }
+
+  _logVibeConsole();
 });
+
+function _logVibeConsole() {
+  const quotes = [
+    "“18世纪的工人在砸纺织机，21世纪的我们在用 AI 写周报，用 FindDeep 看小说。”",
+    "“AI 负责让老板觉得你产出惊人，FindDeep 负责让你在这个过程中保持灵魂有趣。”",
+    "“不反抗技术，只反抗注视。正在为您注入赛博伪装协议...”"
+  ];
+  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  
+  console.log(
+    `%c ${store.appTitle} %c ${quote} `,
+    'background: #8ab4f8; color: #131314; padding: 2px 4px; border-radius: 4px; font-weight: bold;',
+    'color: #8ab4f8; font-style: italic;'
+  );
+}
+
 </script>
 
 <style lang="less">
