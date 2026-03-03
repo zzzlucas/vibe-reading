@@ -331,6 +331,34 @@
   overflow: hidden;
 }
 
+/* ===== Force Modals to always use Gemini Style ===== */
+[data-theme="dark"] .modal-overlay {
+  --bg-primary:#131314;--bg-secondary:#131314;--bg-surface:#1e1f20;
+  --bg-surface-hover:#2b2c2f;--bg-surface-active:#21242d;--bg-sidebar:#1e1f20;
+  --bg-input:#1e1f20;--bg-modal:#1e1f20;
+  --text-primary:#e3e3e3;--text-secondary:#c4c7c5;--text-muted:#8a8d91;--text-link:#8ab4f8;
+  --text-active:#a8c7fa;
+  --border-color:#3c4043;--border-color-light:#5f6368;
+  --accent:#8ab4f8;--accent-secondary:#c58af9;--accent-pink:#f28b82;--accent-green:#81c995;
+  --gradient-start:#4285f4;--gradient-mid:#9b72cb;--gradient-end:#d96570;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 12px rgba(0,0,0,.4);--shadow-lg:0 8px 24px rgba(0,0,0,.5);
+  --modal-overlay:rgba(0,0,0,.6);--scrollbar-thumb:#3c4043;--scrollbar-hover:#5f6368;
+  --sparkle-bg:linear-gradient(135deg,#4285f4,#9b72cb,#d96570);
+}
+
+[data-theme="light"] .modal-overlay {
+  --bg-primary:#ffffff;--bg-secondary:#f8f9fa;--bg-surface:#f1f3f4;
+  --bg-surface-hover:#e8eaed;--bg-surface-active:#dadce0;--bg-sidebar:#f8f9fa;
+  --bg-input:#f1f3f4;--bg-modal:#ffffff;
+  --text-primary:#1f1f1f;--text-secondary:#5f6368;--text-muted:#80868b;--text-link:#1a73e8;
+  --border-color:#dadce0;--border-color-light:#c4c7c5;
+  --accent:#1a73e8;--accent-secondary:#9334e6;--accent-pink:#d93025;--accent-green:#188038;
+  --gradient-start:#4285f4;--gradient-mid:#9b72cb;--gradient-end:#d96570;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.1);--shadow-md:0 4px 12px rgba(0,0,0,.12);--shadow-lg:0 8px 24px rgba(0,0,0,.15);
+  --modal-overlay:rgba(0,0,0,.3);--scrollbar-thumb:#dadce0;--scrollbar-hover:#c4c7c5;
+  --sparkle-bg:linear-gradient(135deg,#4285f4,#9b72cb,#d96570);
+}
+
 /* ===== Common Variables ===== */
 :root{
   --sidebar-width:280px;--topbar-height:56px;--transition-speed:.2s;
