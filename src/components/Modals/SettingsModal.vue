@@ -20,9 +20,9 @@
             <AppearanceTab />
             
             <div class="settings-section">
-              <div class="section-header interactive-row" @click="openSubModal('reading', '阅读配置')">
+              <div class="section-header interactive-row" @click="openSubModal('reading', '排版配置')">
                 <div class="header-with-tip">
-                  <h3>阅读配置</h3>
+                  <h3>排版配置</h3>
                   <span class="advanced-tip">{{ vibeReadingText }}</span>
                 </div>
                 <icon-material-symbols-settings class="collapse-icon" />
@@ -133,7 +133,7 @@ watch(() => store.showSettings, (newVal) => {
       store.autoExpandAdvanced = false;
     } else if (store.autoExpandReading) {
       activeSubModal.value = 'reading';
-      subModalTitle.value = '阅读配置';
+      subModalTitle.value = '排版配置';
       store.autoExpandReading = false;
     } else {
       activeSubModal.value = null;
@@ -143,6 +143,22 @@ watch(() => store.showSettings, (newVal) => {
       clearInterval(typeTimer);
       clearTimeout(typeTimer);
     }
+  }
+});
+
+watch(() => store.autoExpandReading, (newVal) => {
+  if (newVal && store.showSettings) {
+    activeSubModal.value = 'reading';
+    subModalTitle.value = '排版配置';
+    store.autoExpandReading = false;
+  }
+});
+
+watch(() => store.autoExpandAdvanced, (newVal) => {
+  if (newVal && store.showSettings) {
+    activeSubModal.value = 'advanced';
+    subModalTitle.value = '高级与实验性功能';
+    store.autoExpandAdvanced = false;
   }
 });
 

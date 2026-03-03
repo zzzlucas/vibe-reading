@@ -74,7 +74,7 @@
     <input type="file" ref="fileInput" accept="*" style="display:none" multiple @change="handleFileSelect">
     
     <!-- Dev Only: Quick Reading Settings Button -->
-    <button v-if="isDev" class="dev-quick-settings-btn" @click="openDevReadingSettings" title="[DEV] 快速调试阅读配置">
+    <button v-if="isDev" class="dev-quick-settings-btn" @click="openDevReadingSettings" title="[DEV] 快速调试排版配置">
       <icon-material-symbols-settings />
     </button>
 

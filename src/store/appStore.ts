@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, watch, computed } from 'vue';
 import type { Novel, Chapter, Settings, Theme, StyleName, Encoding } from '../types';
 import { ContentDB } from '../utils/db';
+import { STYLE_CONFIG } from '../config/constants';
 
 const STORAGE_PREFIX = 'deep_reader_';
 // 内存级集合：仅记录本次会话中刚导入的作品 ID，用于精确触发首次打开时的打字机动画
@@ -65,6 +66,7 @@ export const useAppStore = defineStore('app', () => {
   const triggerTypewriter = ref(false);
   const fakeSidebarRefreshSeed = ref(0);
   const triggerSystemFileSignal = ref(0);
+  const isInitializing = ref(true);
   // Custom Modal States
   const confirmVisible = ref(false);
   const confirmMessage = ref('');
@@ -275,11 +277,19 @@ export const useAppStore = defineStore('app', () => {
         if (novels.value.length > 0) {
           setTimeout(() => {
              openNovel(0);
+             // 初始化彻底完成，开放打字机和 Toast 触发
+             setTimeout(() => { isInitializing.value = false; }, 200);
           }, 100);
+        } else {
+          isInitializing.value = false;
         }
+      } else {
+        // 如果不是初次安装，也要在加载完已存数据后标记完成
+        isInitializing.value = false;
       }
     } catch (err) {
       console.error('Store Init failed:', err);
+      isInitializing.value = false;
     }
   }
 
@@ -338,15 +348,18 @@ export const useAppStore = defineStore('app', () => {
 
   // Watchers to auto-save
   watch(theme, (val) => _saveToStorage('theme', val));
-  watch(style, (val) => {
+  watch(style, (val, oldVal) => {
     _saveToStorage('style', val);
-    // Check if switching to classic_blog1 for the first time while on works
-    if (val === 'classic_blog1' && activeId.value && !settings.value.hasSeenClassicBlogVibeTip) {
-      const activeIdx = activeNovelIndex.value;
-      if (activeIdx !== null && novels.value[activeIdx]?.type === 'works') {
+    
+    // Only show toast if it's a real switch (not initial load/refresh)
+    if (!isInitializing.value && oldVal && val !== oldVal) {
+      const config = STYLE_CONFIG[val];
+      const uiName = config?.uiName || '新风格';
+      
+      showActionToast(`✨ 已为您开启 ${uiName} 风格，是否快速配置排版获取更好阅读氛围`, '快速配置', () => {
         showSettings.value = true;
         autoExpandReading.value = true;
-      }
+      });
     }
   });
   watch(encoding, (val) => _saveToStorage('encoding', val));
@@ -402,13 +415,7 @@ export const useAppStore = defineStore('app', () => {
     showWasteland.value = false;
     _saveNovelsMeta();
 
-    // Trigger Reading configuration for classic blog on first switch
-    if (style.value === 'classic_blog1' && novel.type === 'works' && !settings.value.hasSeenClassicBlogVibeTip) {
-      setTimeout(() => {
-        showSettings.value = true;
-        autoExpandReading.value = true;
-      }, 500); // Wait for open novel animation to breathe
-    }
+
   }
 
   async function deleteNovel(index: number) {
@@ -659,7 +666,7 @@ export const useAppStore = defineStore('app', () => {
       if (bossNovelIndex === -1) {
         let templateIndex = novels.value.findIndex(n => n.name === 'dummy_boss_chat.txt');
         if (templateIndex === -1) {
-          const content = `[USER]: 帮我整理一下 Q1 季度项目进展报告的要点，包括完成的里程碑和下一步计划\n\n好的，我来帮你整理 Q1 季度项目进展报告的要点：\n\n**一、已完成的里程碑**\n\n1. 核心模块重构完成，性能提升 40%\n2. 用户管理系统 v2.0 上线，支持多租户架构\n3. 完成第三方支付系统对接（支付宝、微信支付）\n4. 自动化测试覆盖率从 45% 提升至 82%\n\n**二、关键数据指标**\n\n• 日活用户: 12.5 万 → 18.3 万 (↑46.4%)\n• 系统可用性: 99.95%\n• 平均响应时间: 从 320ms 降至 180ms\n\n**三、下一步计划**\n\n1. 启动微服务拆分第二阶段\n2. 引入 AI 智能推荐模型\n`;
+          const content = `[USER]: Q1 季度项目进展报告的要点，包括完成的里程碑和下一步计划\n\n好的，我来帮你整理 Q1 季度项目进展报告的要点：\n\n**一、已完成的里程碑**\n\n1. 核心模块重构完成，性能提升 40%\n2. 用户管理系统 v2.0 上线，支持多租户架构\n3. 完成第三方支付系统对接（支付宝、微信支付）\n4. 自动化测试覆盖率从 45% 提升至 82%\n\n**二、关键数据指标**\n\n• 日活用户: 12.5 万 → 18.3 万 (↑46.4%)\n• 系统可用性: 99.95%\n• 平均响应时间: 从 320ms 降至 180ms\n\n**三、下一步计划**\n\n1. 启动微服务拆分第二阶段\n2. 引入 AI 智能推荐模型\n`;
           const bossId = generateUid();
           await ContentDB.save(bossId, content, 'fake', 'dummy_boss_chat.txt');
           novels.value.unshift({
