@@ -11,3 +11,8 @@ taro-yanxuan-master/
 xingzuo-master/
 chat-uikit-wechat-main/
 resource/
+
+# Generated keys and local secrets
+new_keys_export_*.txt
+.env
+.env.*

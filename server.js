@@ -13,6 +13,9 @@ const PORT = process.env.PORT || 3000;
 const redisUrl = process.env.REDIS_URL || 'redis://default:jq0kCQS7k1o2JkoPs5ioZEuMoFae5o0k@redis-14849.crce194.ap-seast-1-1.ec2.cloud.redislabs.com:14849';
 const redis = new Redis(redisUrl);
 
+// Prefix for isolating data environments in standard Vercel setup
+const envPrefix = process.env.VERCEL_ENV || 'development';
+
 // ===== Static serving =====
 const distDir = path.join(__dirname, 'dist');
 const staticDir = fs.existsSync(distDir) ? distDir : __dirname;
@@ -39,24 +42,24 @@ app.use(express.static(staticDir));
 
 async function readKeys() {
   try {
-    const data = await redis.get('cardkeys');
+    const data = await redis.get(`${envPrefix}:cardkeys`);
     return data ? JSON.parse(data) : [];
   } catch { return []; }
 }
 
 async function writeKeys(keys) {
-  await redis.set('cardkeys', JSON.stringify(keys));
+  await redis.set(`${envPrefix}:cardkeys`, JSON.stringify(keys));
 }
 
 async function readTokens() {
   try {
-    const data = await redis.get('tokens');
+    const data = await redis.get(`${envPrefix}:tokens`);
     return data ? JSON.parse(data) : {};
   } catch { return {}; }
 }
 
 async function writeTokens(tokens) {
-  await redis.set('tokens', JSON.stringify(tokens));
+  await redis.set(`${envPrefix}:tokens`, JSON.stringify(tokens));
 }
 
 function generateToken() {
@@ -67,13 +70,13 @@ function generateToken() {
 
 async function readInvites() {
   try {
-    const data = await redis.get('invites');
+    const data = await redis.get(`${envPrefix}:invites`);
     return data ? JSON.parse(data) : {};
   } catch { return {}; }
 }
 
 async function writeInvites(invites) {
-  await redis.set('invites', JSON.stringify(invites));
+  await redis.set(`${envPrefix}:invites`, JSON.stringify(invites));
 }
 
 function generateInviteCode() {
@@ -297,21 +300,10 @@ app.post('/api/track', async (req, res) => {
   const { event, deviceId, meta } = req.body;
   if (!event || !deviceId) return res.json({ success: false });
 
-  try {
-    const timestamp = new Date().toISOString();
-    const trackData = { event, deviceId, meta, timestamp, ip: req.ip || 'unknown' };
-    
-    // Log to console for debugging or metrics collection
-    console.log(`[TRACK] ${event} from ${deviceId} (${trackData.ip})`);
-    
-    // Store in a simple redis list 'tracking_events'
-    await redis.lpush('tracking_events', JSON.stringify(trackData));
-    
-    // Optionally keep only recent 10000 events
-    await redis.ltrim('tracking_events', 0, 9999);
-  } catch (err) {
-    console.warn('[TRACK] Error storing event:', err);
-  }
+  // Log to console for debugging or Vercel metrics only. 
+  // Redis tracking removed to save KV quota.
+  const ip = req.ip || 'unknown';
+  console.log(`[TRACK] ${event} from ${deviceId} (${ip})`);
 
   res.json({ success: true });
 });
