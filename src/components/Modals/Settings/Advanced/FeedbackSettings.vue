@@ -9,7 +9,7 @@
         <button class="type-tag" :class="{ active: feedbackType === 'bug' }" @click="feedbackType = 'bug'">Bug</button>
         <button class="type-tag" :class="{ active: feedbackType === 'feature' }" @click="feedbackType = 'feature'">需求</button>
       </div>
-      <textarea class="feedback-textarea" v-model="feedbackText" placeholder="吐槽或建议..." rows="2"></textarea>
+      <textarea class="feedback-textarea" v-model="feedbackText" placeholder="欢迎吐槽、建议、创意点子..." rows="2"></textarea>
       <div class="feedback-actions" style="display: flex; justify-content: space-between; align-items: center;">
         <input type="text" v-model="feedbackContact" class="name-input-small" placeholder="联系方式 (选填)" style="width: 120px;">
         <button class="setting-btn feedback-submit-btn" :disabled="sendingFeedback" @click="sendFeedback">

@@ -39,7 +39,7 @@
             
             <div style="display: flex; align-items: center; gap: 12px;">
               <div v-if="store.settings.bossModeUnlocked" style="display: flex; align-items: center; gap: 6px;" @click.stop>
-                <span class="desc-text" style="font-size: 11px; text-transform: none; letter-spacing: normal;">换一换</span>
+                <span class="desc-text" style="font-size: 11px; text-transform: none; letter-spacing: normal;">Redefining</span>
                 <label class="toggle-switch mini">
                   <input type="checkbox" v-model="store.settings.coffeeVibeMode">
                   <span class="toggle-slider"></span>

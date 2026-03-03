@@ -708,7 +708,7 @@ export const useAppStore = defineStore('app', () => {
     settings.value.secondaryRenderObfuscationMode = 'log_simple';
     settings.value.secondaryRenderContentBlocks = ['git_status']; // 轻度点缀
     settings.value.hasSeenClassicBlogVibeTip = true;
-    showToast(`🔮 ${settings.value.coffeeVibeMode ? '大杯' : '进阶'}氛围配置成功！`, 'info');
+    showToast(`🔮 ${settings.value.coffeeVibeMode ? '大杯' : '进阶'}氛围配置成功！有点班味了~`, 'info');
   }
 
   function applyDeepVibe() {
@@ -720,7 +720,7 @@ export const useAppStore = defineStore('app', () => {
     settings.value.secondaryRenderEnablePunctuation = true;
     settings.value.secondaryRenderRemovePunctuation = ['all'];
     settings.value.hasSeenClassicBlogVibeTip = true;
-    showToast(`🚀 ${settings.value.coffeeVibeMode ? '超大杯' : '深度'}氛围配置已启动！`, 'info');
+    showToast(`🚀 ${settings.value.coffeeVibeMode ? '超大杯' : '深度'}氛围配置已启动！班味有点浓~`, 'info');
   }
 
   // 供外部 composable 标记刚导入的作品，使其能在首次打开时触发打字机动画

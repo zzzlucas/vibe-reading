@@ -67,8 +67,18 @@ import AdvancedTab from './Settings/AdvancedTab.vue';
 const store = useAppStore();
 const isPeeking = ref(false);
 
-const activeSubModal = ref<string | null>(null);
-const subModalTitle = ref('');
+const activeSubModal = ref<string | null>(localStorage.getItem('deep_reader_last_sub_modal') || null);
+const subModalTitle = ref(localStorage.getItem('deep_reader_last_sub_title') || '');
+
+watch(activeSubModal, (val) => {
+  if (val) {
+    localStorage.setItem('deep_reader_last_sub_modal', val);
+    localStorage.setItem('deep_reader_last_sub_title', subModalTitle.value);
+  } else {
+    localStorage.removeItem('deep_reader_last_sub_modal');
+    localStorage.removeItem('deep_reader_last_sub_title');
+  }
+});
 const transitionName = ref('slide-left');
 const vibeReadingText = ref('Vibe Reading');
 
@@ -135,8 +145,6 @@ watch(() => store.showSettings, (newVal) => {
       activeSubModal.value = 'reading';
       subModalTitle.value = '排版配置';
       store.autoExpandReading = false;
-    } else {
-      activeSubModal.value = null;
     }
   } else {
     if (typeTimer) {
