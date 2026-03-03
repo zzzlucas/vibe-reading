@@ -24,15 +24,9 @@
         </p>
         
         <!-- Action area -->
-        <div style="display:flex; gap: 8px; width: 100%; flex-wrap: wrap;">
-          <button class="setting-btn" @click="copyInviteCode" style="background:var(--bg-hover);color:var(--text-primary);border:1px solid var(--border-color); flex: 1; min-width: 120px;">
-            复制邀请码：{{ inviteInfo.inviteCode }}
-          </button>
-          
-          <button class="setting-btn" @click="inputInviteCode" style="background:transparent;color:var(--text-regular);border:1px solid var(--border-color); flex: 1; min-width: 120px;">
-            输入好友邀请码
-          </button>
-        </div>
+        <button class="setting-btn" @click="generateInviteLink" style="background:var(--text-primary);color:var(--bg-primary);border:none;margin-top:4px">
+          生成邀请链接
+        </button>
       </div>
     </div>
   </div>
@@ -67,41 +61,17 @@ async function fetchInviteInfo() {
   } catch (err) {}
 }
 
-async function copyInviteCode() {
+async function generateInviteLink() {
   if (!inviteInfo.value) return;
+  store.trackEvent('click_invite_link');
   try {
-    await navigator.clipboard.writeText(inviteInfo.value.inviteCode);
-    store.showToast('已复制邀请码！发送给好友体验吧', 'info');
+    const url = new URL(window.location.href);
+    url.search = ''; // break out any old query
+    url.searchParams.set('invite', inviteInfo.value.inviteCode);
+    await navigator.clipboard.writeText(url.toString());
+    store.showToast('生成成功！已将您的专属链接复制到剪贴板，快去发送给好友体验吧！', 'info');
   } catch (err) {
-    store.showToast('复制失败，请手动选择复制', 'info');
-  }
-}
-
-async function inputInviteCode() {
-  const code = await store.promptDialog('请输入好友的邀请码（6位大写字母/数字）', '', '例如: A1B2C3', '输入邀请码');
-  if (!code) return;
-  
-  if (code.trim().toUpperCase() === inviteInfo.value?.inviteCode) {
-    return store.showToast('不能输入自己的邀请码哦', 'info');
-  }
-
-  try {
-    const deviceId = await store.ensureDeviceId();
-    const res = await fetch('/api/invite/use', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ inviteCode: code, deviceId })
-    });
-    const data = await res.json();
-    if (data.success) {
-      await store.saveInvitedBy(code);
-      store.showToast('成功接受邀请！', 'info');
-      fetchInviteInfo(); // refresh status
-    } else {
-      store.showToast(data.error || '无效的邀请码', 'info');
-    }
-  } catch (err) {
-    store.showToast('网络错误，请稍后重试', 'info');
+    store.showToast('复制失败，请重试', 'info');
   }
 }
 

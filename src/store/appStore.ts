@@ -214,6 +214,17 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
+  async function trackEvent(eventName: string, meta: any = {}) {
+    try {
+      const deviceId = await ensureDeviceId();
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: eventName, deviceId, meta })
+      }).catch(()=>{});
+    } catch (err) {}
+  }
+
   // Actions
   async function initStore() {
     try {
@@ -827,7 +838,7 @@ export const useAppStore = defineStore('app', () => {
     theme, style, encoding, settings, aiSettings, appTitle, userName, userAvatar, userAvatarColor, autoExpandAdvanced, autoExpandReading, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed, triggerSystemFileSignal,
     openNovel, deleteNovel, renameNovel, togglePinNovel, prevPage, nextPage, searchInNovel, toggleBossMode,
     initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, resolveConfirmDialog,
-    generateUid, ensureDeviceId, saveInvitedBy, getInvitedBy, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
+    generateUid, ensureDeviceId, saveInvitedBy, getInvitedBy, trackEvent, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
     confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmDefaultValue, confirmPlaceholder,
     toastVisible, toastMessage, toastType, toastHasIcon, toastActionText, previewTimer,
     hasImportedFile, hasModifiedSettings, activeReadingSeconds, inviteValidated, checkInviteValidation,

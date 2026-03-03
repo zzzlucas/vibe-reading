@@ -58,6 +58,7 @@ watch(() => store.showActivateModal, (val) => {
 });
 
 async function handleActivate() {
+  store.trackEvent('click_activate_pro');
   const code = cardKey.value.trim();
   if (!code) {
     statusType.value = 'error';

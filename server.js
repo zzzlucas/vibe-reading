@@ -1,12 +1,17 @@
+require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const Redis = require('ioredis');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const redisUrl = process.env.REDIS_URL || 'redis://default:jq0kCQS7k1o2JkoPs5ioZEuMoFae5o0k@redis-14849.crce194.ap-seast-1-1.ec2.cloud.redislabs.com:14849';
+const redis = new Redis(redisUrl);
 
 // ===== Static serving =====
 const distDir = path.join(__dirname, 'dist');
@@ -31,31 +36,27 @@ app.use((req, res, next) => {
 app.use(express.static(staticDir));
 
 // ===== Card Key System =====
-const KEYS_FILE = path.join(__dirname, 'cardkeys.json');
-const TOKENS_FILE = path.join(__dirname, 'tokens.json');
 
-function readKeys() {
+async function readKeys() {
   try {
-    return JSON.parse(fs.readFileSync(KEYS_FILE, 'utf-8'));
-  } catch {
-    return [];
-  }
+    const data = await redis.get('cardkeys');
+    return data ? JSON.parse(data) : [];
+  } catch { return []; }
 }
 
-function writeKeys(keys) {
-  fs.writeFileSync(KEYS_FILE, JSON.stringify(keys, null, 2), 'utf-8');
+async function writeKeys(keys) {
+  await redis.set('cardkeys', JSON.stringify(keys));
 }
 
-function readTokens() {
+async function readTokens() {
   try {
-    return JSON.parse(fs.readFileSync(TOKENS_FILE, 'utf-8'));
-  } catch {
-    return {};
-  }
+    const data = await redis.get('tokens');
+    return data ? JSON.parse(data) : {};
+  } catch { return {}; }
 }
 
-function writeTokens(tokens) {
-  fs.writeFileSync(TOKENS_FILE, JSON.stringify(tokens, null, 2), 'utf-8');
+async function writeTokens(tokens) {
+  await redis.set('tokens', JSON.stringify(tokens));
 }
 
 function generateToken() {
@@ -63,18 +64,16 @@ function generateToken() {
 }
 
 // ===== Invite System =====
-const INVITES_FILE = path.join(__dirname, 'invites.json');
 
-function readInvites() {
+async function readInvites() {
   try {
-    return JSON.parse(fs.readFileSync(INVITES_FILE, 'utf-8'));
-  } catch {
-    return {};
-  }
+    const data = await redis.get('invites');
+    return data ? JSON.parse(data) : {};
+  } catch { return {}; }
 }
 
-function writeInvites(invites) {
-  fs.writeFileSync(INVITES_FILE, JSON.stringify(invites, null, 2), 'utf-8');
+async function writeInvites(invites) {
+  await redis.set('invites', JSON.stringify(invites));
 }
 
 function generateInviteCode() {
@@ -85,19 +84,20 @@ function generateInviteCode() {
  * GET /api/invite/info?deviceId=xxx
  * Returns: { inviteCode, count, rewardToken }
  */
-app.get('/api/invite/info', (req, res) => {
+app.get('/api/invite/info', async (req, res) => {
   const { deviceId } = req.query;
   if (!deviceId) return res.status(400).json({ error: 'Missing deviceId' });
 
-  const invites = readInvites();
+  const invites = await readInvites();
   if (!invites[deviceId]) {
     invites[deviceId] = {
       inviteCode: generateInviteCode(),
       invitedBy: null,
       invitedDevices: [],
-      rewardToken: null
+      rewardToken: null,
+      isValid: false
     };
-    writeInvites(invites);
+    await writeInvites(invites);
   }
 
   const user = invites[deviceId];
@@ -105,15 +105,15 @@ app.get('/api/invite/info', (req, res) => {
   // Check if eligible for reward
   if (user.invitedDevices.length >= 3 && !user.rewardToken) {
     const token = generateToken();
-    const tokens = readTokens();
+    const tokens = await readTokens();
     tokens[token] = {
       code: 'INVITE_REWARD',
       activatedAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
     };
-    writeTokens(tokens);
+    await writeTokens(tokens);
     user.rewardToken = token;
-    writeInvites(invites);
+    await writeInvites(invites);
   }
 
   res.json({
@@ -127,12 +127,12 @@ app.get('/api/invite/info', (req, res) => {
  * POST /api/invite/use
  * Body: { inviteCode: "XXX", deviceId: "YYY" }
  */
-app.post('/api/invite/use', (req, res) => {
+app.post('/api/invite/use', async (req, res) => {
   const { inviteCode, deviceId } = req.body;
   if (!inviteCode || !deviceId) return res.status(400).json({ error: 'Missing logic parameters' });
 
   const code = inviteCode.trim().toUpperCase();
-  const invites = readInvites();
+  const invites = await readInvites();
 
   const MAX_INVITES_PER_IP = 3;
   
@@ -180,7 +180,7 @@ app.post('/api/invite/use', (req, res) => {
   invites[deviceId].ip = requesterIp;
   // Does not add to the inviter's invitedDevices array until validity criteria are met
   
-  writeInvites(invites);
+  await writeInvites(invites);
   res.json({ success: true, message: '成功受邀注册！开始阅读并体验功能以助力好友吧！' });
 });
 
@@ -189,11 +189,11 @@ app.post('/api/invite/use', (req, res) => {
  * Body: { deviceId: "YYY" }
  * Called when the frontend determines the user has met the usage criteria.
  */
-app.post('/api/invite/validate', (req, res) => {
+app.post('/api/invite/validate', async (req, res) => {
   const { deviceId } = req.body;
   if (!deviceId) return res.status(400).json({ error: 'Missing logic parameters' });
 
-  const invites = readInvites();
+  const invites = await readInvites();
   if (!invites[deviceId] || !invites[deviceId].invitedBy) {
     return res.json({ success: false, reason: '未受邀' });
   }
@@ -212,7 +212,7 @@ app.post('/api/invite/validate', (req, res) => {
     invites[inviterId].invitedDevices.push(deviceId);
   }
 
-  writeInvites(invites);
+  await writeInvites(invites);
   res.json({ success: true });
 });
 
@@ -223,14 +223,14 @@ app.post('/api/invite/validate', (req, res) => {
  * Body: { code: "XXXX" }
  * Response: { success: true, token: "xxx" }  or  { error: "..." }
  */
-app.post('/api/activate', (req, res) => {
+app.post('/api/activate', async (req, res) => {
   const { code } = req.body;
   if (!code || typeof code !== 'string') {
     return res.status(400).json({ error: '请输入卡密' });
   }
 
   const normalizedCode = code.trim().toUpperCase();
-  const keys = readKeys();
+  const keys = await readKeys();
   const keyIndex = keys.findIndex(k => k.code.toUpperCase() === normalizedCode);
 
   if (keyIndex === -1) {
@@ -251,16 +251,16 @@ app.post('/api/activate', (req, res) => {
   keys[keyIndex].used = true;
   keys[keyIndex].usedAt = new Date().toISOString();
   keys[keyIndex].usedBy = req.ip || 'unknown';
-  writeKeys(keys);
+  await writeKeys(keys);
 
   // Store token with expiry (365 days)
-  const tokens = readTokens();
+  const tokens = await readTokens();
   tokens[token] = {
     code: normalizedCode,
     activatedAt: new Date().toISOString(),
     expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
   };
-  writeTokens(tokens);
+  await writeTokens(tokens);
 
   console.log(`[Activate] Code "${normalizedCode}" activated from ${req.ip}`);
   res.json({ success: true, token, message: '激活成功！享受您的阅读时光 🎉' });
@@ -271,11 +271,11 @@ app.post('/api/activate', (req, res) => {
  * Body: { token: "xxx" }
  * Response: { valid: true }  or  { valid: false, reason: "..." }
  */
-app.post('/api/verify', (req, res) => {
+app.post('/api/verify', async (req, res) => {
   const { token } = req.body;
   if (!token) return res.json({ valid: false, reason: '未提供令牌' });
 
-  const tokens = readTokens();
+  const tokens = await readTokens();
   const entry = tokens[token];
 
   if (!entry) {
@@ -287,6 +287,33 @@ app.post('/api/verify', (req, res) => {
   }
 
   res.json({ valid: true, activatedAt: entry.activatedAt, expiresAt: entry.expiresAt });
+});
+
+/**
+ * POST /api/track
+ * Body: { event: "...", deviceId: "YYY", meta: {} }
+ */
+app.post('/api/track', async (req, res) => {
+  const { event, deviceId, meta } = req.body;
+  if (!event || !deviceId) return res.json({ success: false });
+
+  try {
+    const timestamp = new Date().toISOString();
+    const trackData = { event, deviceId, meta, timestamp, ip: req.ip || 'unknown' };
+    
+    // Log to console for debugging or metrics collection
+    console.log(`[TRACK] ${event} from ${deviceId} (${trackData.ip})`);
+    
+    // Store in a simple redis list 'tracking_events'
+    await redis.lpush('tracking_events', JSON.stringify(trackData));
+    
+    // Optionally keep only recent 10000 events
+    await redis.ltrim('tracking_events', 0, 9999);
+  } catch (err) {
+    console.warn('[TRACK] Error storing event:', err);
+  }
+
+  res.json({ success: true });
 });
 
 // ===== SMTP / Feedback =====
@@ -365,14 +392,18 @@ app.get('*', (req, res) => {
 });
 
 // ===== Start =====
-app.listen(PORT, () => {
-  console.log(`\n  🚀 FindDeep Server is running`);
-  console.log(`  📖 Open http://localhost:${PORT} to start reading`);
-  console.log(`  🔑 Card key system: ENABLED`);
-  if (isProd) {
-    console.log(`  🔒 Serving obfuscated build from /dist`);
-  } else {
-    console.log(`  🛠  Dev mode (source files)`);
-  }
-  console.log('');
-});
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  app.listen(PORT, () => {
+    console.log(`\n  🚀 FindDeep Server is running`);
+    console.log(`  📖 Open http://localhost:${PORT} to start reading`);
+    console.log(`  🔑 Card key system: ENABLED`);
+    if (isProd) {
+      console.log(`  🔒 Serving obfuscated build from /dist`);
+    } else {
+      console.log(`  🛠  Dev mode (source files)`);
+    }
+    console.log('');
+  });
+}

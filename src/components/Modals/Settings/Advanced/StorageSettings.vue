@@ -77,6 +77,7 @@ function formatFileSize(bytes: number) {
 }
 
 async function handleClearAll() {
+  store.trackEvent('click_clear_data');
   if (await store.confirmDialog('警告：此操作将删除所有本地内容（含书架作品、阅读进度、自定义设置，以及激活状态）。确定继续？', '严重警告')) {
     if (await store.confirmDialog('数据无法恢复，真的要全部清空吗？', '终极确认')) {
       await clearCache();

@@ -166,6 +166,12 @@ onMounted(async () => {
     }
   }
 
+  // Tracking: First Open
+  if (!localStorage.getItem('deep_reader_first_open_tracked')) {
+    store.trackEvent('first_open', { url: window.location.href });
+    localStorage.setItem('deep_reader_first_open_tracked', 'true');
+  }
+
   // Handle invite links
   const queryInvite = route.query.invite as string;
   if (queryInvite) {
