@@ -153,12 +153,35 @@ onMounted(async () => {
     }
   }
 
+  // Handle invite links
+  const queryInvite = route.query.invite as string;
+  if (queryInvite) {
+    const code = queryInvite.trim().toUpperCase();
+    await store.saveInvitedBy(code);
+    
+    // Strip from URL
+    const newQuery = { ...route.query };
+    delete newQuery.invite;
+    router.replace({ path: route.path, query: newQuery });
+  }
+
+  // Auto-consume invite code silently
+  const storedInvite = await store.getInvitedBy();
+  if (storedInvite) {
+    const deviceId = await store.ensureDeviceId();
+    fetch('/api/invite/use', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ inviteCode: storedInvite, deviceId })
+    }).then(() => {}).catch(() => {});
+  }
+
   _logVibeConsole();
 });
 
 function _logVibeConsole() {
   const quotes = [
-    "“18世纪的工人在砸纺织机，21世纪的我们在用 AI 写周报，用 FindDeep 看小说。”",
+    "“18世纪的工人在砸纺织机，21世纪的我们在用 AI 写周报，用 FindDeep 阅读。”",
     "“AI 负责让老板觉得你产出惊人，FindDeep 负责让你在这个过程中保持灵魂有趣。”",
     "“不反抗技术，只反抗注视。正在为您注入赛博伪装协议...”"
   ];

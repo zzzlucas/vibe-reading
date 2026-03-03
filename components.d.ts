@@ -58,6 +58,7 @@ declare module 'vue' {
     IconMaterialSymbolsFormatListNumbered: typeof import('~icons/material-symbols/format-list-numbered')['default']
     IconMaterialSymbolsGraphicEq: typeof import('~icons/material-symbols/graphic-eq')['default']
     IconMaterialSymbolsGridView: typeof import('~icons/material-symbols/grid-view')['default']
+    IconMaterialSymbolsGroupAdd: typeof import('~icons/material-symbols/group-add')['default']
     IconMaterialSymbolsHelp: typeof import('~icons/material-symbols/help')['default']
     IconMaterialSymbolsHelpOutline: typeof import('~icons/material-symbols/help-outline')['default']
     IconMaterialSymbolsHistory: typeof import('~icons/material-symbols/history')['default']

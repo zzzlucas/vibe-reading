@@ -89,3 +89,55 @@ export const ContentDB = {
     });
   }
 };
+
+// ===== Identity DB for Dual Anchoring =====
+const IDENTITY_DB_NAME = 'deep_reader_identity';
+const IDENTITY_STORE_NAME = 'identity_store';
+
+let identityDbInstance: IDBDatabase | null = null;
+
+export const IdentityDB = {
+  async open(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      if (identityDbInstance) return resolve(identityDbInstance);
+
+      const request = indexedDB.open(IDENTITY_DB_NAME, 1);
+      request.onupgradeneeded = (e) => {
+        const db = (e.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains(IDENTITY_STORE_NAME)) {
+          db.createObjectStore(IDENTITY_STORE_NAME);
+        }
+      };
+      request.onsuccess = (e) => {
+        identityDbInstance = (e.target as IDBOpenDBRequest).result;
+        resolve(identityDbInstance);
+      };
+      request.onerror = (e) => reject((e.target as IDBOpenDBRequest).error);
+    });
+  },
+
+  async set(key: string, value: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!identityDbInstance) return reject(new Error('DB not open'));
+      const tx = identityDbInstance.transaction(IDENTITY_STORE_NAME, 'readwrite');
+      const store = tx.objectStore(IDENTITY_STORE_NAME);
+      const req = store.put(value, key);
+      req.onsuccess = () => resolve();
+      tx.onerror = (e) => reject((e.target as IDBRequest).error);
+    });
+  },
+
+  async get(key: string): Promise<string | null> {
+    return new Promise((resolve, reject) => {
+      if (!identityDbInstance) return reject(new Error('DB not open'));
+      const tx = identityDbInstance.transaction(IDENTITY_STORE_NAME, 'readonly');
+      const store = tx.objectStore(IDENTITY_STORE_NAME);
+      const req = store.get(key);
+      req.onsuccess = (e) => {
+        const result = (e.target as IDBRequest).result;
+        resolve(result || null);
+      };
+      req.onerror = (e) => reject((e.target as IDBRequest).error);
+    });
+  }
+};

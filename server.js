@@ -62,6 +62,112 @@ function generateToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
+// ===== Invite System =====
+const INVITES_FILE = path.join(__dirname, 'invites.json');
+
+function readInvites() {
+  try {
+    return JSON.parse(fs.readFileSync(INVITES_FILE, 'utf-8'));
+  } catch {
+    return {};
+  }
+}
+
+function writeInvites(invites) {
+  fs.writeFileSync(INVITES_FILE, JSON.stringify(invites, null, 2), 'utf-8');
+}
+
+function generateInviteCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+/**
+ * GET /api/invite/info?deviceId=xxx
+ * Returns: { inviteCode, count, rewardToken }
+ */
+app.get('/api/invite/info', (req, res) => {
+  const { deviceId } = req.query;
+  if (!deviceId) return res.status(400).json({ error: 'Missing deviceId' });
+
+  const invites = readInvites();
+  if (!invites[deviceId]) {
+    invites[deviceId] = {
+      inviteCode: generateInviteCode(),
+      invitedBy: null,
+      invitedDevices: [],
+      rewardToken: null
+    };
+    writeInvites(invites);
+  }
+
+  const user = invites[deviceId];
+  
+  // Check if eligible for reward
+  if (user.invitedDevices.length >= 3 && !user.rewardToken) {
+    const token = generateToken();
+    const tokens = readTokens();
+    tokens[token] = {
+      code: 'INVITE_REWARD',
+      activatedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+    };
+    writeTokens(tokens);
+    user.rewardToken = token;
+    writeInvites(invites);
+  }
+
+  res.json({
+    inviteCode: user.inviteCode,
+    count: user.invitedDevices.length,
+    rewardToken: user.rewardToken
+  });
+});
+
+/**
+ * POST /api/invite/use
+ * Body: { inviteCode: "XXX", deviceId: "YYY" }
+ */
+app.post('/api/invite/use', (req, res) => {
+  const { inviteCode, deviceId } = req.body;
+  if (!inviteCode || !deviceId) return res.status(400).json({ error: 'Missing logic parameters' });
+
+  const code = inviteCode.trim().toUpperCase();
+  const invites = readInvites();
+
+  // Ensure current device exists
+  if (!invites[deviceId]) {
+    invites[deviceId] = {
+      inviteCode: generateInviteCode(),
+      invitedBy: null,
+      invitedDevices: [],
+      rewardToken: null
+    };
+  }
+
+  if (invites[deviceId].invitedBy) {
+    return res.status(400).json({ error: '您已经使用过邀请码了' });
+  }
+
+  // Find inviter
+  const inviterId = Object.keys(invites).find(id => invites[id].inviteCode === code);
+  if (!inviterId) {
+    return res.status(404).json({ error: '无效的邀请码' });
+  }
+
+  if (inviterId === deviceId) {
+    return res.status(400).json({ error: '不能使用自己的邀请码' });
+  }
+
+  // Bind
+  invites[deviceId].invitedBy = code;
+  if (!invites[inviterId].invitedDevices.includes(deviceId)) {
+    invites[inviterId].invitedDevices.push(deviceId);
+  }
+  
+  writeInvites(invites);
+  res.json({ success: true, message: '成功受邀注册，感谢支持！' });
+});
+
 /**
  * POST /api/activate
  * Body: { code: "XXXX" }

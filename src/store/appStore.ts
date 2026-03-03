@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, watch, computed } from 'vue';
 import type { Novel, Chapter, Settings, Theme, StyleName, Encoding } from '../types';
-import { ContentDB } from '../utils/db';
+import { ContentDB, IdentityDB } from '../utils/db';
 import { STYLE_CONFIG } from '../config/constants';
 
 const STORAGE_PREFIX = 'deep_reader_';
@@ -159,6 +159,54 @@ export const useAppStore = defineStore('app', () => {
     // Generate a clean 12-char UID
     return Math.random().toString(36).substring(2, 8) + Math.random().toString(36).substring(2, 8);
   };
+
+  async function ensureDeviceId() {
+    let lsId = localStorage.getItem('deep_reader_device_id');
+    try {
+      await IdentityDB.open();
+      let idbId = await IdentityDB.get('device_id');
+      
+      let finalId = idbId || lsId;
+      if (!finalId) {
+        finalId = generateUid() + generateUid();
+      }
+      
+      if (finalId !== idbId) {
+        await IdentityDB.set('device_id', finalId);
+      }
+      if (finalId !== lsId) {
+        localStorage.setItem('deep_reader_device_id', finalId);
+      }
+      
+      return finalId;
+    } catch(err) {
+      if (!lsId) {
+        lsId = generateUid() + generateUid();
+        localStorage.setItem('deep_reader_device_id', lsId);
+      }
+      return lsId;
+    }
+  }
+
+  async function saveInvitedBy(code: string) {
+    if (!code) return;
+    localStorage.setItem('deep_reader_invited_by', code);
+    try {
+      await IdentityDB.open();
+      await IdentityDB.set('invited_by', code);
+    } catch(err) {}
+  }
+
+  async function getInvitedBy() {
+    let lsCode = localStorage.getItem('deep_reader_invited_by');
+    try {
+      await IdentityDB.open();
+      let idbCode = await IdentityDB.get('invited_by');
+      return idbCode || lsCode || null;
+    } catch(err) {
+      return lsCode || null;
+    }
+  }
 
   // Actions
   async function initStore() {
@@ -734,7 +782,7 @@ export const useAppStore = defineStore('app', () => {
     theme, style, encoding, settings, aiSettings, appTitle, userName, userAvatar, userAvatarColor, autoExpandAdvanced, autoExpandReading, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed, triggerSystemFileSignal,
     openNovel, deleteNovel, renameNovel, togglePinNovel, prevPage, nextPage, searchInNovel, toggleBossMode,
     initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, resolveConfirmDialog,
-    generateUid, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
+    generateUid, ensureDeviceId, saveInvitedBy, getInvitedBy, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
     confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmDefaultValue, confirmPlaceholder,
     toastVisible, toastMessage, toastType, toastHasIcon, toastActionText, previewTimer,
     _saveNovelsMeta, _syncNovelPage
