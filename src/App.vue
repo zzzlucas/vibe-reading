@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watchEffect, nextTick, watch } from 'vue';
+import { onMounted, watchEffect, nextTick, watch, ref, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAppStore } from '@/store/appStore';
 
@@ -139,6 +139,19 @@ async function checkActivation() {
   return false;
 }
 
+// Active reading tracking
+const isUserActive = ref(true);
+let trackInterval: any = null;
+let activityTimeout: any = null;
+
+function markActive() {
+  isUserActive.value = true;
+  if (activityTimeout) clearTimeout(activityTimeout);
+  activityTimeout = setTimeout(() => {
+    isUserActive.value = false;
+  }, 10000); // 10s idle = inactive
+}
+
 onMounted(async () => {
   // Initialization Sequence
   checkActivation(); // Background check, non-blocking
@@ -176,7 +189,33 @@ onMounted(async () => {
     }).then(() => {}).catch(() => {});
   }
 
+  // Active reading tracking
+  window.addEventListener('mousemove', markActive);
+  window.addEventListener('keydown', markActive);
+  window.addEventListener('click', markActive);
+  window.addEventListener('touchstart', markActive);
+  window.addEventListener('scroll', markActive);
+
+  trackInterval = setInterval(() => {
+    if (!store.inviteValidated && isUserActive.value && store.activeId) {
+       store.activeReadingSeconds++;
+       if (store.activeReadingSeconds % 10 === 0) { // Check every 10s
+          store.checkInviteValidation();
+       }
+    }
+  }, 1000);
+
   _logVibeConsole();
+});
+
+onBeforeUnmount(() => {
+  if (trackInterval) clearInterval(trackInterval);
+  if (activityTimeout) clearTimeout(activityTimeout);
+  window.removeEventListener('mousemove', markActive);
+  window.removeEventListener('keydown', markActive);
+  window.removeEventListener('click', markActive);
+  window.removeEventListener('touchstart', markActive);
+  window.removeEventListener('scroll', markActive);
 });
 
 function _logVibeConsole() {

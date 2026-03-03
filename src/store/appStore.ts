@@ -67,6 +67,12 @@ export const useAppStore = defineStore('app', () => {
   const fakeSidebarRefreshSeed = ref(0);
   const triggerSystemFileSignal = ref(0);
   const isInitializing = ref(true);
+  
+  // Validation state for invites
+  const hasImportedFile = ref(false);
+  const hasModifiedSettings = ref(false);
+  const activeReadingSeconds = ref(0);
+  const inviteValidated = ref(false);
   // Custom Modal States
   const confirmVisible = ref(false);
   const confirmMessage = ref('');
@@ -300,6 +306,13 @@ export const useAppStore = defineStore('app', () => {
           _saveNovelsMeta();
         }
       }
+      
+      const savedInviteValidated = _loadFromStorage('invite_validated');
+      if (savedInviteValidated) inviteValidated.value = true;
+      const savedImported = _loadFromStorage('has_imported');
+      if (savedImported) hasImportedFile.value = true;
+      const savedModified = _loadFromStorage('has_modified');
+      if (savedModified) hasModifiedSettings.value = true;
 
       // Default book onboarding: Load if list is empty or we are upgrading from broken version
       const hasOldInit = _loadFromStorage('has_init_default');
@@ -411,7 +424,13 @@ export const useAppStore = defineStore('app', () => {
     }
   });
   watch(encoding, (val) => _saveToStorage('encoding', val));
-  watch(settings, (val) => _saveToStorage('settings', val), { deep: true });
+  watch(settings, (val, oldVal) => {
+    _saveToStorage('settings', val);
+    if (!isInitializing.value && oldVal && !hasModifiedSettings.value) {
+      hasModifiedSettings.value = true;
+      _saveToStorage('has_modified', true);
+    }
+  }, { deep: true });
   watch(aiSettings, (val) => _saveToStorage('aiSettings', val), { deep: true });
   watch(appTitle, (val) => _saveToStorage('appTitle', val));
   watch(userName, (val) => _saveToStorage('userName', val));
@@ -774,6 +793,32 @@ export const useAppStore = defineStore('app', () => {
   // 供外部 composable 标记刚导入的作品，使其能在首次打开时触发打字机动画
   function markJustAdded(id: string) {
     _justAddedIds.add(id);
+    if (!hasImportedFile.value) {
+      hasImportedFile.value = true;
+      _saveToStorage('has_imported', true);
+    }
+  }
+
+  async function checkInviteValidation() {
+    if (inviteValidated.value) return;
+    if (hasImportedFile.value && hasModifiedSettings.value && activeReadingSeconds.value >= 180) {
+      const storedInvite = await getInvitedBy();
+      if (storedInvite) {
+        const deviceId = await ensureDeviceId();
+        try {
+          const res = await fetch('/api/invite/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deviceId })
+          });
+          const data = await res.json();
+          if (data.success) {
+            inviteValidated.value = true;
+            _saveToStorage('invite_validated', true);
+          }
+        } catch (err) {}
+      }
+    }
   }
 
   return {
@@ -785,6 +830,7 @@ export const useAppStore = defineStore('app', () => {
     generateUid, ensureDeviceId, saveInvitedBy, getInvitedBy, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
     confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmDefaultValue, confirmPlaceholder,
     toastVisible, toastMessage, toastType, toastHasIcon, toastActionText, previewTimer,
+    hasImportedFile, hasModifiedSettings, activeReadingSeconds, inviteValidated, checkInviteValidation,
     _saveNovelsMeta, _syncNovelPage
   };
 });

@@ -134,13 +134,16 @@ app.post('/api/invite/use', (req, res) => {
   const code = inviteCode.trim().toUpperCase();
   const invites = readInvites();
 
+  const MAX_INVITES_PER_IP = 3;
+  
   // Ensure current device exists
   if (!invites[deviceId]) {
     invites[deviceId] = {
       inviteCode: generateInviteCode(),
       invitedBy: null,
       invitedDevices: [],
-      rewardToken: null
+      rewardToken: null,
+      isValid: false
     };
   }
 
@@ -158,15 +161,62 @@ app.post('/api/invite/use', (req, res) => {
     return res.status(400).json({ error: '不能使用自己的邀请码' });
   }
 
+  const requesterIp = req.ip || 'unknown';
+  
+  // Check IP limit across all invites
+  let ipCount = 0;
+  for (const id in invites) {
+    if (invites[id].invitedBy && invites[id].ip === requesterIp) {
+      ipCount++;
+    }
+  }
+
+  if (ipCount >= MAX_INVITES_PER_IP) {
+    return res.status(403).json({ error: '当前网络环境限制，无法接受更多邀请' });
+  }
+
   // Bind
   invites[deviceId].invitedBy = code;
+  invites[deviceId].ip = requesterIp;
+  // Does not add to the inviter's invitedDevices array until validity criteria are met
+  
+  writeInvites(invites);
+  res.json({ success: true, message: '成功受邀注册！开始阅读并体验功能以助力好友吧！' });
+});
+
+/**
+ * POST /api/invite/validate
+ * Body: { deviceId: "YYY" }
+ * Called when the frontend determines the user has met the usage criteria.
+ */
+app.post('/api/invite/validate', (req, res) => {
+  const { deviceId } = req.body;
+  if (!deviceId) return res.status(400).json({ error: 'Missing logic parameters' });
+
+  const invites = readInvites();
+  if (!invites[deviceId] || !invites[deviceId].invitedBy) {
+    return res.json({ success: false, reason: '未受邀' });
+  }
+
+  if (invites[deviceId].isValid) {
+    return res.json({ success: true, alreadyValid: true }); // Already validated
+  }
+
+  // Find inviter
+  const inviterId = Object.keys(invites).find(id => invites[id].inviteCode === invites[deviceId].invitedBy);
+  if (!inviterId) return res.json({ success: false, reason: '未找到邀请人' });
+
+  // Mark valid and add to inviter's array
+  invites[deviceId].isValid = true;
   if (!invites[inviterId].invitedDevices.includes(deviceId)) {
     invites[inviterId].invitedDevices.push(deviceId);
   }
-  
+
   writeInvites(invites);
-  res.json({ success: true, message: '成功受邀注册，感谢支持！' });
+  res.json({ success: true });
 });
+
+
 
 /**
  * POST /api/activate
