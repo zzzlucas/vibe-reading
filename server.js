@@ -168,7 +168,9 @@ app.post('/api/invite/use', async (req, res) => {
     return res.status(400).json({ error: '不能使用自己的邀请码' });
   }
 
-  const requesterIp = req.ip || 'unknown';
+  const forwardedFor = req.headers['x-forwarded-for'];
+  const realIp = typeof forwardedFor === 'string' ? forwardedFor.split(',')[0].trim() : req.ip;
+  const requesterIp = realIp || 'unknown';
   
   // Check IP limit across all invites
   let ipCount = 0;
