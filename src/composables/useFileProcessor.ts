@@ -45,7 +45,8 @@ export function useFileProcessor(attachedImages: Ref<string[]>) {
           size: file.size,
           lastRead: Date.now(),
           currentPage: 0,
-          displayName: cleanDisplayName
+          displayName: cleanDisplayName,
+          readRanges: []
         });
         
         await ContentDB.save(newId, content, 'works', file.name);

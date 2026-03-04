@@ -7,6 +7,7 @@ export interface Novel {
   currentPage: number;
   displayName?: string;
   isPinned?: boolean;
+  readRanges?: [number, number][]; // Tracks absolute character ranges read: [start, end][]
 }
 
 export interface Chapter {

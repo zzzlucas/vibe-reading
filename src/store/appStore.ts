@@ -63,6 +63,10 @@ export const useAppStore = defineStore('app', () => {
   const forceMainSettings = ref(false);
   const scrollToPro = ref(false);
   const autoPreview = ref(false);
+
+  // Global Counter (Anti-Tamper)
+  const globalReadChars = ref(0);
+
   const comingSoonText = ref('更多功能敬请期待');
   const isNewAchievement = ref(false);
   const skipNextTypewriter = ref(false);
@@ -228,11 +232,80 @@ export const useAppStore = defineStore('app', () => {
     } catch (err) {}
   }
 
+  function _generateSecurityHash(chars: number, deviceId: string): string {
+    const salt = "f!nD_dEep#82";
+    const raw = `${salt}:${chars}:@:${deviceId}`;
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < raw.length; i++) {
+        const char = raw.charCodeAt(i);
+        h1 = Math.imul(h1 ^ char, 2654435761);
+        h2 = Math.imul(h2 ^ char, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    
+    // Expand to a 64-character UUID-like intimidating hash string (8x8)
+    const p1 = (h1 >>> 0).toString(16).padStart(8, '0');
+    const p2 = (h2 >>> 0).toString(16).padStart(8, '0');
+    const p3 = ((h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
+    const p4 = ((~h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
+    const p5 = ((h1 ^ ~h2) >>> 0).toString(16).padStart(8, '0');
+    const p6 = ((h1 + h2) >>> 0).toString(16).padStart(8, '0');
+    const p7 = ((h1 - h2) >>> 0).toString(16).padStart(8, '0');
+    const p8 = ((h2 - h1) >>> 0).toString(16).padStart(8, '0');
+    
+    return p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+  }
+
+  function _generateMetaHash(metaStr: string, deviceId: string): string {
+    const salt = "m3T4_dEep#91";
+    const raw = `${salt}:${metaStr}:@:${deviceId}`;
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < raw.length; i++) {
+        const char = raw.charCodeAt(i);
+        h1 = Math.imul(h1 ^ char, 2654435761);
+        h2 = Math.imul(h2 ^ char, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    
+    const p1 = (h1 >>> 0).toString(16).padStart(8, '0');
+    const p2 = (h2 >>> 0).toString(16).padStart(8, '0');
+    const p3 = ((h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
+    const p4 = ((~h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
+    const p5 = ((h1 ^ ~h2) >>> 0).toString(16).padStart(8, '0');
+    const p6 = ((h1 + h2) >>> 0).toString(16).padStart(8, '0');
+    const p7 = ((h1 - h2) >>> 0).toString(16).padStart(8, '0');
+    const p8 = ((h2 - h1) >>> 0).toString(16).padStart(8, '0');
+    
+    return p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+  }
+
   // Actions
   async function initStore() {
     try {
       await ContentDB.open();
       
+      // Load Global Counter safely (Anti-Tamper check)
+      const savedGlobalChars = localStorage.getItem('find_deep_global_chars');
+      const savedGlobalHash = localStorage.getItem('find_deep_global_chars_hash');
+      
+      // Clean up legacy pages record if exists
+      if (localStorage.getItem('find_deep_global_pages')) {
+        localStorage.removeItem('find_deep_global_pages');
+      }
+
+      if (savedGlobalChars && savedGlobalHash) {
+          const devId = localStorage.getItem('find_deep_device_id') || 'unknown';
+          const expectedHash = _generateSecurityHash(parseInt(savedGlobalChars, 10), devId);
+          if (expectedHash === savedGlobalHash) {
+              globalReadChars.value = parseInt(savedGlobalChars, 10) || 0;
+          } else {
+              // Tamper detected! Max out the counter as a penalty
+              globalReadChars.value = 999999;
+          }
+      }
+
       // Load config
       const savedTheme = _loadFromStorage('theme');
       if (savedTheme) theme.value = savedTheme as Theme;
@@ -288,9 +361,24 @@ export const useAppStore = defineStore('app', () => {
       }
 
       // Load novels
-      const savedNovels = _loadFromStorage('novels_meta');
+      const savedNovels = _loadFromStorage('works_meta');
+      const savedNovelsHash = localStorage.getItem('find_deep_works_meta_hash');
+      
       if (savedNovels && Array.isArray(savedNovels)) {
         novels.value = savedNovels;
+        
+        // Anti-Tamper check for works meta ranges
+        const devId = localStorage.getItem('find_deep_device_id') || 'unknown';
+        const rangesData = savedNovels.map(n => ({ i: n.id, r: n.readRanges || [] }));
+        const expectedMetaHash = _generateMetaHash(JSON.stringify(rangesData), devId);
+        
+        // If hash is missing or tampering is detected, clear all their read ranges.
+        // Penalty: They can't fake ranges to bypass, and previously read pages will charge them again.
+        if (savedNovelsHash !== expectedMetaHash) {
+            for (const novel of novels.value) {
+               novel.readRanges = [];
+            }
+        }
         
         let modified = false;
         const toRemove: number[] = [];
@@ -399,7 +487,8 @@ export const useAppStore = defineStore('app', () => {
         lastRead: Date.now(),
         currentPage: 0,
         displayName: '海底两万里（示例）',
-        isPinned: false
+        isPinned: false,
+        readRanges: []
       });
       
       // 标记为"刚导入"，openNovel 时精确触发一次打字机动画
@@ -417,9 +506,15 @@ export const useAppStore = defineStore('app', () => {
       type: n.type,
       name: n.name, size: n.size, lastRead: n.lastRead,
       currentPage: n.currentPage, displayName: n.displayName || '',
-      isPinned: !!n.isPinned
+      isPinned: !!n.isPinned,
+      readRanges: n.readRanges || []
     }));
-    _saveToStorage('novels_meta', meta);
+    _saveToStorage('works_meta', meta);
+    
+    // Create tamper-evident seal for readRanges
+    const rangesData = meta.map(n => ({ i: n.id, r: n.readRanges }));
+    const devId = localStorage.getItem('find_deep_device_id') || 'unknown';
+    localStorage.setItem('find_deep_works_meta_hash', _generateMetaHash(JSON.stringify(rangesData), devId));
   }
 
   // Watchers to auto-save
@@ -511,15 +606,67 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  function checkProLimit(): boolean {
+  function _getPageUnreadLength(pageIndex: number): number {
+      const activeIdx = activeNovelIndex.value;
+      if (activeIdx === null || !novels.value[activeIdx]) return 0;
+      const novel = novels.value[activeIdx];
+      if (!pages.value[pageIndex]) return 0;
+      
+      let startOffset = 0;
+      for(let i = 0; i < pageIndex; i++) {
+          startOffset += pages.value[i].length;
+      }
+      const endOffset = startOffset + pages.value[pageIndex].length;
+      
+      const ranges = novel.readRanges || [];
+      let unreadLength = 0;
+      let currentStart = startOffset;
+      const tempRanges = [...ranges].sort((a, b) => a[0] - b[0]);
+      
+      for (const [rStart, rEnd] of tempRanges) {
+          if (currentStart >= endOffset) break;
+          if (rEnd <= currentStart) continue;
+          if (rStart > currentStart) {
+              unreadLength += Math.min(rStart, endOffset) - currentStart;
+          }
+          currentStart = Math.max(currentStart, rEnd);
+      }
+      if (currentStart < endOffset) {
+          unreadLength += endOffset - currentStart;
+      }
+      return unreadLength;
+  }
+
+  function checkProLimit(targetPage?: number): boolean {
     if (isPro.value) return true;
     
-    const charsReadSoFar = (currentPage.value + 1) * settings.value.charsPerPage;
+    // Check if the page we are trying to access is completely covered by previously read ranges
+    const pageToCheck = targetPage !== undefined ? targetPage : currentPage.value;
+    const unread = _getPageUnreadLength(pageToCheck);
+    if (unread === 0) return true; // Free revisit, no nags, no blocks
+
+    
+    // Calculate precise character count for current novel up to the current page
+    let charsReadSoFar = 0;
+    for (let i = 0; i <= currentPage.value; i++) {
+        if (pages.value[i]) {
+            charsReadSoFar += pages.value[i].length;
+        }
+    }
+    
+    // Fallback to estimation for the first page if content hasn't been split yet
+    if (charsReadSoFar === 0) {
+       charsReadSoFar = settings.value.charsPerPage;
+    }
+    
+    const globalCharsReadSoFar = globalReadChars.value;
+    const effectiveCharsRead = Math.max(charsReadSoFar, globalCharsReadSoFar);
+
     const threshold = 300000;
     const warningThreshold = threshold * 0.9;
     const warningThreshold80 = threshold * 0.8;
 
-    if (charsReadSoFar >= threshold) {
+    if (effectiveCharsRead >= threshold) {
       if (!hasNaggedPro.value) {
         hasNaggedPro.value = true;
         showActivateModal.value = true;
@@ -527,7 +674,7 @@ export const useAppStore = defineStore('app', () => {
         showActivateModal.value = true;
       }
       return false;
-    } else if (charsReadSoFar >= warningThreshold) {
+    } else if (effectiveCharsRead >= warningThreshold) {
       if (!hasWarnedPro.value) {
         hasWarnedPro.value = true;
         showActionToast(
@@ -541,7 +688,7 @@ export const useAppStore = defineStore('app', () => {
           }
         );
       }
-    } else if (charsReadSoFar >= warningThreshold80) {
+    } else if (effectiveCharsRead >= warningThreshold80) {
       if (!hasWarnedPro80.value) {
         hasWarnedPro80.value = true;
         showActionToast(
@@ -626,9 +773,73 @@ export const useAppStore = defineStore('app', () => {
   }
   function nextPage() {
     if (currentPage.value < totalPages.value - 1) {
-        if (!checkProLimit()) return;
+        if (!checkProLimit(currentPage.value + 1)) return;
         triggerTypewriter.value = true;
         currentPage.value++;
+        
+        // Increment global counter securely
+        if (!isPro.value) {
+           const activeIdx = activeNovelIndex.value;
+           if (activeIdx !== null && novels.value[activeIdx]) {
+               const novel = novels.value[activeIdx];
+               novel.readRanges = novel.readRanges || [];
+               
+               const pageJustRead = currentPage.value - 1;
+               
+               if (pageJustRead >= 0 && pages.value[pageJustRead]) {
+                   let startOffset = 0;
+                   for(let i = 0; i < pageJustRead; i++) {
+                       startOffset += pages.value[i].length;
+                   }
+                   let endOffset = startOffset + pages.value[pageJustRead].length;
+                   
+                   let ranges = novel.readRanges;
+                   let unreadLength = 0;
+                   let currentStart = startOffset;
+                   
+                   // Sort ranges by start point to correctly calculate intersections
+                   let tempRanges = [...ranges].sort((a, b) => a[0] - b[0]);
+                   for (const [rStart, rEnd] of tempRanges) {
+                       if (currentStart >= endOffset) break;
+                       if (rEnd <= currentStart) continue;
+                       if (rStart > currentStart) {
+                           unreadLength += Math.min(rStart, endOffset) - currentStart;
+                       }
+                       currentStart = Math.max(currentStart, rEnd);
+                   }
+                   if (currentStart < endOffset) {
+                       unreadLength += endOffset - currentStart;
+                   }
+                   
+                   // Merge range and optimize memory
+                   ranges.push([startOffset, endOffset]);
+                   ranges.sort((a, b) => a[0] - b[0]);
+                   
+                   let merged: [number, number][] = [];
+                   for (const r of ranges) {
+                       if (merged.length === 0) {
+                           merged.push([...r]);
+                       } else {
+                           let last = merged[merged.length - 1];
+                           if (r[0] <= last[1]) {
+                               last[1] = Math.max(last[1], r[1]);
+                           } else {
+                               merged.push([...r]);
+                           }
+                       }
+                   }
+                   novel.readRanges = merged;
+                   
+                   if (unreadLength > 0) {
+                       globalReadChars.value += unreadLength;
+                       const devId = localStorage.getItem('find_deep_device_id') || 'unknown';
+                       localStorage.setItem('find_deep_global_chars', globalReadChars.value.toString());
+                       localStorage.setItem('find_deep_global_chars_hash', _generateSecurityHash(globalReadChars.value, devId));
+                   }
+               }
+           }
+        }
+
         _syncNovelPage();
     } else {
       // 检查是否为示例作品且已到达末尾
@@ -788,7 +999,8 @@ export const useAppStore = defineStore('app', () => {
             lastRead: Date.now(),
             currentPage: 0,
             displayName: 'Q1 季度项目进展报告',
-            isPinned: true
+            isPinned: true,
+            readRanges: []
           });
           _saveNovelsMeta();
           templateIndex = 0;
@@ -865,6 +1077,28 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
+  function devClearReadCount() {
+    globalReadChars.value = 0;
+    localStorage.removeItem('find_deep_global_chars');
+    localStorage.removeItem('find_deep_global_chars_hash');
+    hasWarnedPro.value = false;
+    hasWarnedPro80.value = false;
+    hasNaggedPro.value = false;
+    
+    // reset readRanges for every novel to allow re-testing
+    for (const novel of novels.value) {
+        novel.readRanges = [];
+    }
+    _saveNovelsMeta();
+    
+    if (activeNovelIndex.value !== null) {
+      currentPage.value = 0;
+      _syncNovelPage();
+    }
+    
+    showToast('阅读记录与限制状态已清零 (仅限快速开发者测试)', 'achievement');
+  }
+
   return {
     novels, activeId, activeNovelId, activeNovelIndex, currentPage, totalPages, pages, chapters, generatingContexts,
     sidebarOpen, showWasteland, isPro, hasNaggedPro, showHelp, showSettings, showProfileModal, showActivateModal, showToc, bossMode,
@@ -875,6 +1109,6 @@ export const useAppStore = defineStore('app', () => {
     confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmDefaultValue, confirmPlaceholder,
     toastVisible, toastMessage, toastType, toastHasIcon, toastActionText, previewTimer,
     hasImportedFile, hasModifiedSettings, activeReadingSeconds, inviteValidated, checkInviteValidation,
-    _saveNovelsMeta, _syncNovelPage
+    _saveNovelsMeta, _syncNovelPage, devClearReadCount
   };
 });

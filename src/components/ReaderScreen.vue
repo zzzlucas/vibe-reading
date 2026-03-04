@@ -87,6 +87,11 @@
     <button v-if="isDev" class="dev-clear-data-btn" @click="devClearData" title="[DEV] 一键强制洗白所有数据(含设备指纹)">
       <icon-material-symbols-delete-sweep />
     </button>
+    
+    <!-- Dev Only: Clear Read Count -->
+    <button v-if="isDev" class="dev-clear-read-btn" @click="store.devClearReadCount" title="[DEV] 一键清除阅读字数">
+      <icon-material-symbols-restore-page />
+    </button>
 
     <!-- Image Preview Modal -->
     <ImagePreviewModal v-model="previewImageUrl" />
@@ -625,7 +630,7 @@ watch(() => store.activeNovelIndex, (newIdx) => {
 
 .dev-mock-new-user-btn {
   position: fixed;
-  bottom: 128px;
+  bottom: 176px;
   right: 20px;
   width: 36px;
   height: 36px;
@@ -648,7 +653,7 @@ watch(() => store.activeNovelIndex, (newIdx) => {
 
 .dev-quick-settings-btn {
   position: fixed;
-  bottom: 80px;
+  bottom: 128px;
   right: 20px;
   width: 36px;
   height: 36px;
@@ -678,7 +683,7 @@ watch(() => store.activeNovelIndex, (newIdx) => {
   border-radius: 50%;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  color: var(--accent-pink);
+  color: var(--text-muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -687,7 +692,33 @@ watch(() => store.activeNovelIndex, (newIdx) => {
   box-shadow: var(--shadow-sm);
   
   &:hover {
+    color: var(--accent-pink);
+    border-color: var(--accent-pink);
     background: rgba(242, 139, 130, 0.1);
+  }
+}
+
+.dev-clear-read-btn {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+  
+  &:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--bg-surface-hover);
   }
 }
 
