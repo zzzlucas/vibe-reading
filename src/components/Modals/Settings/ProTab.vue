@@ -134,6 +134,16 @@ onMounted(() => {
   if (!hasSavedState && store.isPro) {
     isCollapsed.value = true;
   }
+
+  if (store.scrollToPro) {
+    isCollapsed.value = false;
+    store.scrollToPro = false;
+    setTimeout(() => {
+      if (proSectionRef.value) {
+          proSectionRef.value.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
+  }
   
   fetchInviteInfo();
 });
@@ -141,6 +151,20 @@ onMounted(() => {
 watch(() => store.isPro, (newVal) => {
   if (newVal) {
     isCollapsed.value = true;
+  }
+});
+
+watch(() => store.scrollToPro, (newVal) => {
+  if (newVal) {
+    store.scrollToPro = false;
+    isCollapsed.value = false;
+    nextTick(() => {
+      setTimeout(() => {
+        if (proSectionRef.value) {
+           proSectionRef.value.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 150);
+    });
   }
 });
 

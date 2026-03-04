@@ -438,6 +438,15 @@ async function handleKeydown(e: KeyboardEvent) {
   
   if (store.bossMode) return;
   
+  if (store.showSettings || store.showProfileModal || store.showActivateModal || store.showHelp || store.confirmVisible) {
+    if (e.key === 'Escape') {
+      store.showHelp = false;
+      store.showSettings = false;
+      store.showToc = false;
+    }
+    return;
+  }
+
   const key = e.key;
   const isScrollUp = store.settings.scrollUpKeys?.includes(key);
   const isScrollDown = store.settings.scrollDownKeys?.includes(key);

@@ -57,8 +57,11 @@ export const useAppStore = defineStore('app', () => {
   let toastActionCallback: (() => void) | null = null;
   const previewTimer = ref(0);
   const hasWarnedPro = ref(false);
+  const hasWarnedPro80 = ref(false);
   const autoExpandAdvanced = ref(false);
   const autoExpandReading = ref(false);
+  const forceMainSettings = ref(false);
+  const scrollToPro = ref(false);
   const autoPreview = ref(false);
   const comingSoonText = ref('更多功能敬请期待');
   const isNewAchievement = ref(false);
@@ -508,24 +511,52 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  function checkProLimit() {
-    if (isPro.value) return;
+  function checkProLimit(): boolean {
+    if (isPro.value) return true;
     
     const charsReadSoFar = (currentPage.value + 1) * settings.value.charsPerPage;
     const threshold = 300000;
     const warningThreshold = threshold * 0.9;
+    const warningThreshold80 = threshold * 0.8;
 
     if (charsReadSoFar >= threshold) {
       if (!hasNaggedPro.value) {
         hasNaggedPro.value = true;
         showActivateModal.value = true;
+      } else {
+        showActivateModal.value = true;
       }
+      return false;
     } else if (charsReadSoFar >= warningThreshold) {
       if (!hasWarnedPro.value) {
         hasWarnedPro.value = true;
-        showToast('您已阅读接近 10 万字，继续阅读需升级 Pro 版本');
+        showActionToast(
+          `您已阅读接近 ${(threshold / 10000).toFixed(0)} 万字，期望继续阅读可以通过邀请新用户免费升级 Pro 版本`,
+          '查看详情',
+          () => {
+             showActivateModal.value = false;
+             forceMainSettings.value = true;
+             scrollToPro.value = true;
+             showSettings.value = true;
+          }
+        );
+      }
+    } else if (charsReadSoFar >= warningThreshold80) {
+      if (!hasWarnedPro80.value) {
+        hasWarnedPro80.value = true;
+        showActionToast(
+          `普通版限制 ${(threshold / 10000).toFixed(0)} 万字，您已阅读超过 80%，随时可考虑付费升级无限制阅读`,
+          '查看方案',
+          () => {
+             showActivateModal.value = false;
+             forceMainSettings.value = true;
+             scrollToPro.value = true;
+             showSettings.value = true;
+          }
+        );
       }
     }
+    return true;
   }
 
   function showToast(msg: string, type: 'info' | 'preview' | 'achievement' | 'action' = 'info') {
@@ -595,6 +626,7 @@ export const useAppStore = defineStore('app', () => {
   }
   function nextPage() {
     if (currentPage.value < totalPages.value - 1) {
+        if (!checkProLimit()) return;
         triggerTypewriter.value = true;
         currentPage.value++;
         _syncNovelPage();
@@ -836,7 +868,7 @@ export const useAppStore = defineStore('app', () => {
   return {
     novels, activeId, activeNovelId, activeNovelIndex, currentPage, totalPages, pages, chapters, generatingContexts,
     sidebarOpen, showWasteland, isPro, hasNaggedPro, showHelp, showSettings, showProfileModal, showActivateModal, showToc, bossMode,
-    theme, style, encoding, settings, aiSettings, appTitle, userName, userAvatar, userAvatarColor, autoExpandAdvanced, autoExpandReading, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed, triggerSystemFileSignal,
+    theme, style, encoding, settings, aiSettings, appTitle, userName, userAvatar, userAvatarColor, autoExpandAdvanced, autoExpandReading, forceMainSettings, scrollToPro, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed, triggerSystemFileSignal,
     openNovel, deleteNovel, renameNovel, togglePinNovel, prevPage, nextPage, searchInNovel, toggleBossMode,
     initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, resolveConfirmDialog,
     generateUid, ensureDeviceId, saveInvitedBy, getInvitedBy, trackEvent, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,

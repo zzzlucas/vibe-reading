@@ -31,6 +31,7 @@ declare module 'vue' {
     IconMaterialSymbolsAddCircle: typeof import('~icons/material-symbols/add-circle')['default']
     IconMaterialSymbolsAddCircleOutline: typeof import('~icons/material-symbols/add-circle-outline')['default']
     IconMaterialSymbolsArrowBack: typeof import('~icons/material-symbols/arrow-back')['default']
+    IconMaterialSymbolsArrowForward: typeof import('~icons/material-symbols/arrow-forward')['default']
     IconMaterialSymbolsArrowUpward: typeof import('~icons/material-symbols/arrow-upward')['default']
     IconMaterialSymbolsAutoAwesome: typeof import('~icons/material-symbols/auto-awesome')['default']
     IconMaterialSymbolsAutoFix: typeof import('~icons/material-symbols/auto-fix')['default']

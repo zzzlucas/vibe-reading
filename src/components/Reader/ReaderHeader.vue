@@ -13,7 +13,7 @@
       </span>
     </div>
     <div class="top-bar-right">
-      <button v-if="!store.isPro" class="top-btn" @click="store.showActivateModal = true">
+      <button v-if="!store.isPro" class="top-btn" @click="openProSettings">
         升级 Pro
       </button>
       <button class="icon-btn" @click="toggleTheme" title="切换主题">
@@ -79,6 +79,13 @@ function openProfileModal() {
 
 function openSettings() {
   showAvatarDropdown.value = false;
+  store.showSettings = true;
+}
+
+function openProSettings() {
+  showAvatarDropdown.value = false;
+  store.forceMainSettings = true;
+  store.scrollToPro = true;
   store.showSettings = true;
 }
 

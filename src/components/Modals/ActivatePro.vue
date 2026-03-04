@@ -32,6 +32,11 @@
           {{ loading ? '正在验证...' : '立即激活' }}
         </button>
 
+        <div class="activate-alt-option" @click="openProSettings">
+          不想花钱？前往参加邀请裂变免费解锁
+          <icon-material-symbols-arrow-forward />
+        </div>
+
         <div class="activate-status" :class="statusType">{{ statusMsg }}</div>
       </div>
     </div>
@@ -56,6 +61,13 @@ watch(() => store.showActivateModal, (val) => {
     statusType.value = '';
   }
 });
+
+function openProSettings() {
+  store.showActivateModal = false;
+  store.forceMainSettings = true;
+  store.scrollToPro = true;
+  store.showSettings = true;
+}
 
 async function handleActivate() {
   store.trackEvent('click_activate_pro');
@@ -281,6 +293,32 @@ async function handleActivate() {
   &.error { color: var(--accent-pink); }
   &.success { color: var(--accent-green); }
   &.loading { color: var(--text-muted); }
+}
+
+.activate-alt-option {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+
+  .material-symbols-outlined {
+    font-size: 16px;
+    transition: transform 0.2s;
+  }
+
+  &:hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+
+    .material-symbols-outlined {
+      transform: translateX(4px);
+    }
+  }
 }
 
 .activate-close-btn {

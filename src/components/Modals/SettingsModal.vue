@@ -145,6 +145,9 @@ watch(() => store.showSettings, (newVal) => {
       activeSubModal.value = 'reading';
       subModalTitle.value = '排版配置';
       store.autoExpandReading = false;
+    } else if (store.forceMainSettings) {
+      activeSubModal.value = null;
+      store.forceMainSettings = false;
     }
   } else {
     if (typeTimer) {
