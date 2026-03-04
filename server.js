@@ -141,7 +141,7 @@ app.post('/api/invite/use', async (req, res) => {
   const code = inviteCode.trim().toUpperCase();
   const invites = await readInvites();
 
-  const MAX_INVITES_PER_IP = 3;
+  const MAX_INVITES_PER_IP = 2;
   
   // Ensure current device exists
   if (!invites[deviceId]) {
