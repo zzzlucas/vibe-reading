@@ -38,6 +38,7 @@
 import { onMounted, watchEffect, nextTick, watch, ref, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAppStore } from '@/store/appStore';
+import { apiFetch } from '@/utils/request';
 
 import SettingsModal from '@/components/Modals/SettingsModal.vue';
 import ProfileModal from '@/components/Modals/ProfileModal.vue';
@@ -131,7 +132,7 @@ async function checkActivation() {
   if (!token) return false;
 
   try {
-    const res = await fetch('/api/verify', {
+    const res = await apiFetch('/api/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token })
@@ -205,7 +206,7 @@ onMounted(async () => {
   const storedInvite = await store.getInvitedBy();
   if (storedInvite) {
     const deviceId = await store.ensureDeviceId();
-    fetch('/api/invite/use', {
+    apiFetch('/api/invite/use', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ inviteCode: storedInvite, deviceId })

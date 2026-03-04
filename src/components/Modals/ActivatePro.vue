@@ -46,6 +46,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useAppStore } from '@/store/appStore';
+import { apiFetch } from '@/utils/request';
 
 const store = useAppStore();
 
@@ -83,7 +84,7 @@ async function handleActivate() {
   statusMsg.value = '正在验证...';
 
   try {
-    const res = await fetch('/api/activate', {
+    const res = await apiFetch('/api/activate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code })

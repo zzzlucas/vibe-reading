@@ -24,6 +24,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAppStore } from '@/store/appStore';
+import { apiFetch } from '@/utils/request';
 
 const store = useAppStore();
 const feedbackText = ref('');
@@ -53,7 +54,7 @@ async function sendFeedback() {
       timestamp: new Date().toISOString()
     };
 
-    const res = await fetch('/api/feedback', {
+    const res = await apiFetch('/api/feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 

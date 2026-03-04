@@ -3,6 +3,7 @@ import { ref, watch, computed } from 'vue';
 import type { Novel, Chapter, Settings, Theme, StyleName, Encoding } from '../types';
 import { ContentDB, IdentityDB } from '../utils/db';
 import { STYLE_CONFIG } from '../config/constants';
+import { apiFetch, generateSecurityHash } from '@/utils/request';
 
 const STORAGE_PREFIX = 'find_deep_';
 // 内存级集合：仅记录本次会话中刚导入的作品 ID，用于精确触发首次打开时的打字机动画
@@ -224,7 +225,7 @@ export const useAppStore = defineStore('app', () => {
   async function trackEvent(eventName: string, meta: any = {}) {
     try {
       const deviceId = await ensureDeviceId();
-      fetch('/api/track', {
+      apiFetch('/api/track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ event: eventName, deviceId, meta })
@@ -233,28 +234,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function _generateSecurityHash(chars: number, deviceId: string): string {
-    const salt = "f!nD_dEep#82";
-    const raw = `${salt}:${chars}:@:${deviceId}`;
-    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-    for (let i = 0; i < raw.length; i++) {
-        const char = raw.charCodeAt(i);
-        h1 = Math.imul(h1 ^ char, 2654435761);
-        h2 = Math.imul(h2 ^ char, 1597334677);
-    }
-    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-    
-    // Expand to a 64-character UUID-like intimidating hash string (8x8)
-    const p1 = (h1 >>> 0).toString(16).padStart(8, '0');
-    const p2 = (h2 >>> 0).toString(16).padStart(8, '0');
-    const p3 = ((h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
-    const p4 = ((~h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
-    const p5 = ((h1 ^ ~h2) >>> 0).toString(16).padStart(8, '0');
-    const p6 = ((h1 + h2) >>> 0).toString(16).padStart(8, '0');
-    const p7 = ((h1 - h2) >>> 0).toString(16).padStart(8, '0');
-    const p8 = ((h2 - h1) >>> 0).toString(16).padStart(8, '0');
-    
-    return p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+    return generateSecurityHash(chars, deviceId);
   }
 
   function _generateMetaHash(metaStr: string, deviceId: string): string {
@@ -1064,7 +1044,7 @@ export const useAppStore = defineStore('app', () => {
         try {
           const activeTime = activeReadingSeconds.value;
           const verifyToken = _generateSecurityHash(activeTime, deviceId);
-          const res = await fetch('/api/invite/validate', {
+          const res = await apiFetch('/api/invite/validate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ deviceId, activeTime, verifyToken })

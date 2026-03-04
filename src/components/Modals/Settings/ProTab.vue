@@ -44,6 +44,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, nextTick } from 'vue';
 import { useAppStore } from '@/store/appStore';
+import { apiFetch } from '@/utils/request';
 
 const store = useAppStore();
 const isCollapsed = ref(false);
@@ -73,7 +74,7 @@ function openPro() {
 async function fetchInviteInfo() {
   try {
     const deviceId = await store.ensureDeviceId();
-    const res = await fetch(`/api/invite/info?deviceId=${deviceId}`);
+    const res = await apiFetch(`/api/invite/info?deviceId=${deviceId}`);
     const data = await res.json();
     if (data.inviteCode) {
       inviteInfo.value = { inviteCode: data.inviteCode, count: data.count };

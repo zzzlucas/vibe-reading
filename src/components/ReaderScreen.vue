@@ -118,6 +118,7 @@ import { useSpeech } from '@/composables/useSpeech';
 import { useFileProcessor } from '@/composables/useFileProcessor';
 import { useTypewriter } from '@/composables/useTypewriter';
 import { useBossStream } from '@/composables/useBossStream';
+import { apiFetch } from '@/utils/request';
 
 const store = useAppStore();
 const isDev = (import.meta as any).env?.DEV;
@@ -190,7 +191,7 @@ function openDevReadingSettings() {
 async function mockNewUserEffect() {
   try {
     const deviceId = await store.ensureDeviceId();
-    const infoRes = await fetch(`/api/invite/info?deviceId=${deviceId}`);
+    const infoRes = await apiFetch(`/api/invite/info?deviceId=${deviceId}`);
     const infoData = await infoRes.json();
     
     if (!infoData.inviteCode) {
@@ -200,7 +201,7 @@ async function mockNewUserEffect() {
 
     const mockDeviceId = 'mock_' + Math.random().toString(36).substring(2, 10);
 
-    const useRes = await fetch('/api/invite/use', {
+    const useRes = await apiFetch('/api/invite/use', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ inviteCode: infoData.inviteCode, deviceId: mockDeviceId })
@@ -212,7 +213,7 @@ async function mockNewUserEffect() {
        return;
     }
 
-    await fetch('/api/invite/validate', {
+    await apiFetch('/api/invite/validate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deviceId: mockDeviceId })

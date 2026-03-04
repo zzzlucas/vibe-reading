@@ -38,6 +38,63 @@ app.use((req, res, next) => {
 
 app.use(express.static(staticDir));
 
+// ===== Global API Signature Middleware =====
+// Prevents Postman/script abuse by verifying a time-based HMAC-like request signature
+// on every /api/ call in production. Development mode bypasses this for convenience.
+function _apiSignatureHash(payload, deviceId) {
+  const salt = "f!nD_dEep#82";
+  const raw = `${salt}:${payload}:@:${deviceId}`;
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < raw.length; i++) {
+    const char = raw.charCodeAt(i);
+    h1 = Math.imul(h1 ^ char, 2654435761);
+    h2 = Math.imul(h2 ^ char, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const p1 = (h1 >>> 0).toString(16).padStart(8, '0');
+  const p2 = (h2 >>> 0).toString(16).padStart(8, '0');
+  const p3 = ((h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
+  const p4 = ((~h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
+  const p5 = ((h1 ^ ~h2) >>> 0).toString(16).padStart(8, '0');
+  const p6 = ((h1 + h2) >>> 0).toString(16).padStart(8, '0');
+  const p7 = ((h1 - h2) >>> 0).toString(16).padStart(8, '0');
+  const p8 = ((h2 - h1) >>> 0).toString(16).padStart(8, '0');
+  return p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+}
+
+app.use('/api', (req, res, next) => {
+  // Skip verification in development mode
+  if (envPrefix === 'development') return next();
+
+  const deviceId = req.headers['x-device-id'];
+  const timestamp = parseInt(req.headers['x-timestamp'] || '0', 10);
+  const signature = req.headers['x-signature'];
+
+  // Require all three headers
+  if (!deviceId || !timestamp || !signature) {
+    return res.status(403).json({ error: '无效的请求来源' });
+  }
+
+  // Timestamp must be within a 90-second window (prevents replay attacks)
+  const now = Date.now();
+  if (Math.abs(now - timestamp) > 90000) {
+    return res.status(403).json({ error: '请求已过期，请重试' });
+  }
+
+  // Verify signature: hash of "timestamp:path" keyed by deviceId
+  const urlObj = new URL(req.url, 'http://localhost');
+  const path = urlObj.pathname;
+  const expectedSig = _apiSignatureHash(`${timestamp}:${path}`, deviceId);
+  if (signature !== expectedSig) {
+    return res.status(403).json({ error: '签名校验不通过' });
+  }
+
+  next();
+});
+
+
+
 // ===== Card Key System =====
 
 async function readKeys() {
