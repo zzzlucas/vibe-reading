@@ -1,4 +1,4 @@
-const DB_NAME = 'deep_reader_db';
+const DB_NAME = 'find_deep_db';
 const DB_VERSION = 2; // Incremented for keyPath change
 const STORE_NAME = 'novels_content';
 
@@ -91,7 +91,7 @@ export const ContentDB = {
 };
 
 // ===== Identity DB for Dual Anchoring =====
-const IDENTITY_DB_NAME = 'deep_reader_identity';
+const IDENTITY_DB_NAME = 'find_deep_identity';
 const IDENTITY_STORE_NAME = 'identity_store';
 
 let identityDbInstance: IDBDatabase | null = null;

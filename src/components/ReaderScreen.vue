@@ -83,6 +83,11 @@
       <icon-material-symbols-settings />
     </button>
 
+    <!-- Dev Only: Clear All Data -->
+    <button v-if="isDev" class="dev-clear-data-btn" @click="devClearData" title="[DEV] 一键强制洗白所有数据(含设备指纹)">
+      <icon-material-symbols-delete-sweep />
+    </button>
+
     <!-- Image Preview Modal -->
     <ImagePreviewModal v-model="previewImageUrl" />
   </main>
@@ -542,6 +547,26 @@ watch(() => store.currentPage, (newVal, oldVal) => {
   }
 });
 
+watch(() => store.autoPreview, (newVal) => {
+  if (newVal) {
+    store._saveNovelsMeta();
+  }
+});
+
+async function devClearData() {
+  if (confirm('⚠️ [DEV测试专属操作]\n是否要彻底清除本地域名下产生的所有缓存？\n将清除包括设备指纹(IdentityDB)、卡密记录及全部小说，相当于系统重装。')) {
+    localStorage.clear();
+    try {
+      const { ContentDB, IdentityDB } = await import('@/utils/db');
+      await ContentDB.clear();
+      await IdentityDB.open();
+      await IdentityDB.clear(); 
+    } catch(err) {}
+    window.location.reload();
+  }
+}
+
+
 watch(() => store.activeNovelIndex, (newIdx) => {
   if (newIdx !== null && store.novels[newIdx]) {
     const chatId = store.novels[newIdx].id;
@@ -632,6 +657,28 @@ watch(() => store.activeNovelIndex, (newIdx) => {
   &:hover {
     color: var(--text-primary);
     background: var(--bg-surface-hover);
+  }
+}
+
+.dev-clear-data-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--accent-pink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+  
+  &:hover {
+    background: rgba(242, 139, 130, 0.1);
   }
 }
 

@@ -4,7 +4,7 @@ import type { Novel, Chapter, Settings, Theme, StyleName, Encoding } from '../ty
 import { ContentDB, IdentityDB } from '../utils/db';
 import { STYLE_CONFIG } from '../config/constants';
 
-const STORAGE_PREFIX = 'deep_reader_';
+const STORAGE_PREFIX = 'find_deep_';
 // 内存级集合：仅记录本次会话中刚导入的作品 ID，用于精确触发首次打开时的打字机动画
 const _justAddedIds = new Set<string>();
 
@@ -167,7 +167,7 @@ export const useAppStore = defineStore('app', () => {
   };
 
   async function ensureDeviceId() {
-    let lsId = localStorage.getItem('deep_reader_device_id');
+    let lsId = localStorage.getItem('find_deep_device_id');
     try {
       await IdentityDB.open();
       let idbId = await IdentityDB.get('device_id');
@@ -181,14 +181,14 @@ export const useAppStore = defineStore('app', () => {
         await IdentityDB.set('device_id', finalId);
       }
       if (finalId !== lsId) {
-        localStorage.setItem('deep_reader_device_id', finalId);
+        localStorage.setItem('find_deep_device_id', finalId);
       }
       
       return finalId;
     } catch(err) {
       if (!lsId) {
         lsId = generateUid() + generateUid();
-        localStorage.setItem('deep_reader_device_id', lsId);
+        localStorage.setItem('find_deep_device_id', lsId);
       }
       return lsId;
     }
@@ -196,7 +196,7 @@ export const useAppStore = defineStore('app', () => {
 
   async function saveInvitedBy(code: string) {
     if (!code) return;
-    localStorage.setItem('deep_reader_invited_by', code);
+    localStorage.setItem('find_deep_invited_by', code);
     try {
       await IdentityDB.open();
       await IdentityDB.set('invited_by', code);
@@ -204,7 +204,7 @@ export const useAppStore = defineStore('app', () => {
   }
 
   async function getInvitedBy() {
-    let lsCode = localStorage.getItem('deep_reader_invited_by');
+    let lsCode = localStorage.getItem('find_deep_invited_by');
     try {
       await IdentityDB.open();
       let idbCode = await IdentityDB.get('invited_by');

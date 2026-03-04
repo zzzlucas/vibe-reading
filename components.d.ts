@@ -46,6 +46,7 @@ declare module 'vue' {
     IconMaterialSymbolsDarkMode: typeof import('~icons/material-symbols/dark-mode')['default']
     IconMaterialSymbolsDatabase: typeof import('~icons/material-symbols/database')['default']
     IconMaterialSymbolsDelete: typeof import('~icons/material-symbols/delete')['default']
+    IconMaterialSymbolsDeleteSweep: typeof import('~icons/material-symbols/delete-sweep')['default']
     IconMaterialSymbolsDescription: typeof import('~icons/material-symbols/description')['default']
     IconMaterialSymbolsEdit: typeof import('~icons/material-symbols/edit')['default']
     IconMaterialSymbolsEditNote: typeof import('~icons/material-symbols/edit-note')['default']

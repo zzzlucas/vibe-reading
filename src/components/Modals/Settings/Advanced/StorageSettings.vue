@@ -78,7 +78,7 @@ function formatFileSize(bytes: number) {
 
 async function handleClearAll() {
   store.trackEvent('click_clear_data');
-  if (await store.confirmDialog('警告：此操作将删除所有本地内容（含书架作品、阅读进度、自定义设置，以及激活状态）。确定继续？', '严重警告')) {
+  if (await store.confirmDialog('警告：此操作将删除所有本地内容（含书架作品、阅读进度、自定义排版设置等）。确定继续？', '严重警告')) {
     if (await store.confirmDialog('数据无法恢复，真的要全部清空吗？', '终极确认')) {
       await clearCache();
     }
@@ -87,9 +87,9 @@ async function handleClearAll() {
 
 async function clearCache() {
   await ContentDB.clear();
-  Object.keys(localStorage).filter(k => k.startsWith('deep_reader_')).forEach(k => {
+  Object.keys(localStorage).filter(k => k.startsWith('find_deep_')).forEach(k => {
     // 保护这三个核心的设备和激活信息：设备指纹、已录入的邀请人卡密、当前已激活的Pro Token
-    if (k !== 'deep_reader_device_id' && k !== 'deep_reader_invited_by' && k !== 'deep_reader_token') {
+    if (k !== 'find_deep_device_id' && k !== 'find_deep_invited_by' && k !== 'find_deep_token') {
       localStorage.removeItem(k);
     }
   });

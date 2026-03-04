@@ -85,15 +85,15 @@ async function fetchInviteInfo() {
       generatedLink.value = url.toString();
 
       if (data.rewardToken) {
-        localStorage.setItem('deep_reader_token', data.rewardToken);
+        localStorage.setItem('find_deep_token', data.rewardToken);
         store.isPro = true;
         try {
           await import('@/utils/db').then(m => {
             m.IdentityDB.open().then(() => m.IdentityDB.set('token', data.rewardToken));
           });
         } catch(err) {}
-        if (!localStorage.getItem('deep_reader_reward_toast_shown')) {
-          localStorage.setItem('deep_reader_reward_toast_shown', 'true');
+        if (!localStorage.getItem('find_deep_reward_toast_shown')) {
+          localStorage.setItem('find_deep_reward_toast_shown', 'true');
           store.showToast('🎉 恭喜！您已成功邀请3位用户并解锁 Pro 体验！', 'info');
         }
       }
@@ -119,7 +119,7 @@ async function generateInviteLink() {
 }
 
 onMounted(() => {
-  const saved = localStorage.getItem('deep_reader_collapsed_sections');
+  const saved = localStorage.getItem('find_deep_collapsed_sections');
   let hasSavedState = false;
   if (saved) {
     try {
@@ -145,11 +145,11 @@ watch(() => store.isPro, (newVal) => {
 });
 
 watch(isCollapsed, (val) => {
-  const saved = localStorage.getItem('deep_reader_collapsed_sections') || '{}';
+  const saved = localStorage.getItem('find_deep_collapsed_sections') || '{}';
   try {
     const parsed = JSON.parse(saved);
     parsed.pro = val;
-    localStorage.setItem('deep_reader_collapsed_sections', JSON.stringify(parsed));
+    localStorage.setItem('find_deep_collapsed_sections', JSON.stringify(parsed));
   } catch (e) {}
 });
 </script>

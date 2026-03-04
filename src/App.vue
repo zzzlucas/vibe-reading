@@ -114,7 +114,7 @@ function viewAchievement() {
 }
 
 async function checkActivation() {
-  let token = localStorage.getItem('deep_reader_token');
+  let token = localStorage.getItem('find_deep_token');
   
   try {
     const { IdentityDB } = await import('@/utils/db');
@@ -122,7 +122,7 @@ async function checkActivation() {
     const idbToken = await IdentityDB.get('token');
     if (!token && idbToken) {
       token = idbToken; // 恢复丢失的 token
-      localStorage.setItem('deep_reader_token', token);
+      localStorage.setItem('find_deep_token', token);
     } else if (token && token !== idbToken) {
       await IdentityDB.set('token', token); // 下发同步给 idb
     }
@@ -147,7 +147,7 @@ async function checkActivation() {
   }
 
   // Token invalid or expired
-  localStorage.removeItem('deep_reader_token');
+  localStorage.removeItem('find_deep_token');
   try {
     const { IdentityDB } = await import('@/utils/db');
     await IdentityDB.open();
@@ -184,9 +184,9 @@ onMounted(async () => {
   }
 
   // Tracking: First Open
-  if (!localStorage.getItem('deep_reader_first_open_tracked')) {
+  if (!localStorage.getItem('find_deep_first_open_tracked')) {
     store.trackEvent('first_open', { url: window.location.href });
-    localStorage.setItem('deep_reader_first_open_tracked', 'true');
+    localStorage.setItem('find_deep_first_open_tracked', 'true');
   }
 
   // Handle invite links

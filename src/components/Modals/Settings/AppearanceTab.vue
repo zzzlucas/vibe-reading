@@ -131,7 +131,7 @@ function setStyle(style: StyleName) {
 // However, the parent modal logic saves toggle state to localStorage.
 // We can handle that here too.
 onMounted(() => {
-  const saved = localStorage.getItem('deep_reader_collapsed_sections');
+  const saved = localStorage.getItem('find_deep_collapsed_sections');
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
@@ -141,11 +141,11 @@ onMounted(() => {
 });
 
 watch(isCollapsed, (val) => {
-  const saved = localStorage.getItem('deep_reader_collapsed_sections') || '{}';
+  const saved = localStorage.getItem('find_deep_collapsed_sections') || '{}';
   try {
     const parsed = JSON.parse(saved);
     parsed.appearance = val;
-    localStorage.setItem('deep_reader_collapsed_sections', JSON.stringify(parsed));
+    localStorage.setItem('find_deep_collapsed_sections', JSON.stringify(parsed));
   } catch (e) {}
 });
 </script>

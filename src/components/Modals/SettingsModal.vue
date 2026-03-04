@@ -67,16 +67,16 @@ import AdvancedTab from './Settings/AdvancedTab.vue';
 const store = useAppStore();
 const isPeeking = ref(false);
 
-const activeSubModal = ref<string | null>(localStorage.getItem('deep_reader_last_sub_modal') || null);
-const subModalTitle = ref(localStorage.getItem('deep_reader_last_sub_title') || '');
+const activeSubModal = ref<string | null>(localStorage.getItem('find_deep_last_sub_modal') || null);
+const subModalTitle = ref(localStorage.getItem('find_deep_last_sub_title') || '');
 
 watch(activeSubModal, (val) => {
   if (val) {
-    localStorage.setItem('deep_reader_last_sub_modal', val);
-    localStorage.setItem('deep_reader_last_sub_title', subModalTitle.value);
+    localStorage.setItem('find_deep_last_sub_modal', val);
+    localStorage.setItem('find_deep_last_sub_title', subModalTitle.value);
   } else {
-    localStorage.removeItem('deep_reader_last_sub_modal');
-    localStorage.removeItem('deep_reader_last_sub_title');
+    localStorage.removeItem('find_deep_last_sub_modal');
+    localStorage.removeItem('find_deep_last_sub_title');
   }
 });
 const transitionName = ref('slide-left');

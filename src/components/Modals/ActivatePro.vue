@@ -79,7 +79,7 @@ async function handleActivate() {
     const data = await res.json();
 
     if (data.success) {
-      localStorage.setItem('deep_reader_token', data.token);
+      localStorage.setItem('find_deep_token', data.token);
       try {
         await store.ensureDeviceId(); // just ensuring idb is basically ready
         await import('@/utils/db').then(m => {
