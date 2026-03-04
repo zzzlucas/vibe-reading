@@ -200,12 +200,44 @@ app.post('/api/invite/use', async (req, res) => {
  * Body: { deviceId: "YYY" }
  * Called when the frontend determines the user has met the usage criteria.
  */
+function _generateSecurityHash(chars, deviceId) {
+  const salt = "f!nD_dEep#82";
+  const raw = `${salt}:${chars}:@:${deviceId}`;
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < raw.length; i++) {
+      const char = raw.charCodeAt(i);
+      h1 = Math.imul(h1 ^ char, 2654435761);
+      h2 = Math.imul(h2 ^ char, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const p1 = (h1 >>> 0).toString(16).padStart(8, '0');
+  const p2 = (h2 >>> 0).toString(16).padStart(8, '0');
+  const p3 = ((h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
+  const p4 = ((~h1 ^ h2) >>> 0).toString(16).padStart(8, '0');
+  const p5 = ((h1 ^ ~h2) >>> 0).toString(16).padStart(8, '0');
+  const p6 = ((h1 + h2) >>> 0).toString(16).padStart(8, '0');
+  const p7 = ((h1 - h2) >>> 0).toString(16).padStart(8, '0');
+  const p8 = ((h2 - h1) >>> 0).toString(16).padStart(8, '0');
+  return p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+}
+
 app.post('/api/invite/validate', async (req, res) => {
-  const { deviceId } = req.body;
+  const { deviceId, activeTime, verifyToken } = req.body;
   if (!deviceId) return res.status(400).json({ error: 'Missing logic parameters' });
 
-  if (envPrefix !== 'development' && deviceId.startsWith('mock_')) {
-    return res.status(403).json({ error: '生产环境不允许使用模拟设备进行邀请测试' });
+  if (envPrefix !== 'development') {
+    if (deviceId.startsWith('mock_')) {
+      return res.status(403).json({ error: '生产环境不允许使用模拟设备进行邀请测试' });
+    }
+    // Anti-bot validation
+    if (!activeTime || typeof activeTime !== 'number' || activeTime < 180) {
+      return res.status(403).json({ error: '阅读时长未达标，无法激活验证' });
+    }
+    const expectedToken = _generateSecurityHash(activeTime, deviceId);
+    if (verifyToken !== expectedToken) {
+      return res.status(403).json({ error: '非法激活请求，签名校验不通过' });
+    }
   }
 
   const invites = await readInvites();

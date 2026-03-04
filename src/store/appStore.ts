@@ -1062,10 +1062,12 @@ export const useAppStore = defineStore('app', () => {
       if (storedInvite) {
         const deviceId = await ensureDeviceId();
         try {
+          const activeTime = activeReadingSeconds.value;
+          const verifyToken = _generateSecurityHash(activeTime, deviceId);
           const res = await fetch('/api/invite/validate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ deviceId })
+            body: JSON.stringify({ deviceId, activeTime, verifyToken })
           });
           const data = await res.json();
           if (data.success) {
