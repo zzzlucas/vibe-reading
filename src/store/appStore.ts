@@ -367,8 +367,9 @@ export const useAppStore = defineStore('app', () => {
 
   async function _loadDefaultBook() {
     try {
-      // Use full URL or relative path based on environment, for dev/prod flexibility
-      const response = await fetch('./《海底两万里》（示例作品）.txt');
+      // Use absolute path from root, as relative paths fail on SPA subroutes (e.g., /app/:id)
+      // which causes the server to return the fallback index.html instead of the text file.
+      const response = await fetch('/《海底两万里》（示例作品）.txt');
       if (!response.ok) return;
       
       const buffer = await response.arrayBuffer();
