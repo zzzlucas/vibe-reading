@@ -73,6 +73,11 @@
     
     <input type="file" ref="fileInput" accept="*" style="display:none" multiple @change="handleFileSelect">
     
+    <!-- Dev Only: Mock New User Button -->
+    <button v-if="isDev" class="dev-mock-new-user-btn" @click="mockNewUserEffect" title="[DEV] 模拟新用户 +1">
+      <icon-material-symbols-group-add />
+    </button>
+
     <!-- Dev Only: Quick Reading Settings Button -->
     <button v-if="isDev" class="dev-quick-settings-btn" @click="openDevReadingSettings" title="[DEV] 快速调试排版配置">
       <icon-material-symbols-settings />
@@ -170,6 +175,43 @@ async function onDrop(e: DragEvent) {
 function openDevReadingSettings() {
   store.autoExpandReading = true;
   store.showSettings = true;
+}
+
+async function mockNewUserEffect() {
+  try {
+    const deviceId = await store.ensureDeviceId();
+    const infoRes = await fetch(`/api/invite/info?deviceId=${deviceId}`);
+    const infoData = await infoRes.json();
+    
+    if (!infoData.inviteCode) {
+      store.showToast('无法获取您的邀请码');
+      return;
+    }
+
+    const mockDeviceId = 'mock_' + Math.random().toString(36).substring(2, 10);
+
+    const useRes = await fetch('/api/invite/use', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ inviteCode: infoData.inviteCode, deviceId: mockDeviceId })
+    });
+    
+    const useData = await useRes.json();
+    if (useData.error) {
+       store.showToast('❌ 模拟失败: ' + useData.error);
+       return;
+    }
+
+    await fetch('/api/invite/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId: mockDeviceId })
+    });
+
+    store.showToast('✅ 成功模拟 1 名新用户完成邀请任务！(重新打开排版侧栏查看最新进度)');
+  } catch (err: any) {
+    store.showToast('❌ 模拟失败: ' + err.message);
+  }
 }
 
 const renderedScrollPages = ref<number[]>([]);
@@ -545,6 +587,29 @@ watch(() => store.activeNovelIndex, (newIdx) => {
 .reading-content {
   flex: 1;
   min-width: 0;
+}
+
+.dev-mock-new-user-btn {
+  position: fixed;
+  bottom: 128px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+  
+  &:hover {
+    color: var(--text-primary);
+    background: var(--bg-surface-hover);
+  }
 }
 
 .dev-quick-settings-btn {

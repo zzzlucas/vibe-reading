@@ -60,3 +60,6 @@
   - `npm run generate-keys`：默认生成 10 个新卡密并存入 `cardkeys.json`，同时更新 `new_keys_export.txt`。
   - `npm run generate-one-key`：生成 1 个新卡密。
   - 生成逻辑底层由 `generateKeys.js` 驱动，支持自定义数量。
+
+## 7. Dev 专属工具与测试
+- **邀请功能模拟**：在 `dev` 模式下，支持在左下角阅读界面额外显示一个 "模拟新用户+1" 按钮，一键模拟设备接受自身邀请码并完成验证流程，方便快速调试邀请机制与解锁 Pro 流程。

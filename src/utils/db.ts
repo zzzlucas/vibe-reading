@@ -139,5 +139,27 @@ export const IdentityDB = {
       };
       req.onerror = (e) => reject((e.target as IDBRequest).error);
     });
+  },
+
+  async clear(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!identityDbInstance) return reject(new Error('DB not open'));
+      const tx = identityDbInstance.transaction(IDENTITY_STORE_NAME, 'readwrite');
+      const store = tx.objectStore(IDENTITY_STORE_NAME);
+      const req = store.clear();
+      req.onsuccess = () => resolve();
+      tx.onerror = (e) => reject((e.target as IDBRequest).error);
+    });
+  },
+
+  async delete(key: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!identityDbInstance) return reject(new Error('DB not open'));
+      const tx = identityDbInstance.transaction(IDENTITY_STORE_NAME, 'readwrite');
+      const store = tx.objectStore(IDENTITY_STORE_NAME);
+      const req = store.delete(key);
+      req.onsuccess = () => resolve();
+      req.onerror = (e) => reject((e.target as IDBRequest).error);
+    });
   }
 };

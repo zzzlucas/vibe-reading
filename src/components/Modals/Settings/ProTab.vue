@@ -1,23 +1,26 @@
 <template>
-  <div class="settings-section" v-if="!store.isPro" :class="{ 'is-collapsed': isCollapsed }">
-    <div class="section-header" @click="isCollapsed = !isCollapsed">
-      <h3>升级 Pro</h3>
+  <div class="settings-section" :class="{ 'is-collapsed': isCollapsed }" ref="proSectionRef">
+    <div class="section-header" @click="toggleCollapse">
+      <div class="header-with-tip">
+        <h3>升级 Pro</h3>
+        <span class="advanced-tip" v-if="store.isPro">已升级</span>
+      </div>
       <icon-material-symbols-expand-more class="collapse-icon" />
     </div>
     <div class="section-body">
       <!-- Invite section -->
-      <div class="setting-item pro-banner" style="display:flex;flex-direction:column;align-items:flex-start;background:var(--bg-input);padding:16px;border-radius:12px;border:1px solid var(--border-color);gap:12px" v-if="inviteInfo">
+      <div class="setting-item pro-banner" style="display:flex;flex-direction:column;align-items:flex-start;background:var(--bg-input);padding:16px;border-radius:12px;border:1px solid var(--border-color);gap:12px;min-height:136px">
         <div style="display:flex;align-items:center;gap:8px">
           <icon-material-symbols-group-add style="color:var(--text-link)" />
           <span style="font-weight:500">邀请升级并解锁 Pro</span>
         </div>
         <p style="font-size:13px;color:var(--text-secondary);margin:0;line-height:1.5">
-          每邀请 1 名新用户即可累计，邀请 <strong style="color:var(--text-primary)">3</strong> 个有效用户免费解锁 Pro。当前进度: <strong style="color:var(--text-primary)">{{ inviteInfo.count }} / 3</strong>
+          每邀请 1 名新用户即可累计，邀请 <strong style="color:var(--text-primary)">3</strong> 个有效用户免费解锁 Pro。当前进度: <strong style="color:var(--text-primary)">{{ inviteInfo ? inviteInfo.count : '-' }} / 3</strong>
         </p>
         
         <!-- Action area -->
         <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px; width: 100%;">
-          <button class="setting-btn" @click="generateInviteLink" style="background:var(--text-primary);color:var(--bg-primary);border:none; white-space: nowrap; flex-shrink: 0;">
+          <button class="setting-btn" @click="generateInviteLink" :disabled="!inviteInfo" style="background:var(--text-primary);color:var(--bg-primary);border:none; white-space: nowrap; flex-shrink: 0; opacity: 1;" :style="{ opacity: inviteInfo ? 1 : 0.5 }">
             生成邀请链接
           </button>
           <div v-if="generatedLink" style="font-size: 13px; color: var(--text-primary); background: var(--bg-surface); padding: 8px 12px; border-radius: 8px; border: 1px dashed var(--border-color); flex: 1; user-select: all; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" :title="generatedLink">
@@ -39,13 +42,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, nextTick } from 'vue';
 import { useAppStore } from '@/store/appStore';
 
 const store = useAppStore();
 const isCollapsed = ref(false);
 const inviteInfo = ref<{ inviteCode: string, count: number } | null>(null);
 const generatedLink = ref('');
+const proSectionRef = ref<HTMLElement | null>(null);
+
+function toggleCollapse() {
+  isCollapsed.value = !isCollapsed.value;
+  // If we just expanded it, scroll it into view slightly after DOM updates
+  if (!isCollapsed.value) {
+    nextTick(() => {
+      setTimeout(() => {
+        if (proSectionRef.value) {
+           proSectionRef.value.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }, 50);
+    });
+  }
+}
 
 function openPro() {
   store.showSettings = false;
@@ -69,7 +87,15 @@ async function fetchInviteInfo() {
       if (data.rewardToken) {
         localStorage.setItem('deep_reader_token', data.rewardToken);
         store.isPro = true;
-        store.showToast('🎉 恭喜！您已成功邀请3位用户并解锁 Pro 体验！', 'info');
+        try {
+          await import('@/utils/db').then(m => {
+            m.IdentityDB.open().then(() => m.IdentityDB.set('token', data.rewardToken));
+          });
+        } catch(err) {}
+        if (!localStorage.getItem('deep_reader_reward_toast_shown')) {
+          localStorage.setItem('deep_reader_reward_toast_shown', 'true');
+          store.showToast('🎉 恭喜！您已成功邀请3位用户并解锁 Pro 体验！', 'info');
+        }
       }
     }
   } catch (err) {}
@@ -94,13 +120,28 @@ async function generateInviteLink() {
 
 onMounted(() => {
   const saved = localStorage.getItem('deep_reader_collapsed_sections');
+  let hasSavedState = false;
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      if (parsed.pro !== undefined) isCollapsed.value = parsed.pro;
+      if (parsed.pro !== undefined) {
+        isCollapsed.value = parsed.pro;
+        hasSavedState = true;
+      }
     } catch (e) {}
   }
+  
+  if (!hasSavedState && store.isPro) {
+    isCollapsed.value = true;
+  }
+  
   fetchInviteInfo();
+});
+
+watch(() => store.isPro, (newVal) => {
+  if (newVal) {
+    isCollapsed.value = true;
+  }
 });
 
 watch(isCollapsed, (val) => {

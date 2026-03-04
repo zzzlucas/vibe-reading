@@ -87,7 +87,12 @@ async function handleClearAll() {
 
 async function clearCache() {
   await ContentDB.clear();
-  Object.keys(localStorage).filter(k => k.startsWith('deep_reader_')).forEach(k => localStorage.removeItem(k));
+  Object.keys(localStorage).filter(k => k.startsWith('deep_reader_')).forEach(k => {
+    // 保护这三个核心的设备和激活信息：设备指纹、已录入的邀请人卡密、当前已激活的Pro Token
+    if (k !== 'deep_reader_device_id' && k !== 'deep_reader_invited_by' && k !== 'deep_reader_token') {
+      localStorage.removeItem(k);
+    }
+  });
   
   store.novels = [];
   store.activeId = null;

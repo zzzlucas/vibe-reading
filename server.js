@@ -134,6 +134,10 @@ app.post('/api/invite/use', async (req, res) => {
   const { inviteCode, deviceId } = req.body;
   if (!inviteCode || !deviceId) return res.status(400).json({ error: 'Missing logic parameters' });
 
+  if (envPrefix !== 'development' && deviceId.startsWith('mock_')) {
+    return res.status(403).json({ error: '生产环境不允许使用模拟设备进行邀请测试' });
+  }
+
   const code = inviteCode.trim().toUpperCase();
   const invites = await readInvites();
 
@@ -174,7 +178,9 @@ app.post('/api/invite/use', async (req, res) => {
     }
   }
 
-  if (ipCount >= MAX_INVITES_PER_IP) {
+  if (envPrefix === 'development' && deviceId.startsWith('mock_')) {
+    // bypass IP limits for mock devices in dev environment to allow unlimited testing
+  } else if (ipCount >= MAX_INVITES_PER_IP) {
     return res.status(403).json({ error: '当前网络环境限制，无法接受更多邀请' });
   }
 
@@ -195,6 +201,10 @@ app.post('/api/invite/use', async (req, res) => {
 app.post('/api/invite/validate', async (req, res) => {
   const { deviceId } = req.body;
   if (!deviceId) return res.status(400).json({ error: 'Missing logic parameters' });
+
+  if (envPrefix !== 'development' && deviceId.startsWith('mock_')) {
+    return res.status(403).json({ error: '生产环境不允许使用模拟设备进行邀请测试' });
+  }
 
   const invites = await readInvites();
   if (!invites[deviceId] || !invites[deviceId].invitedBy) {

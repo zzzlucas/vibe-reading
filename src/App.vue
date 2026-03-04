@@ -114,10 +114,21 @@ function viewAchievement() {
 }
 
 async function checkActivation() {
-  const token = localStorage.getItem('deep_reader_token');
-  if (!token) {
-    return false;
-  }
+  let token = localStorage.getItem('deep_reader_token');
+  
+  try {
+    const { IdentityDB } = await import('@/utils/db');
+    await IdentityDB.open();
+    const idbToken = await IdentityDB.get('token');
+    if (!token && idbToken) {
+      token = idbToken; // 恢复丢失的 token
+      localStorage.setItem('deep_reader_token', token);
+    } else if (token && token !== idbToken) {
+      await IdentityDB.set('token', token); // 下发同步给 idb
+    }
+  } catch (err) {}
+
+  if (!token) return false;
 
   try {
     const res = await fetch('/api/verify', {
@@ -132,10 +143,16 @@ async function checkActivation() {
     }
   } catch (err) {
     console.warn('Verify API failed, offline or server down. Assuming invalid.', err);
+    return false; // 如果服务端报错，本次暂时不清除 token 的本地持久化以防网络问题误杀
   }
 
   // Token invalid or expired
   localStorage.removeItem('deep_reader_token');
+  try {
+    const { IdentityDB } = await import('@/utils/db');
+    await IdentityDB.open();
+    await IdentityDB.delete('token');
+  } catch (err) {}
   return false;
 }
 

@@ -953,6 +953,7 @@ watch(() => store.autoExpandAdvanced, (newVal) => {
   border-radius: 10px;
 }
 
+
 .advanced-sub-group {
   margin-top: 16px;
   padding: 12px;

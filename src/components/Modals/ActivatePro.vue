@@ -80,6 +80,12 @@ async function handleActivate() {
 
     if (data.success) {
       localStorage.setItem('deep_reader_token', data.token);
+      try {
+        await store.ensureDeviceId(); // just ensuring idb is basically ready
+        await import('@/utils/db').then(m => {
+           m.IdentityDB.open().then(() => m.IdentityDB.set('token', data.token));
+        });
+      } catch(err) {}
       statusType.value = 'success';
       statusMsg.value = data.message;
       store.isPro = true;
