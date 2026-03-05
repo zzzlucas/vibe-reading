@@ -8,6 +8,7 @@ export interface Novel {
   displayName?: string;
   isPinned?: boolean;
   readRanges?: [number, number][]; // Tracks absolute character ranges read: [start, end][]
+  aiConfigId?: string; // Tracks the last used AI config specifically for this chat
 }
 
 export interface Chapter {

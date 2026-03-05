@@ -116,7 +116,14 @@ export const useAppStore = defineStore('app', () => {
   });
 
   const currentAiConfig = computed(() => {
-    return aiSettings.value.configs.find(c => c.id === aiSettings.value.activeConfigId) || aiSettings.value.configs[0];
+    let targetId = aiSettings.value.activeConfigId;
+    if (activeNovelIndex.value !== null && novels.value[activeNovelIndex.value]) {
+      const novelConfigId = novels.value[activeNovelIndex.value].aiConfigId;
+      if (novelConfigId && aiSettings.value.configs.some(c => c.id === novelConfigId)) {
+        targetId = novelConfigId;
+      }
+    }
+    return aiSettings.value.configs.find(c => c.id === targetId) || aiSettings.value.configs[0];
   });
   
   const settings = ref<Settings>({
@@ -511,7 +518,8 @@ export const useAppStore = defineStore('app', () => {
       name: n.name, size: n.size, lastRead: n.lastRead,
       currentPage: n.currentPage, displayName: n.displayName || '',
       isPinned: !!n.isPinned,
-      readRanges: n.readRanges || []
+      readRanges: n.readRanges || [],
+      aiConfigId: n.aiConfigId
     }));
     _saveToStorage('works_meta', meta);
     

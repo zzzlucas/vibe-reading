@@ -52,9 +52,9 @@
                 <div class="model-dropdown-item" 
                      v-for="conf in store.aiSettings.configs" 
                      :key="conf.id"
-                     :class="{ active: store.aiSettings.activeConfigId === conf.id }"
+                     :class="{ active: store.currentAiConfig?.id === conf.id }"
                      @click.stop="switchConfig(conf.id)">
-                  <icon-material-symbols-check v-if="store.aiSettings.activeConfigId === conf.id" class="check-icon" />
+                  <icon-material-symbols-check v-if="store.currentAiConfig?.id === conf.id" class="check-icon" />
                   <span class="check-placeholder" v-else></span>
                   <span>{{ conf.name || '未命名' }}</span>
                 </div>
@@ -97,9 +97,9 @@
               <div class="model-dropdown-item" 
                    v-for="conf in store.aiSettings.configs" 
                    :key="conf.id"
-                   :class="{ active: store.aiSettings.activeConfigId === conf.id }"
+                   :class="{ active: store.currentAiConfig?.id === conf.id }"
                    @click.stop="switchConfig(conf.id)">
-                <icon-material-symbols-check v-if="store.aiSettings.activeConfigId === conf.id" class="check-icon" />
+                <icon-material-symbols-check v-if="store.currentAiConfig?.id === conf.id" class="check-icon" />
                 <span class="check-placeholder" v-else></span>
                 <span>{{ conf.name || '未命名' }}</span>
               </div>
@@ -140,9 +140,9 @@
               <div class="model-dropdown-item" 
                    v-for="conf in store.aiSettings.configs" 
                    :key="conf.id"
-                   :class="{ active: store.aiSettings.activeConfigId === conf.id }"
+                   :class="{ active: store.currentAiConfig?.id === conf.id }"
                    @click.stop="switchConfig(conf.id)">
-                <icon-material-symbols-check v-if="store.aiSettings.activeConfigId === conf.id" class="check-icon" />
+                <icon-material-symbols-check v-if="store.currentAiConfig?.id === conf.id" class="check-icon" />
                 <span class="check-placeholder" v-else></span>
                 <span>{{ conf.name || '未命名' }}</span>
               </div>
@@ -209,7 +209,12 @@ const currentStyle = computed(() => STYLE_CONFIG[store.style]);
 const showModelSelector = ref(false);
 
 function switchConfig(id: string) {
-  store.aiSettings.activeConfigId = id;
+  if (store.activeNovelIndex !== null && store.novels[store.activeNovelIndex]) {
+    store.novels[store.activeNovelIndex].aiConfigId = id;
+    store._saveNovelsMeta();
+  } else {
+    store.aiSettings.activeConfigId = id;
+  }
   showModelSelector.value = false;
 }
 
