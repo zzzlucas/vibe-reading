@@ -82,6 +82,23 @@
                @keydown.enter="$emit('submit')" 
                :placeholder="currentStyle.placeholder" />
         <div class="chatgpt-right-actions">
+          <div class="model-selector-wrapper" v-click-outside="() => showModelSelector = false">
+            <div class="model-selector chatgpt-model-selector" @click="showModelSelector = !showModelSelector">
+              <span>{{ store.currentAiConfig?.name || currentStyle.modelLabel || 'Pro' }}</span>
+              <icon-material-symbols-expand-more style="font-size:16px" />
+            </div>
+            <div class="model-dropdown-menu" v-if="showModelSelector">
+              <div class="model-dropdown-item" 
+                   v-for="conf in store.aiSettings.configs" 
+                   :key="conf.id"
+                   :class="{ active: store.currentAiConfig?.id === conf.id }"
+                   @click.stop="switchConfig(conf.id)">
+                <icon-material-symbols-check v-if="store.currentAiConfig?.id === conf.id" class="check-icon" />
+                <span class="check-placeholder" v-else></span>
+                <span>{{ conf.name || '未命名' }}</span>
+              </div>
+            </div>
+          </div>
           <button class="icon-btn send-btn chatgpt-send" :class="{ 'has-text': (modelValue.trim() || attachedImages.length > 0 || isListening) && !isAiGenerating, 'is-listening': isListening }" @click="$emit('send-click')" :title="isActiveStreaming ? '停止响应' : (isListening ? '停止聆听' : ((modelValue.trim() || attachedImages.length > 0) ? '发送' : '语音输入'))" :disabled="isAiGenerating && !isActiveStreaming">
             <icon-material-symbols-stop-circle v-if="isActiveStreaming" style="font-size: 20px; color: var(--bg-primary)" />
             <icon-material-symbols-graphic-eq v-else-if="isListening" class="voice-active-icon" style="font-size: 20px; color: var(--bg-primary)" />
@@ -351,6 +368,22 @@ function onInput(e: Event) {
 
       &:hover {
         opacity: 0.8;
+      }
+    }
+
+    .chatgpt-model-selector {
+      border: 1px solid var(--border-color);
+      padding: 5px 10px;
+      border-radius: 16px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      transition: all 0.2s;
+      
+      &:hover {
+        background: var(--bg-surface-hover);
+        border-color: var(--text-muted);
+        color: var(--text-primary);
       }
     }
   }

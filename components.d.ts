@@ -112,6 +112,7 @@ declare module 'vue' {
     IconMaterialSymbolsSentimentSatisfiedOutline: typeof import('~icons/material-symbols/sentiment-satisfied-outline')['default']
     IconMaterialSymbolsSettings: typeof import('~icons/material-symbols/settings')['default']
     IconMaterialSymbolsSettingsOutline: typeof import('~icons/material-symbols/settings-outline')['default']
+    IconMaterialSymbolsSidebarButton: typeof import('~icons/material-symbols/sidebar-button')['default']
     IconMaterialSymbolsSideNavigation: typeof import('~icons/material-symbols/side-navigation')['default']
     IconMaterialSymbolsSmartToy: typeof import('~icons/material-symbols/smart-toy')['default']
     IconMaterialSymbolsStarOutline: typeof import('~icons/material-symbols/star-outline')['default']

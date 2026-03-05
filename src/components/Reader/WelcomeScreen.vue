@@ -14,6 +14,13 @@
         </h1>
       </div>
     </template>
+    
+    <!-- ChatGPT specific welcome (minimalist) -->
+    <template v-else-if="store.style === 'chatgpt'">
+      <div class="chatgpt-greeting-container">
+        <h1 class="chatgpt-welcome-text">准备好了，随时开始</h1>
+      </div>
+    </template>
     <!-- Generic welcome -->
     <template v-else>
       <div class="welcome-gradient-text">{{ currentStyle.welcomeTitle }}</div>
@@ -168,6 +175,24 @@ function openRecent() {
   font-weight: 500;
   margin-top: 4px;
 }
+
+/* ChatGPT Welcome specific */
+.chatgpt-greeting-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.chatgpt-welcome-text {
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
 @media (max-width: 900px) {
   .welcome-cards { grid-template-columns: repeat(2, 1fr); }
 }

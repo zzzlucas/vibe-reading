@@ -1,5 +1,5 @@
 <template>
-  <main class="main-content" :class="{'gemini-welcome-layout': store.style === 'gemini' && store.activeNovelIndex === null && !store.showWasteland}">
+  <main class="main-content" :class="{'center-input-layout': (store.style === 'gemini' || store.style === 'chatgpt') && store.activeNovelIndex === null && !store.showWasteland}">
     <!-- Top Bar -->
     <ReaderHeader />
 
@@ -776,7 +776,7 @@ watch(() => store.activeNovelIndex, (newIdx) => {
   }
 }
 
-.main-content.gemini-welcome-layout {
+.main-content.center-input-layout {
   .chat-area {
     display: flex;
     flex-direction: column;
@@ -786,6 +786,7 @@ watch(() => store.activeNovelIndex, (newIdx) => {
     margin-top: auto;
     overflow: visible;
     padding-bottom: 0;
+    transform: translateY(-10vh);
   }
 
   :deep(.welcome-screen) {
@@ -794,6 +795,13 @@ watch(() => store.activeNovelIndex, (newIdx) => {
     max-width: 820px;
     flex: none;
     align-items: flex-start;
+  }
+
+  :deep(.chatgpt-greeting-container) {
+    align-items: center;
+    width: 100%;
+    margin-bottom: 24px;
+    padding: 0;
   }
 
   :deep(.input-area) {
@@ -805,6 +813,7 @@ watch(() => store.activeNovelIndex, (newIdx) => {
     width: 100%;
     margin-bottom: auto;
     padding-top: 0;
+    transform: translateY(-10vh);
   }
 
   :deep(.input-container) {
