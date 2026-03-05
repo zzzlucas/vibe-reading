@@ -471,7 +471,24 @@ async function handleKeydown(e: KeyboardEvent) {
   const isInput = (e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA';
   if (isInput) return;
 
-  if (store.settings.bossKeys.includes(e.key)) {
+  const key = e.key;
+
+  // 1. 优先处理 Escape 用于关闭弹窗/界面
+  if (key === 'Escape') {
+    if (store.showSettings || store.showProfileModal || store.showActivateModal || store.showHelp || store.confirmVisible || store.showToc) {
+      e.preventDefault();
+      store.showHelp = false;
+      store.showSettings = false;
+      store.showToc = false;
+      store.showProfileModal = false;
+      store.showActivateModal = false;
+      if (store.confirmVisible) store.resolveConfirmDialog(false);
+      return;
+    }
+  }
+
+  // 2. 检查老板键
+  if (store.settings.bossKeys.includes(key)) {
     e.preventDefault();
     const wasBossMode = store.bossMode;
     await store.toggleBossMode();
@@ -499,16 +516,6 @@ async function handleKeydown(e: KeyboardEvent) {
   
   if (store.bossMode) return;
   
-  if (store.showSettings || store.showProfileModal || store.showActivateModal || store.showHelp || store.confirmVisible) {
-    if (e.key === 'Escape') {
-      store.showHelp = false;
-      store.showSettings = false;
-      store.showToc = false;
-    }
-    return;
-  }
-
-  const key = e.key;
   const isScrollUp = store.settings.scrollUpKeys?.includes(key);
   const isScrollDown = store.settings.scrollDownKeys?.includes(key);
   const isPrev = store.settings.prevPageKeys?.includes(key);
@@ -531,12 +538,6 @@ async function handleKeydown(e: KeyboardEvent) {
     e.preventDefault();
     store.nextPage();
     return;
-  }
-
-  if (key === 'Escape') {
-    store.showHelp = false;
-    store.showSettings = false;
-    store.showToc = false;
   }
 }
 

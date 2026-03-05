@@ -133,7 +133,7 @@ export const useAppStore = defineStore('app', () => {
     lineHeight: 1.8,
     charsPerPage: 2000,
     readingMode: 'page',
-    bossKeys: ['`', 'Escape'],
+    bossKeys: ['`'],
     bossModeUnlocked: false,
     tripleClickBossKey: true,
     prevPageKeys: ['ArrowLeft'],
@@ -1012,7 +1012,7 @@ export const useAppStore = defineStore('app', () => {
       if (bossNovelIndex === -1) {
         let templateIndex = novels.value.findIndex(n => n.name === 'dummy_boss_chat.txt');
         if (templateIndex === -1) {
-          const content = `[USER]: Q1 季度项目进展报告的要点，包括完成的里程碑和下一步计划\n\n好的，我来帮你整理 Q1 季度项目进展报告的要点：\n\n**一、已完成的里程碑**\n\n1. 核心模块重构完成，性能提升 40%\n2. 用户管理系统 v2.0 上线，支持多租户架构\n3. 完成第三方支付系统对接（支付宝、微信支付）\n4. 自动化测试覆盖率从 45% 提升至 82%\n\n**二、关键数据指标**\n\n• 日活用户: 12.5 万 → 18.3 万 (↑46.4%)\n• 系统可用性: 99.95%\n• 平均响应时间: 从 320ms 降至 180ms\n\n**三、下一步计划**\n\n1. 启动微服务拆分第二阶段\n2. 引入 AI 智能推荐模型\n`;
+          const content = `[USER]: 如何在 Excel 中实现多条件查找，并在存在重复项时返回最后一个匹配项的对应列数据？最好能支持动态数组。\n\n针对多条件查找且返回最后一次匹配项的需求，推荐使用 Excel 的 **XLOOKUP** 函数，它原生支持搜索顺序。\n\n**公式示例：**\n\`=XLOOKUP(1, (CriteriaRange1=Crit1) * (CriteriaRange2=Crit2), ReturnRange, "未找到", 0, -1)\`\n\n**逻辑解析：**\n1. **(CriteriaRange1=Crit1) * (CriteriaRange2=Crit2)**: 这会生成一个包含 0 和 1 的数组，只有同时满足两个条件的位置才是 1。\n2. **查找值 1**: 在上述数组中寻找 1。\n3. **搜索模式 -1**: 这是关键。设置为 \`-1\` 表示从后往前搜索（从最后一行向上查找），从而返回最后一个匹配项。\n4. **动态数组**: 如果你使用的是 Microsoft 365 或 Excel 2021+，这个公式会自动处理数组溢出，无需再使用传统的 Ctrl+Shift+Enter。\n\n这种方法比传统的 \`LOOKUP(2, 1/(...))\` 更加直观且性能更优。`;
           const bossId = generateUid();
           await ContentDB.save(bossId, content, 'fake', 'dummy_boss_chat.txt');
           novels.value.unshift({
@@ -1022,7 +1022,7 @@ export const useAppStore = defineStore('app', () => {
             size: content.length,
             lastRead: Date.now(),
             currentPage: 0,
-            displayName: 'Q1 季度项目进展报告',
+            displayName: 'Excel 进阶函数技巧：多条件末位检索',
             isPinned: true,
             readRanges: []
           });

@@ -122,6 +122,8 @@ function captureBossKey(e: KeyboardEvent) {
   e.preventDefault();
   isListeningKey.value = false;
   const key = e.key;
+  // Escape 键保留给系统关闭弹窗使用，不允许设为老板键
+  if (key === 'Escape') return;
   if (!store.settings.bossKeys.includes(key)) {
     store.settings.bossKeys.push(key);
   }

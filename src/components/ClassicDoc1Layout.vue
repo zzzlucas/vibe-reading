@@ -164,7 +164,7 @@ const outlineItems = computed(() => {
 });
 
 const repoName = ref(localStorage.getItem('doc1_repo_name') || '张三的文档');
-const repoSubName = ref(localStorage.getItem('doc1_repo_sub_name') || 'public_front_end');
+const repoSubName = ref(localStorage.getItem('doc1_repo_sub_name') || '张三的文档-空间1号');
 
 function saveRepoName(e: Event) {
   const val = (e.target as HTMLElement).innerText.trim();
