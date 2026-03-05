@@ -37,7 +37,7 @@
             <button class="icon-btn input-icon" @click="$emit('trigger-file')" title="上传文件">
               <icon-material-symbols-add />
             </button>
-            <button class="icon-btn tool-btn" title="工具" @click="store.showToast(store.comingSoonText)">
+            <button class="icon-btn tool-btn" title="工具" @click="handleToolClick">
               <icon-material-symbols-instant-mix />
               <span class="tool-text">工具</span>
             </button>
@@ -228,6 +228,25 @@ const vClickOutside = {
 
 function onInput(e: Event) {
   emit('update:modelValue', (e.target as HTMLInputElement).value);
+}
+
+async function handleToolClick() {
+  if (store.settings.toolShortcut === 'settings') {
+    store.showSettings = true;
+    store.autoExpandReading = true;
+  } else {
+    store.showActionToast(store.comingSoonText, '配置该按钮功能', async () => {
+      const val = await store.selectDialog('为节省界面空间，请绑定工具按钮的快捷跳转目标：', [
+        { label: '排版设置', value: 'settings' }
+      ], 'settings', '配置工具按钮');
+      if (val === 'settings') {
+        store.settings.toolShortcut = 'settings';
+        store.showSettings = true;
+        store.autoExpandReading = true;
+          store.showToast('配置成功！', 'info');
+      }
+    });
+  }
 }
 </script>
 

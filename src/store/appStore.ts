@@ -86,6 +86,8 @@ export const useAppStore = defineStore('app', () => {
   const confirmMessage = ref('');
   const confirmTitle = ref('提示');
   const confirmIsPrompt = ref(false);
+  const confirmIsSelect = ref(false);
+  const confirmSelectOptions = ref<{label: string, value: string}[]>([]);
   const confirmDefaultValue = ref('');
   const confirmPlaceholder = ref('');
   let resolveConfirm: ((result: { confirmed: boolean, value: string | null }) => void) | null = null;
@@ -746,6 +748,7 @@ export const useAppStore = defineStore('app', () => {
       confirmMessage.value = msg;
       confirmTitle.value = title;
       confirmIsPrompt.value = false;
+      confirmIsSelect.value = false;
       confirmVisible.value = true;
       resolveConfirm = (res) => resolve(res.confirmed);
     });
@@ -756,8 +759,22 @@ export const useAppStore = defineStore('app', () => {
       confirmMessage.value = msg;
       confirmTitle.value = title;
       confirmIsPrompt.value = true;
+      confirmIsSelect.value = false;
       confirmDefaultValue.value = defaultValue;
       confirmPlaceholder.value = placeholder;
+      confirmVisible.value = true;
+      resolveConfirm = (res) => resolve(res.confirmed ? (res.value || '') : null);
+    });
+  }
+
+  function selectDialog(msg: string, options: {label: string, value: string}[], defaultValue = '', title = '请选择') {
+    return new Promise<string | null>((resolve) => {
+      confirmMessage.value = msg;
+      confirmTitle.value = title;
+      confirmIsPrompt.value = false;
+      confirmIsSelect.value = true;
+      confirmSelectOptions.value = options;
+      confirmDefaultValue.value = defaultValue;
       confirmVisible.value = true;
       resolveConfirm = (res) => resolve(res.confirmed ? (res.value || '') : null);
     });
@@ -1139,14 +1156,14 @@ export const useAppStore = defineStore('app', () => {
 
     // Actions
     openNovel, deleteNovel, renameNovel, togglePinNovel, prevPage, nextPage, searchInNovel, toggleBossMode,
-    initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, resolveConfirmDialog,
+    initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, selectDialog, resolveConfirmDialog,
     generateUid, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
     checkInviteValidation,
     scrollToUpgrade,
     _saveNovelsMeta, _syncNovelPage, devClearReadCount,
 
     // Confirm Dialog State
-    confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmDefaultValue, confirmPlaceholder,
+    confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmIsSelect, confirmSelectOptions, confirmDefaultValue, confirmPlaceholder,
 
     // Toast State
     toastVisible, toastMessage, toastType, toastHasIcon, toastActionText, previewTimer

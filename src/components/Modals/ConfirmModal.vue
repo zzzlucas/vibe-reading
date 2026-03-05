@@ -14,6 +14,24 @@
           <input type="text" ref="promptInput" class="prompt-input" v-model="promptValue" @keydown.enter="handleOk" @keydown.esc="handleCancel" :placeholder="store.confirmPlaceholder" />
         </div>
         
+        <div v-if="store.confirmIsSelect" class="prompt-input-container">
+          <div class="custom-select-wrapper" v-click-outside="() => showSelectDropdown = false">
+            <div class="custom-select-trigger prompt-input" :class="{'is-open': showSelectDropdown}" @click="showSelectDropdown = !showSelectDropdown">
+              <span>{{ store.confirmSelectOptions.find(opt => opt.value === promptValue)?.label || '请选择' }}</span>
+              <icon-material-symbols-expand-more style="font-size: 18px; color: var(--text-secondary);" />
+            </div>
+            <div class="custom-select-dropdown" v-if="showSelectDropdown">
+              <div class="custom-select-option" 
+                   v-for="opt in store.confirmSelectOptions" 
+                   :key="opt.value" 
+                   :class="{'active': opt.value === promptValue}"
+                   @click="selectOption(opt.value)">
+                {{ opt.label }}
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <div class="confirm-actions">
           <button class="setting-btn" @click="handleCancel">取消</button>
           <button class="setting-btn primary-fill" @click="handleOk">确定</button>
@@ -30,10 +48,26 @@ import { ref, watch, nextTick } from 'vue';
 const store = useAppStore();
 const promptValue = ref('');
 const promptInput = ref<HTMLInputElement | null>(null);
+const showSelectDropdown = ref(false);
+
+const vClickOutside = {
+  mounted(el: any, binding: any) {
+    el._clickOutside = (event: Event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value();
+      }
+    };
+    document.addEventListener('mousedown', el._clickOutside);
+  },
+  unmounted(el: any) {
+    document.removeEventListener('mousedown', el._clickOutside);
+  }
+};
 
 watch(() => store.confirmVisible, (val) => {
   if (val) {
     promptValue.value = store.confirmDefaultValue || '';
+    showSelectDropdown.value = false;
     if (store.confirmIsPrompt) {
       nextTick(() => {
         promptInput.value?.focus();
@@ -47,11 +81,16 @@ function handleCancel() {
 }
 
 function handleOk() {
-  if (store.confirmIsPrompt) {
+  if (store.confirmIsPrompt || store.confirmIsSelect) {
     store.resolveConfirmDialog(true, promptValue.value);
   } else {
     store.resolveConfirmDialog(true, null);
   }
+}
+
+function selectOption(val: string) {
+  promptValue.value = val;
+  showSelectDropdown.value = false;
 }
 </script>
 
@@ -135,5 +174,60 @@ function handleOk() {
     background: var(--accent);
     opacity: 0.9;
   }
+}
+
+.custom-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  
+  &.is-open {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+}
+
+.custom-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-select-option {
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: var(--bg-surface-hover);
+  }
+  
+  &.active {
+    color: var(--accent);
+    background-color: rgba(var(--accent-rgb, 138, 180, 248), 0.1);
+    font-weight: 500;
+  }
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

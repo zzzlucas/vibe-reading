@@ -82,9 +82,29 @@ watch(() => route.params.id, async (newId) => {
   }
 });
 
+import { STYLE_CONFIG } from '@/config/constants';
+
 watchEffect(() => {
   document.documentElement.setAttribute('data-theme', store.theme);
   document.documentElement.setAttribute('data-style', store.style);
+  
+  // Favicon dynamic updating
+  const favicon = document.getElementById('favicon') as HTMLLinkElement;
+  if (favicon) {
+    const styleFavicon = STYLE_CONFIG[store.style]?.favicon;
+    let newFavicon = '/pwa-512.svg'; // Default minimalistic transparent icon
+    
+    // Check if it's a valid remote url or specific path
+    if (styleFavicon && (styleFavicon.startsWith('http') || styleFavicon.startsWith('data:') || styleFavicon.startsWith('/'))) {
+      newFavicon = styleFavicon;
+    }
+    
+    // Only update to prevent unnecessary repaints/reload
+    // Ensure absolute resolution for checking to prevent mismatches
+    if (!favicon.href.includes(newFavicon.replace(/^\//, ''))) {
+      favicon.href = newFavicon;
+    }
+  }
 });
 
 function cancelPreview() {

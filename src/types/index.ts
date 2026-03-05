@@ -63,6 +63,7 @@ export interface Settings {
   hasSeenClassicBlogVibeTip?: boolean;
   coffeeVibeMode?: boolean;
   vibeQuickConfigCollapsed?: boolean;
+  toolShortcut?: string;
   version?: number;
 }
 
