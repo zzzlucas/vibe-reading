@@ -32,6 +32,7 @@
 
 ## 5. 部署与环境集成 (Deployment)
 - **Vercel 部署支持**：确认项目当前的配置（如 `vercel.json`、`api/index.js` 及前端打包产物）已经完善，支持代码推送到 GitHub 后，直接在 Vercel 平台上实现“开箱即用”的前后端一键无缝部署。
+- **重新罗列 Vercel 额度**：根据最新的控制台监控面板，在 `README.md` 中重新罗列了各项免费额度指标（如 Function Invocations 1M、Data Transfer 100GB 等），以提供更准确的资源与计费红线参考。
 
 ## 6. 用户文档与帮助说明 (User Manual)
 - **使用说明文档**：编写了一份面向用户的使用说明文件 `read_help.md`（采用 Markdown 编写，记录产品的基本操作如加载作品、快捷键及 Boss 键的使用），并在 `HelpModal.vue` 中通过动态解析 Markdown 原文的方式进行展示，以此为用户提供清晰明了的功能向导。

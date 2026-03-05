@@ -11,12 +11,22 @@
 ---
 
 ## 2. Vercel 免费版 (Hobby) 部署限制一览
-> 以下限制数据是极其准确的，这决定了服务端绝对不能做重型操作，必须时刻坚持**“能放前端算的绝不上云”**的原则。
+> 以下限制数据是根据 Vercel 最新监控面板罗列的准确数值。这决定了服务端绝对不能做重型操作，必须时刻坚持**“能放前端算的绝不上云”**的原则。
 
-### 核心计算与流量限制 (Vercel Functions / Edge)
-*   **云函数调用次数**：100,000 次 / 月（*超出会产生警告甚至熔断停机*）。
-*   **云函数执行超时**：**10 秒 / 次**（*极其严苛，绝不能跑耗时任务，只能做毫秒级的状态校验和短流控制*）。
-*   **公网出站流量**：100 GB / 月（*对于纯跑文本和 JSON 返回来说，可以说是极其充足，不用担心*）。
+### 核心资源额度 (Vercel Overview Limits)
+*   **Fast Data Transfer (公网出站流量)**：100 GB / 月（*对于纯跑文本和 JSON 返回可以说是极其充足*）。
+*   **Fast Origin Transfer (源传输)**：10 GB / 月。
+*   **Edge Requests (边缘节点请求)**：1,000,000 次 / 月。
+*   **Edge Request CPU Duration (边缘 CPU 时长)**：1 小时 / 月。
+*   **Microfrontends Routing (微前端路由)**：50,000 次 / 月。
+*   **ISR Reads / Writes (ISR 读写)**：1,000,000 次读取 / 200,000 次写入。
+*   **Function Invocations (云函数调用次数)**：**1,000,000 次 / 月**（*超出会产生警告甚至熔断停机*）。
+*   **Function Duration (云函数执行时长)**：100 GB-Hrs / 月（*极其严苛，绝不能跑耗时任务，只做毫秒级状态校验和短流控制*）。
+*   **Fluid Provisioned Memory (流体配置内存)**：360 GB-Hrs / 月。
+*   **Fluid Active CPU (流体活动 CPU)**：4 小时 / 月。
+*   **Edge Function Execution Units (边缘函数执行单元)**：500,000 次 / 月。
+*   **Edge Middleware Invocations (边缘中间件调用)**：1,000,000 次 / 月。
+*   **Blob Data Storage (对象存储)**：1 GB 容量上限。
 
 ### Vercel KV (Upstash Redis) 限制
 *这通常用于保存邀请码、卡密验证状态等轻量级全局状态。*
@@ -27,4 +37,3 @@
 
 ### 其他辅助组件限制 (应对未来扩展使用)
 *   **Vercel Postgres (关系型数据库)**：1 个数据库实例，256 MB 存储，每月 60 小时的 CPU 计算时间。
-*   **Vercel Blob (简单的对象/文件存储)**：250 MB 存储容量上限，每月允许 100 万次读取，50,000 次写入操作。
