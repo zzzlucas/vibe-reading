@@ -30,7 +30,7 @@
         <div class="reading-content">
           <ChatMessage 
             v-for="(pageContent, index) in pagesToRender" 
-            :key="isDummyChat ? `dummy-${index}` : `page-${store.settings.readingMode === 'scroll' ? renderedScrollPages[index] : store.currentPage}`"
+            :key="isDummyChat ? `dummy-${index}` : `page-${store.settings.readingMode === 'scroll' ? renderedScrollPages[index] : store.currentPage}-${formattingFingerprint}`"
             :content="pageContent"
             :index="index"
             :totalItems="pagesToRender.length"
@@ -269,21 +269,30 @@ function handleScroll(e: Event) {
   }
 }
 
-const pagesToRender = computed(() => {
-  // Dependency tracking for reactive re-render on settings change
-  const _deps = [
-    store.settings.showNovelTitle,
-    store.settings.showChapterName,
-    store.settings.secondaryRenderMergeParagraphs,
+// 排版指纹：将所有影响渲染结果的设置项拼合成一个短字符串，
+// 作为 ChatMessage 组件 key 的一部分。任何设置变化 → 指纹变化 → key 变化 → Vue 销毁旧组件创建新组件 → 100% 即时渲染。
+const formattingFingerprint = computed(() => {
+  return [
+    store.settings.showNovelTitle ? 1 : 0,
+    store.settings.showChapterName ? 1 : 0,
+    store.settings.secondaryRenderMergeParagraphs ? 1 : 0,
     store.settings.secondaryRenderMergeCount,
     store.settings.secondaryRenderIndent,
-    store.settings.secondaryRenderObfuscationMode,
-    store.settings.secondaryRenderEnablePunctuation,
-    store.settings.secondaryRenderRemovePunctuation,
-    store.settings.secondaryRenderEnableReplace,
-    store.settings.secondaryRenderReplaceDict
-  ];
+    store.settings.secondaryRenderObfuscationMode || 'none',
+    store.settings.secondaryRenderEnablePunctuation ? 1 : 0,
+    (store.settings.secondaryRenderRemovePunctuation || []).join(','),
+    store.settings.secondaryRenderEnableReplace ? 1 : 0,
+    (store.settings.secondaryRenderReplaceDict || '').length,
+    (store.settings.secondaryRenderContentBlocks || []).join(','),
+    store.settings.secondaryRenderContentBlocksRandom ? 1 : 0,
+    store.settings.userBubbleMode || 'default',
+    store.settings.fontSize,
+    store.settings.lineHeight,
+    store.settings.fontColor || ''
+  ].join('|');
+});
 
+const pagesToRender = computed(() => {
   if (store.activeNovelIndex === null) return [];
   if (isDummyChat.value) {
     if (store.bossMode && store.settings.bossKeyStreamTurn !== 'last') {
