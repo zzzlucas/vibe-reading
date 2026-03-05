@@ -11,7 +11,7 @@
     </div>
     
     <div class="ai-response" v-show="!isDummyChat || aiResponseRaw.trim() || (isActiveStreaming && isLast)">
-      <div class="ai-avatar" :class="{ 'breathing': isActiveStreaming && isAiWaitingFirstToken && isLast }">
+      <div class="ai-avatar" v-if="store.style !== 'chatgpt'" :class="{ 'breathing': isActiveStreaming && isAiWaitingFirstToken && isLast }">
         <FindDeepSparkle v-if="currentStyle.favicon === 'fd-sparkle'" size="100%" />
         <img v-else-if="currentStyle.favicon" :src="currentStyle.favicon" alt="AI" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
         <div class="ai-sparkle" v-else></div>

@@ -693,10 +693,7 @@ export const useAppStore = defineStore('app', () => {
           `您已阅读接近 ${(threshold / 10000).toFixed(0)} 万字，期望继续阅读可以通过邀请新用户免费升级 Pro 版本`,
           '查看详情',
           () => {
-             showActivateModal.value = false;
-             forceMainSettings.value = true;
-             scrollToPro.value = true;
-             showSettings.value = true;
+             scrollToUpgrade();
           }
         );
       }
@@ -708,9 +705,7 @@ export const useAppStore = defineStore('app', () => {
           '查看方案',
           () => {
              showActivateModal.value = false;
-             forceMainSettings.value = true;
-             scrollToPro.value = true;
-             showSettings.value = true;
+             scrollToUpgrade();
           }
         );
       }
@@ -1113,6 +1108,12 @@ export const useAppStore = defineStore('app', () => {
     showToast('阅读记录与限制状态已清零 (仅限快速开发者测试)', 'achievement');
   }
 
+  function scrollToUpgrade() {
+    forceMainSettings.value = true;
+    scrollToPro.value = true;
+    showSettings.value = true;
+  }
+
   return {
     // State
     novels, activeId, activeNovelId, activeNovelIndex, currentPage, totalPages, pages, chapters, generatingContexts,
@@ -1141,6 +1142,7 @@ export const useAppStore = defineStore('app', () => {
     initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, resolveConfirmDialog,
     generateUid, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
     checkInviteValidation,
+    scrollToUpgrade,
     _saveNovelsMeta, _syncNovelPage, devClearReadCount,
 
     // Confirm Dialog State

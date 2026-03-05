@@ -1,12 +1,22 @@
 <template>
   <aside class="sidebar" :class="{ collapsed: !store.sidebarOpen }">
     <!-- ChatGPT Sidebar Header -->
-    <div class="sidebar-header" v-if="store.style === 'chatgpt'" style="justify-content: space-between; padding-right: 12px;">
-      <button class="icon-btn sidebar-toggle-btn" @click="store.sidebarOpen = !store.sidebarOpen" title="关闭侧边栏">
-        <icon-material-symbols-menu-open />
-      </button>
-      <button class="icon-btn" @click="createNewChat" title="新聊天">
-        <icon-material-symbols-edit-square />
+    <div class="sidebar-header" v-if="store.style === 'chatgpt'" style="justify-content: space-between; padding: 12px 14px 8px 14px; height: auto;">
+      <div class="chatgpt-top-logo" style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-left: -2px;">
+        <span class="chatgpt-logo-icon-svg" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M14.31 8l5.74 9.94"></path>
+            <path d="M9.69 8h11.48"></path>
+            <path d="M7.38 12l5.74-9.94"></path>
+            <path d="M9.69 16l-5.74-9.94"></path>
+            <path d="M14.31 16H2.83"></path>
+            <path d="M16.62 12l-5.74 9.94"></path>
+          </svg>
+        </span>
+      </div>
+      <button class="icon-btn sidebar-toggle-btn" @click="store.sidebarOpen = !store.sidebarOpen" title="关闭侧边栏" style="color: var(--text-muted)">
+        <icon-material-symbols-side-navigation />
       </button>
     </div>
 
@@ -44,22 +54,42 @@
     </div>
 
     <!-- ChatGPT Nav -->
-    <div class="sidebar-nav" v-if="store.style === 'chatgpt'" style="margin-top: 8px;">
-      <button class="nav-item" @click="createNewChat">
-        <span class="chatgpt-logo-icon"></span>
+    <div class="sidebar-nav" v-if="store.style === 'chatgpt'" style="margin-top: 4px;">
+      <button class="nav-item chatgpt-nav-item" @click="createNewChat">
+        <icon-material-symbols-edit-square-outline />
         <span class="nav-text">新聊天</span>
       </button>
-      <button class="nav-item" @click="store.showWasteland = true; store.activeId = null">
+
+      <!-- ChatGPT Search Bar Logic -->
+      <div v-if="isSearching" class="search-container nav-item chatgpt-search-active">
+        <icon-material-symbols-search class="search-icon" />
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="搜索对话..." 
+          v-model="searchQuery"
+          @blur="closeSearchIfEmpty"
+          @keydown.enter="blurSearchInput"
+          @keydown.esc="clearAndCloseSearch"
+          ref="searchInputRef"
+        />
+      </div>
+      <button v-else class="nav-item chatgpt-nav-item" @click="openSearch">
         <icon-material-symbols-search />
         <span class="nav-text">搜索聊天</span>
       </button>
-      <button class="nav-item" @click="store.showWasteland = true; store.activeId = null">
-        <icon-material-symbols-image />
+
+      <button class="nav-item chatgpt-nav-item" @click="store.showWasteland = true; store.activeId = null">
+        <icon-material-symbols-image-outline />
         <span class="nav-text">图片</span>
       </button>
-      <button class="nav-item" @click="store.showWasteland = true; store.activeId = null">
-        <icon-material-symbols-grid-view />
-        <span class="nav-text">应用</span>
+      <button class="nav-item chatgpt-nav-item" @click="store.showWasteland = true; store.activeId = null">
+        <icon-material-symbols-psychology-outline />
+        <span class="nav-text">Codex</span>
+      </button>
+      <button class="nav-item chatgpt-nav-item" @click="store.showWasteland = true; store.activeId = null">
+        <icon-material-symbols-folder-open-outline />
+        <span class="nav-text">项目</span>
       </button>
     </div>
 
@@ -84,7 +114,8 @@
       </div>
     </div>
 
-    <div class="sidebar-section chat-section" :style="{ marginTop: store.style === 'chatgpt' ? '8px' : '0' }">
+    <div class="sidebar-section chat-section chatgpt-chat-section" :style="{ marginTop: store.style === 'chatgpt' ? '4px' : '0' }">
+      <div v-if="store.style === 'chatgpt'" class="group-label chatgpt-group-label">你的聊天</div>
       <div class="section-header" v-if="store.style !== 'chatgpt'">
          <span class="section-title">对话</span>
       </div>
@@ -97,12 +128,10 @@
             <div v-if="group.label" class="group-label">{{ group.label }}</div>
             <div v-for="item in group.items" :key="item.novel.name" 
                  class="nav-item conv-item chapter-item" 
-                 :class="{ active: store.activeNovelIndex === item.originalIndex, 'pinned-item': item.novel.isPinned }"
+                 :class="{ active: store.activeNovelIndex === item.originalIndex, 'pinned-item': item.novel.isPinned, 'chatgpt-style-item': store.style === 'chatgpt' }"
                  @click.stop="handleNavigate(item.originalIndex)"
                  @contextmenu.prevent="showContextMenu($event, item.originalIndex)">
-              <!-- Conditional Icon for ChatGPT vs Defaults -->
-              <div v-if="store.style === 'chatgpt'" style="width: 20px;"></div>
-              <!-- Removed conv-icon for Gemini style per user request -->
+              <!-- Removed conv-icon and spacer for ChatGPT style to fix padding -->
               
               <input v-if="renamingIndex === item.originalIndex" 
                      type="text" 
@@ -137,19 +166,48 @@
 
     <!-- ChatGPT Bottom Area -->
     <div class="sidebar-bottom chatgpt-bottom" v-if="store.style === 'chatgpt'">
-      <div class="nav-item" @click="store.showSettings = true" style="margin-bottom: 8px;">
-        <icon-material-symbols-stars style="color: #ecc48f" />
-        <div style="display:flex; flex-direction:column; gap:2px">
-          <span class="nav-text" style="font-weight: 500">升级</span>
-          <span class="nav-text" style="font-size: 12px; color: var(--text-muted)">获取 GPT-4 等</span>
+      
+      <!-- New unified profile button -->
+      <div class="nav-item user-profile-btn chatgpt-profile-btn" @click.stop="toggleProfileMenu">
+        <div class="avatar-container">
+          <div class="avatar-small" style="overflow: hidden;" :style="{ background: store.userAvatar ? 'transparent' : (store.userAvatarColor || 'var(--sparkle-bg)') }">
+            <img v-if="store.userAvatar" :src="store.userAvatar" style="width: 100%; height: 100%; object-fit: cover;" />
+            <span v-else>{{ store.userName.charAt(0).toUpperCase() }}</span>
+          </div>
+        </div>
+        <div class="profile-info">
+          <span class="profile-name">{{ store.userName }}</span>
+          <span class="profile-plan">免费版</span>
+        </div>
+        <div class="upgrade-btn-wrapper" @click.stop="store.scrollToUpgrade">
+          <span class="upgrade-badge">升级</span>
         </div>
       </div>
-      <div class="nav-item user-profile-btn" @click="store.showProfileModal = true">
-        <div class="avatar-small" style="overflow: hidden;" :style="(!store.userAvatar && store.userAvatarColor) ? { background: store.userAvatarColor } : {}">
-          <img v-if="store.userAvatar" :src="store.userAvatar" style="width: 100%; height: 100%; object-fit: cover;" />
-          <span v-else>{{ store.userName.charAt(0).toUpperCase() }}</span>
+      
+      <!-- Popup menu associated with profile -->
+      <div class="chatgpt-profile-menu" v-if="showProfileMenu" @click.stop="">
+        <div class="menu-header">
+          <div class="avatar-medium" style="overflow: hidden;" :style="{ background: store.userAvatar ? 'transparent' : (store.userAvatarColor || 'var(--sparkle-bg)') }">
+            <img v-if="store.userAvatar" :src="store.userAvatar" style="width: 100%; height: 100%; object-fit: cover;" />
+            <span v-else>{{ store.userName.charAt(0).toUpperCase() }}</span>
+          </div>
+          <div class="menu-header-info">
+            <div class="menu-user-name">{{ store.userName }}</div>
+            <div class="menu-user-plan">Free Plan</div>
+          </div>
         </div>
-        <span class="nav-text">{{ store.userName }}</span>
+        
+        <div class="menu-divider"></div>
+        
+        <button class="menu-item" @click="store.showProfileModal = true; showProfileMenu = false">
+          <icon-material-symbols-person-outline class="menu-icon" />
+          <span>更换个人资料</span>
+        </button>
+        
+        <button class="menu-item" @click="store.scrollToUpgrade(); showProfileMenu = false">
+          <icon-material-symbols-settings-outline class="menu-icon" />
+          <span>设置</span>
+        </button>
       </div>
     </div>
 
@@ -210,6 +268,32 @@ const currentStyle = computed(() => STYLE_CONFIG[store.style]);
 const isSearching = ref(false);
 const searchQuery = ref('');
 const searchInputRef = ref<HTMLInputElement | null>(null);
+const showProfileMenu = ref(false);
+
+function toggleProfileMenu() {
+  showProfileMenu.value = !showProfileMenu.value;
+}
+
+// Global click to close profile menu and context menu
+function closeGlobalMenus(e: MouseEvent) {
+  const target = e.target as HTMLElement;
+  
+  // Close context menu
+  if (contextMenuTarget.value !== null) {
+    if (!target.closest('.context-menu') && !target.closest('.conv-more-btn')) {
+      hideContextMenu();
+    }
+  }
+  
+  // Close profile menu
+  if (showProfileMenu.value) {
+    if (!target.closest('.chatgpt-profile-menu') && !target.closest('.chatgpt-profile-btn')) {
+      showProfileMenu.value = false;
+    }
+  }
+}
+onMounted(() => document.addEventListener('click', closeGlobalMenus));
+onUnmounted(() => document.removeEventListener('click', closeGlobalMenus));
 
 function openSearch() {
   isSearching.value = true;
@@ -301,18 +385,6 @@ function finishRename(index: number) {
 function cancelRename() {
   renamingIndex.value = null;
 }
-
-// Global click to close context menu
-function closeContextGlobal(e: MouseEvent) {
-  if (contextMenuTarget.value !== null) {
-    const target = e.target as HTMLElement;
-    if (!target.closest('.context-menu') && !target.closest('.conv-more-btn')) {
-      hideContextMenu();
-    }
-  }
-}
-onMounted(() => document.addEventListener('click', closeContextGlobal));
-onUnmounted(() => document.removeEventListener('click', closeContextGlobal));
 
 // Context Menu
 const contextMenuTarget = ref<number | null>(null);
@@ -596,6 +668,10 @@ function createNewChat() {
 
 .sidebar-section {
   padding: 4px 12px;
+  
+  &.chatgpt-chat-section {
+    padding: 4px 8px; // Closer to the left for ChatGPT style
+  }
 }
 
 .chat-section {
@@ -664,6 +740,16 @@ function createNewChat() {
   position: sticky;
   top: 0;
   z-index: 10;
+  
+  &.chatgpt-group-label {
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 12px 12px 8px 12px;
+    opacity: 0.6;
+    position: static;
+    font-weight: 600;
+  }
 }
 
 .section-header {
@@ -702,6 +788,11 @@ function createNewChat() {
   padding: 8px 12px 16px 12px;
   border-top: 1px solid var(--border-color);
   flex-shrink: 0;
+  
+  &.chatgpt-bottom {
+    border-top: none;
+    padding: 8px 12px 12px 12px;
+  }
 }
 
 .location-info {
@@ -798,26 +889,215 @@ function createNewChat() {
 }
 
 
-.chatgpt-logo-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: var(--text-primary);
+.chatgpt-logo-icon-svg {
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--text-primary);
+  
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.chatgpt-nav-item {
+  padding: 6px 12px !important; // Even tighter for ChatGPT
+  border-radius: 8px !important;
+  margin-bottom: 2px;
+  font-weight: 400;
+  
+  &:hover {
+    background-color: var(--bg-surface-hover) !important;
+  }
+  
+  .material-symbols-outlined {
+    font-size: 20px !important;
+    margin-right: -4px;
+  }
+}
+
+.chatgpt-search-active {
+  background-color: var(--bg-surface-active) !important;
+  border-radius: 8px !important;
+  margin-top: 0 !important;
+  height: 38px;
+  display: flex !important;
+  align-items: center;
+  padding: 0 12px !important;
+  border: 1px solid var(--border-color) !important;
+  margin-bottom: 4px;
+  
+  .search-input {
+    height: 100%;
+    font-size: 14px;
+  }
+}
+
+.chatgpt-style-item {
+  padding-left: 12px !important;
+  font-size: 14px;
+  min-height: 36px !important;
 }
 
 .avatar-small {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: var(--sparkle-bg);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 15px;
+}
+
+.avatar-medium {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+// ChatGPT 专属底部样式
+.chatgpt-profile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px !important;
+  background: transparent;
+  gap: 12px;
+  border-radius: 8px !important;
+  
+  &:hover {
+    background: var(--bg-surface-hover) !important;
+  }
+}
+
+.avatar-container {
+  flex-shrink: 0;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+}
+
+.profile-name {
   font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.profile-plan {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.upgrade-btn-wrapper {
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.upgrade-badge {
+  display: inline-flex;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-primary);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: background 0.2s;
+  
+  &:hover {
+    background: var(--bg-surface-active);
+  }
+}
+
+// 弹出层菜单
+.chatgpt-profile-menu {
+  position: absolute;
+  bottom: 8px; // Above the profile button
+  left: 12px;
+  width: calc(var(--sidebar-width) - 24px);
+  background: var(--bg-sidebar); // dark matching background
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  padding: 0;
+  display: flex; flex-direction: column;
+  animation: modalSlideIn 0.2s ease;
+}
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+.menu-header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.menu-user-plan {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.menu-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 14.5px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+  border-radius: 8px;
+  margin: 4px;
+  
+  &:hover {
+    background: var(--bg-surface-hover);
+  }
+  
+  .menu-icon {
+    font-size: 22px;
+    color: var(--text-muted);
+  }
 }
 
 @media (max-width: 900px) {

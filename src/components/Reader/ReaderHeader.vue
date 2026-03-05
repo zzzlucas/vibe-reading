@@ -84,9 +84,7 @@ function openSettings() {
 
 function openProSettings() {
   showAvatarDropdown.value = false;
-  store.forceMainSettings = true;
-  store.scrollToPro = true;
-  store.showSettings = true;
+  store.scrollToUpgrade();
 }
 
 // Directive for clicking outside

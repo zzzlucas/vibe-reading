@@ -16,8 +16,8 @@ export const STYLE_CONFIG: Record<StyleName, StyleConfig> = {
   chatgpt: {
     logo: 'ChatGPT',
     title: 'ChatGPT',
-    placeholder: 'Message ChatGPT...',
-    disclaimer: 'ChatGPT can make mistakes. Consider verifying important information.',
+    placeholder: '有问题，尽管问',
+    disclaimer: 'ChatGPT 也可能会犯错，请核查重要信息。',
     modelLabel: 'GPT-4',
     welcomeTitle: 'How can I help you today?',
     welcomeSubtitle: "I'm ChatGPT, here to chat with you.",

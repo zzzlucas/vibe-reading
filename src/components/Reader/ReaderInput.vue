@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <div class="input-container">
+    <div class="input-container" :class="{ 'is-chatgpt': store.style === 'chatgpt' }">
       <!-- Attached Images Preview -->
       <div class="attached-images" v-if="attachedImages.length > 0">
         <div class="attached-image-wrap" v-for="(img, idx) in attachedImages" :key="idx">
@@ -72,8 +72,8 @@
 
       <!-- ChatGPT Style Input DOM -->
       <div class="input-wrapper chatgpt-wrapper" v-else-if="store.style === 'chatgpt'">
-        <button class="icon-btn input-icon attachment-btn" @click="$emit('trigger-file')" title="上传附件">
-          <icon-material-symbols-add />
+        <button class="icon-btn attachment-btn chatgpt-plus" @click="$emit('trigger-file')" title="上传附件">
+          <icon-material-symbols-add style="font-size: 20px" />
         </button>
         <input type="text" 
                class="chat-input" 
@@ -82,34 +82,11 @@
                @keydown.enter="$emit('submit')" 
                :placeholder="currentStyle.placeholder" />
         <div class="chatgpt-right-actions">
-          <button class="icon-btn input-icon" title="搜索网页">
-            <icon-material-symbols-language />
-          </button>
-          <button class="icon-btn input-icon" title="推理指导">
-            <icon-material-symbols-lightbulb />
-          </button>
-          <div class="model-selector-wrapper" v-click-outside="() => showModelSelector = false">
-            <div class="model-selector" @click="showModelSelector = !showModelSelector">
-              <span>{{ store.currentAiConfig?.name || currentStyle.modelLabel || 'Pro' }}</span>
-              <icon-material-symbols-expand-more style="font-size:16px" />
-            </div>
-            <div class="model-dropdown-menu" v-if="showModelSelector">
-              <div class="model-dropdown-item" 
-                   v-for="conf in store.aiSettings.configs" 
-                   :key="conf.id"
-                   :class="{ active: store.currentAiConfig?.id === conf.id }"
-                   @click.stop="switchConfig(conf.id)">
-                <icon-material-symbols-check v-if="store.currentAiConfig?.id === conf.id" class="check-icon" />
-                <span class="check-placeholder" v-else></span>
-                <span>{{ conf.name || '未命名' }}</span>
-              </div>
-            </div>
-          </div>
           <button class="icon-btn send-btn chatgpt-send" :class="{ 'has-text': (modelValue.trim() || attachedImages.length > 0 || isListening) && !isAiGenerating, 'is-listening': isListening }" @click="$emit('send-click')" :title="isActiveStreaming ? '停止响应' : (isListening ? '停止聆听' : ((modelValue.trim() || attachedImages.length > 0) ? '发送' : '语音输入'))" :disabled="isAiGenerating && !isActiveStreaming">
-            <icon-material-symbols-stop-circle v-if="isActiveStreaming" style="font-size: 16px; color: var(--bg-primary)" />
-            <icon-material-symbols-graphic-eq v-else-if="isListening" class="voice-active-icon" style="font-size: 16px; color: var(--bg-primary)" />
-            <icon-material-symbols-arrow-upward v-else-if="modelValue.trim() || attachedImages.length > 0" style="font-size: 16px; color: var(--bg-primary)" />
-            <icon-material-symbols-mic v-else />
+            <icon-material-symbols-stop-circle v-if="isActiveStreaming" style="font-size: 20px; color: var(--bg-primary)" />
+            <icon-material-symbols-graphic-eq v-else-if="isListening" class="voice-active-icon" style="font-size: 20px; color: var(--bg-primary)" />
+            <icon-material-symbols-arrow-upward v-else-if="modelValue.trim() || attachedImages.length > 0" style="font-size: 20px; color: var(--bg-primary)" />
+            <icon-material-symbols-mic v-else style="font-size: 22px;" />
           </button>
         </div>
       </div>
@@ -268,6 +245,17 @@ function onInput(e: Event) {
     border-color: var(--accent);
     box-shadow: 0 0 0 1px var(--accent);
   }
+
+  &.is-chatgpt {
+    border-radius: 32px;
+    border: none;
+    box-shadow: none;
+    background-color: var(--bg-surface);
+    &:focus-within {
+      box-shadow: none;
+      background-color: var(--bg-surface-hover);
+    }
+  }
 }
 
 .input-wrapper {
@@ -317,17 +305,28 @@ function onInput(e: Event) {
 
   &.chatgpt-wrapper {
     flex-direction: row;
-    padding: 8px;
-    border-radius: 20px;
-
+    padding: 8px 12px;
+    
     .chat-input {
-      padding: 8px 12px;
+      padding: 8px 16px;
+      font-size: 15px;
     }
 
-    .attachment-btn {
+    .chatgpt-plus {
       width: 32px;
       height: 32px;
-      margin-left: 4px;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--text-primary);
+      margin-right: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-color);
+      
+      &:hover {
+        background: var(--bg-surface-active);
+      }
     }
 
     .chatgpt-right-actions {
@@ -342,14 +341,16 @@ function onInput(e: Event) {
       margin-left: 4px;
       background: var(--bg-surface-hover);
       border-radius: 50%;
+      transition: all 0.2s;
 
       &.has-text {
         background: var(--text-primary);
         color: var(--bg-primary);
+        transform: scale(1.05);
       }
 
       &:hover {
-        background: var(--text-muted);
+        opacity: 0.8;
       }
     }
   }
