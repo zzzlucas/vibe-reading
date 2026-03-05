@@ -10,7 +10,7 @@
       <div class="user-msg-bubble" v-if="userTextHtml" v-html="userTextHtml"></div>
     </div>
     
-    <div class="ai-response" v-show="!isDummyChat || aiResponseRaw.trim() || (isActiveStreaming && isLast)">
+    <div class="ai-response" v-show="!isDummyChat || aiResponseRaw.trim() || (isActiveStreaming && isLast)" :class="{ 'is-chatgpt': store.style === 'chatgpt' }">
       <div class="ai-avatar" v-if="store.style !== 'chatgpt'" :class="{ 'breathing': isActiveStreaming && isAiWaitingFirstToken && isLast }">
         <FindDeepSparkle v-if="currentStyle.favicon === 'fd-sparkle'" size="100%" />
         <img v-else-if="currentStyle.favicon" :src="currentStyle.favicon" alt="AI" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
@@ -23,9 +23,9 @@
       }">
         <!-- During streaming: render reasoning as native Vue element -->
         <template v-if="isActiveStreaming && isLast && streamingReasoning">
-          <details class="ai-reasoning" :open="reasoningOpen" @toggle="onReasoningToggle">
+          <details class="ai-reasoning" :open="reasoningOpen" @toggle="onReasoningToggle" :class="{ 'is-chatgpt': store.style === 'chatgpt' }">
             <summary>显示思路</summary>
-            <div class="reasoning-body" v-text="streamingReasoning"></div>
+            <div class="reasoning-body" v-text="streamingReasoning" :class="{ 'is-chatgpt': store.style === 'chatgpt' }"></div>
           </details>
         </template>
         <!-- Main response content (v-html) or edit input -->
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Response actions (feedback, copy) - Always visible/hoverable -->
-    <div class="response-actions" v-show="!isDummyChat || aiResponseRaw.trim() || (isActiveStreaming && isLast)">
+    <div class="response-actions" v-show="!isDummyChat || aiResponseRaw.trim() || (isActiveStreaming && isLast)" :class="{ 'is-chatgpt': store.style === 'chatgpt' }">
       <button class="action-btn" title="好反馈" @click="store.showToast('感谢您的反馈')">
         <icon-material-symbols-thumb-up />
       </button>
@@ -454,6 +454,11 @@ function scrollToTop() {
   display: flex;
   gap: 16px;
   margin-bottom: 12px;
+  
+  &.is-chatgpt {
+    display: block; // No avatar side-by-side
+    margin-bottom: 24px;
+  }
 }
 
 .ai-avatar {
@@ -682,6 +687,10 @@ function scrollToTop() {
   margin-bottom: 0px;
   list-style: none;
 }
+
+:deep(.ai-reasoning.is-chatgpt summary) {
+   justify-content: flex-start;
+}
 :deep(.ai-reasoning summary::-webkit-details-marker) { display: none; }
 :deep(.ai-reasoning summary:hover) { opacity: 0.8; }
 
@@ -707,6 +716,11 @@ function scrollToTop() {
   border-left: 1px solid var(--border-color);
   font-style: italic;
   white-space: pre-wrap;
+}
+
+:deep(.ai-reasoning .reasoning-body.is-chatgpt) {
+  margin-left: 0;
+  padding-left: 16px;
 }
 
 .thinking-loading {
@@ -750,6 +764,10 @@ function scrollToTop() {
   gap: 4px;
   margin-left: 44px;
   margin-bottom: 24px;
+  
+  &.is-chatgpt {
+    margin-left: 0;
+  }
 }
 
 .message-container:hover .response-actions {

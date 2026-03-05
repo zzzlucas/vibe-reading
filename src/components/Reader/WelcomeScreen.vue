@@ -18,7 +18,7 @@
     <!-- ChatGPT specific welcome (minimalist) -->
     <template v-else-if="store.style === 'chatgpt'">
       <div class="chatgpt-greeting-container">
-        <h1 class="chatgpt-welcome-text">准备好了，随时开始</h1>
+        <h1 class="chatgpt-welcome-text">{{ chatgptGreeting }}</h1>
       </div>
     </template>
     <!-- Generic welcome -->
@@ -58,6 +58,18 @@ import FindDeepSparkle from '@/components/FindDeepSparkle.vue';
 
 const store = useAppStore();
 const currentStyle = computed(() => STYLE_CONFIG[store.style]);
+
+const chatgptGreeting = computed(() => {
+  const messages = [
+    "准备好了，随时开始",
+    "今天有什么计划？",
+    "我们先从哪里开始呢？",
+    "你在忙什么？"
+  ];
+  // Seed with current session or just random
+  // For "every refresh", a simple random index based on session or just random on mount
+  return messages[Math.floor(Math.random() * messages.length)];
+});
 
 defineEmits(['trigger-file']);
 

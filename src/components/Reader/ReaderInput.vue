@@ -265,12 +265,13 @@ function onInput(e: Event) {
 
   &.is-chatgpt {
     border-radius: 32px;
-    border: none;
+    border: 1px solid var(--border-color); // Added border to ensure it never blends with bg
     box-shadow: none;
     background-color: var(--bg-surface);
     &:focus-within {
-      box-shadow: none;
+      border-color: var(--text-muted);
       background-color: var(--bg-surface-hover);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
   }
 }
