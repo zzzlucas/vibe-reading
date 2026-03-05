@@ -56,6 +56,7 @@ declare module 'vue' {
     IconMaterialSymbolsEditSquareOutline: typeof import('~icons/material-symbols/edit-square-outline')['default']
     IconMaterialSymbolsExpandMore: typeof import('~icons/material-symbols/expand-more')['default']
     IconMaterialSymbolsExplore: typeof import('~icons/material-symbols/explore')['default']
+    IconMaterialSymbolsExploreOutline: typeof import('~icons/material-symbols/explore-outline')['default']
     IconMaterialSymbolsFolderOpen: typeof import('~icons/material-symbols/folder-open')['default']
     IconMaterialSymbolsFolderOpenOutline: typeof import('~icons/material-symbols/folder-open-outline')['default']
     IconMaterialSymbolsFormatLineSpacing: typeof import('~icons/material-symbols/format-line-spacing')['default']

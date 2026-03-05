@@ -80,16 +80,12 @@
       </button>
 
       <button class="nav-item chatgpt-nav-item" @click="store.showWasteland = true; store.activeId = null">
-        <icon-material-symbols-image-outline />
-        <span class="nav-text">图片</span>
+        <icon-material-symbols-explore-outline />
+        <span class="nav-text">探索内容</span>
       </button>
-      <button class="nav-item chatgpt-nav-item" @click="store.showWasteland = true; store.activeId = null">
-        <icon-material-symbols-psychology-outline />
-        <span class="nav-text">Codex</span>
-      </button>
-      <button class="nav-item chatgpt-nav-item" @click="store.showWasteland = true; store.activeId = null">
-        <icon-material-symbols-folder-open-outline />
-        <span class="nav-text">项目</span>
+      <button class="nav-item chatgpt-nav-item" @click="store.showHelp = true">
+        <icon-material-symbols-help-outline />
+        <span class="nav-text">使用说明</span>
       </button>
     </div>
 
