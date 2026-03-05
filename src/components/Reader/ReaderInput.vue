@@ -43,9 +43,22 @@
             </button>
           </div>
           <div class="toolbar-right">
-            <div class="model-selector">
-              <span>{{ currentStyle.modelLabel || 'Pro' }}</span>
-              <icon-material-symbols-expand-more style="font-size:16px" />
+            <div class="model-selector-wrapper" v-click-outside="() => showModelSelector = false">
+              <div class="model-selector" @click="showModelSelector = !showModelSelector">
+                <span>{{ store.currentAiConfig?.name || currentStyle.modelLabel || 'Pro' }}</span>
+                <icon-material-symbols-expand-more style="font-size:16px" />
+              </div>
+              <div class="model-dropdown-menu" v-if="showModelSelector">
+                <div class="model-dropdown-item" 
+                     v-for="conf in store.aiSettings.configs" 
+                     :key="conf.id"
+                     :class="{ active: store.aiSettings.activeConfigId === conf.id }"
+                     @click.stop="switchConfig(conf.id)">
+                  <icon-material-symbols-check v-if="store.aiSettings.activeConfigId === conf.id" class="check-icon" />
+                  <span class="check-placeholder" v-else></span>
+                  <span>{{ conf.name || '未命名' }}</span>
+                </div>
+              </div>
             </div>
             <button class="icon-btn send-btn" :class="{ 'has-text': (modelValue.trim() || attachedImages.length > 0 || isListening) && !isAiGenerating, 'is-listening': isListening }" @click="$emit('send-click')" :title="isActiveStreaming ? '停止响应' : (isListening ? '停止聆听' : ((modelValue.trim() || attachedImages.length > 0) ? '发送' : '语音输入'))" :disabled="isAiGenerating && !isActiveStreaming">
               <icon-material-symbols-stop-circle v-if="isActiveStreaming" style="color: var(--accent-pink); width: 24px; height: 24px;" />
@@ -75,9 +88,22 @@
           <button class="icon-btn input-icon" title="推理指导">
             <icon-material-symbols-lightbulb />
           </button>
-          <div class="model-selector">
-            <span>{{ currentStyle.modelLabel || 'Pro' }}</span>
-            <icon-material-symbols-expand-more style="font-size:16px" />
+          <div class="model-selector-wrapper" v-click-outside="() => showModelSelector = false">
+            <div class="model-selector" @click="showModelSelector = !showModelSelector">
+              <span>{{ store.currentAiConfig?.name || currentStyle.modelLabel || 'Pro' }}</span>
+              <icon-material-symbols-expand-more style="font-size:16px" />
+            </div>
+            <div class="model-dropdown-menu" v-if="showModelSelector">
+              <div class="model-dropdown-item" 
+                   v-for="conf in store.aiSettings.configs" 
+                   :key="conf.id"
+                   :class="{ active: store.aiSettings.activeConfigId === conf.id }"
+                   @click.stop="switchConfig(conf.id)">
+                <icon-material-symbols-check v-if="store.aiSettings.activeConfigId === conf.id" class="check-icon" />
+                <span class="check-placeholder" v-else></span>
+                <span>{{ conf.name || '未命名' }}</span>
+              </div>
+            </div>
           </div>
           <button class="icon-btn send-btn chatgpt-send" :class="{ 'has-text': (modelValue.trim() || attachedImages.length > 0 || isListening) && !isAiGenerating, 'is-listening': isListening }" @click="$emit('send-click')" :title="isActiveStreaming ? '停止响应' : (isListening ? '停止聆听' : ((modelValue.trim() || attachedImages.length > 0) ? '发送' : '语音输入'))" :disabled="isAiGenerating && !isActiveStreaming">
             <icon-material-symbols-stop-circle v-if="isActiveStreaming" style="font-size: 16px; color: var(--bg-primary)" />
@@ -105,9 +131,22 @@
           </button>
         </div>
         <div class="input-right-actions">
-          <div class="model-selector">
-            <span>{{ currentStyle.modelLabel || 'Pro' }}</span>
-            <icon-material-symbols-expand-more style="font-size:16px" />
+          <div class="model-selector-wrapper" v-click-outside="() => showModelSelector = false">
+            <div class="model-selector" @click="showModelSelector = !showModelSelector">
+              <span>{{ store.currentAiConfig?.name || currentStyle.modelLabel || 'Pro' }}</span>
+              <icon-material-symbols-expand-more style="font-size:16px" />
+            </div>
+            <div class="model-dropdown-menu" v-if="showModelSelector">
+              <div class="model-dropdown-item" 
+                   v-for="conf in store.aiSettings.configs" 
+                   :key="conf.id"
+                   :class="{ active: store.aiSettings.activeConfigId === conf.id }"
+                   @click.stop="switchConfig(conf.id)">
+                <icon-material-symbols-check v-if="store.aiSettings.activeConfigId === conf.id" class="check-icon" />
+                <span class="check-placeholder" v-else></span>
+                <span>{{ conf.name || '未命名' }}</span>
+              </div>
+            </div>
           </div>
           <button class="icon-btn send-btn" :class="{ 'is-listening': isListening }" @click="$emit('send-click')" :title="isActiveStreaming ? '停止响应' : (isListening ? '停止聆听' : ((modelValue.trim() || attachedImages.length > 0) ? '发送' : '语音输入'))" :disabled="isAiGenerating && !isActiveStreaming">
             <icon-material-symbols-stop-circle v-if="isActiveStreaming" style="color: var(--accent-pink)" />
@@ -150,7 +189,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useAppStore } from '@/store/appStore';
 import { STYLE_CONFIG } from '@/config/constants';
 
@@ -167,6 +206,26 @@ const emit = defineEmits(['update:modelValue', 'submit', 'send-click', 'trigger-
 
 const store = useAppStore();
 const currentStyle = computed(() => STYLE_CONFIG[store.style]);
+const showModelSelector = ref(false);
+
+function switchConfig(id: string) {
+  store.aiSettings.activeConfigId = id;
+  showModelSelector.value = false;
+}
+
+const vClickOutside = {
+  mounted(el: any, binding: any) {
+    el._clickOutside = (event: Event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value();
+      }
+    };
+    document.addEventListener('mousedown', el._clickOutside);
+  },
+  unmounted(el: any) {
+    document.removeEventListener('mousedown', el._clickOutside);
+  }
+};
 
 function onInput(e: Event) {
   emit('update:modelValue', (e.target as HTMLInputElement).value);
@@ -196,7 +255,7 @@ function onInput(e: Event) {
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-color);
   transition: border-color var(--transition-speed), box-shadow var(--transition-speed), background-color 0.3s;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   z-index: 10;
   
@@ -320,6 +379,10 @@ function onInput(e: Event) {
   }
 }
 
+.model-selector-wrapper {
+  position: relative;
+}
+
 .model-selector {
   display: flex;
   align-items: center;
@@ -334,6 +397,68 @@ function onInput(e: Event) {
   
   &:hover {
     background-color: var(--bg-surface-hover);
+  }
+}
+
+.model-dropdown-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-modal);
+  border: 1px solid rgba(128, 128, 128, 0.15); /* More subtle and independent border */
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.02) inset;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  z-index: 2000;
+  padding: 6px;
+  animation: dropdownFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.model-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 8px;
+  border: 1px solid transparent; /* Prepare for highlight border */
+
+  &:hover {
+    background-color: rgba(128, 128, 128, 0.08);
+    color: var(--text-primary);
+    border-color: rgba(128, 128, 128, 0.1); /* Subtle highlighting border */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+
+  &.active {
+    color: var(--accent);
+    background-color: transparent;
+    font-weight: 600;
+
+    &:hover {
+      background-color: rgba(var(--accent-rgb, 100, 181, 246), 0.06);
+      border-color: rgba(var(--accent-rgb, 100, 181, 246), 0.12);
+    }
+  }
+
+  .check-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .check-placeholder {
+    width: 16px;
+    display: inline-block;
+    flex-shrink: 0;
   }
 }
 

@@ -40,6 +40,7 @@ declare module 'vue' {
     IconMaterialSymbolsCampaign: typeof import('~icons/material-symbols/campaign')['default']
     IconMaterialSymbolsCancel: typeof import('~icons/material-symbols/cancel')['default']
     IconMaterialSymbolsChatBubbleOutline: typeof import('~icons/material-symbols/chat-bubble-outline')['default']
+    IconMaterialSymbolsCheck: typeof import('~icons/material-symbols/check')['default']
     IconMaterialSymbolsChevronLeft: typeof import('~icons/material-symbols/chevron-left')['default']
     IconMaterialSymbolsChevronRight: typeof import('~icons/material-symbols/chevron-right')['default']
     IconMaterialSymbolsClose: typeof import('~icons/material-symbols/close')['default']

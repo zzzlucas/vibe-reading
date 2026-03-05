@@ -179,8 +179,8 @@ export function useAiChat(attachedImages: Ref<string[]>, chatArea: Ref<HTMLEleme
       }
     }
 
-    const { apiKey, baseUrl, model, customModel } = store.aiSettings;
-    const actualModel = customModel || model || 'gpt-3.5-turbo';
+    const { apiKey, baseUrl, model } = store.currentAiConfig;
+    const actualModel = model || 'gpt-3.5-turbo';
     const isImg = isImageModel(actualModel);
     const url = `${baseUrl.replace(/\/$/, '')}/${isImg ? 'images/generations' : 'chat/completions'}`;
 
@@ -326,8 +326,38 @@ export function useAiChat(attachedImages: Ref<string[]>, chatArea: Ref<HTMLEleme
                   contextObj.isWaitingMainResponse = false;
                 }
                 
-                if (reasoningToken) currentReasoning += reasoningToken;
-                if (delta) currentResponse += delta;
+                if (reasoningToken) {
+                  let cleanedReasoning = reasoningToken
+                    .replace(/<\|?begin_of_box\|?>/gi, '')
+                    .replace(/<\|?end_of_box\|?>/gi, '')
+                    .replace(/<think>/gi, '')
+                    .replace(/<\/think>/gi, '');
+                  currentReasoning += cleanedReasoning;
+                }
+                if (delta) {
+                  let cleanedDelta = delta
+                    .replace(/<\|?begin_of_box\|?>/gi, '')
+                    .replace(/<\|?end_of_box\|?>/gi, '')
+                    .replace(/<think>/gi, '')
+                    .replace(/<\/think>/gi, '');
+                  currentResponse += cleanedDelta;
+
+                  // Some API endpoints merge reasoning into main delta wrapped in <think></think>
+                  // We handle the edge case where they stream it all in delta
+                  const thinkMatch = currentResponse.match(/<think>([\s\S]*?)<\/think>/i);
+                  if (thinkMatch) {
+                    currentReasoning += thinkMatch[1];
+                    currentResponse = currentResponse.replace(thinkMatch[0], '');
+                  } else if (currentResponse.includes('<think>')) {
+                    // It's still streaming inside think tag via main response
+                    const parts = currentResponse.split('<think>');
+                    const possibleEnd = parts[1].split('</think>');
+                    if (possibleEnd.length > 1) {
+                        currentReasoning += possibleEnd[0];
+                        currentResponse = parts[0] + possibleEnd[1];
+                    }
+                  }
+                }
                 
                 contextObj.streamingReasoning = currentReasoning;
                 contextObj.streamingMainResponse = currentResponse;

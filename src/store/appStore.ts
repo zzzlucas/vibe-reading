@@ -99,11 +99,24 @@ export const useAppStore = defineStore('app', () => {
   const userAvatar = ref<string | null>(null);
   const userAvatarColor = ref<string | null>(null);
   
-  const aiSettings = ref({
-    apiKey: '',
-    baseUrl: 'https://api.openai.com/v1',
-    model: 'gpt-3.5-turbo',
-    customModel: ''
+  const aiSettings = ref<{
+    configs: { id: string; name: string; apiKey: string; baseUrl: string; model: string }[];
+    activeConfigId: string;
+  }>({
+    configs: [
+      {
+        id: 'default',
+        name: '默认配置',
+        apiKey: '',
+        baseUrl: 'https://api.openai.com/v1',
+        model: 'gpt-3.5-turbo'
+      }
+    ],
+    activeConfigId: 'default'
+  });
+
+  const currentAiConfig = computed(() => {
+    return aiSettings.value.configs.find(c => c.id === aiSettings.value.activeConfigId) || aiSettings.value.configs[0];
   });
   
   const settings = ref<Settings>({
@@ -337,7 +350,18 @@ export const useAppStore = defineStore('app', () => {
 
       const savedAiSettings = _loadFromStorage('aiSettings');
       if (savedAiSettings) {
-        aiSettings.value = { ...aiSettings.value, ...savedAiSettings };
+        if (!savedAiSettings.configs) {
+          // Migration from old format
+          aiSettings.value.configs[0] = {
+            id: 'default',
+            name: '默认配置',
+            apiKey: savedAiSettings.apiKey || '',
+            baseUrl: savedAiSettings.baseUrl || 'https://api.openai.com/v1',
+            model: savedAiSettings.model || 'gpt-3.5-turbo'
+          };
+        } else {
+          aiSettings.value = { ...aiSettings.value, ...savedAiSettings };
+        }
       }
 
       // Load novels
@@ -1082,15 +1106,39 @@ export const useAppStore = defineStore('app', () => {
   }
 
   return {
+    // State
     novels, activeId, activeNovelId, activeNovelIndex, currentPage, totalPages, pages, chapters, generatingContexts,
     sidebarOpen, showWasteland, isPro, hasNaggedPro, showHelp, showSettings, showProfileModal, showActivateModal, showToc, bossMode,
-    theme, style, encoding, settings, aiSettings, appTitle, userName, userAvatar, userAvatarColor, autoExpandAdvanced, autoExpandReading, forceMainSettings, scrollToPro, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed, triggerSystemFileSignal,
+    theme, style, encoding, settings,
+    autoExpandAdvanced, autoExpandReading, forceMainSettings, scrollToPro, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed, triggerSystemFileSignal,
+    hasImportedFile, hasModifiedSettings, activeReadingSeconds,
+    inviteValidated,
+
+    // Auth and Storage
+    ensureDeviceId,
+    getInvitedBy,
+    saveInvitedBy,
+    trackEvent,
+
+    // State Expose
+    aiSettings,
+    currentAiConfig,
+    appTitle,
+    userName,
+    userAvatar,
+    userAvatarColor,
+
+    // Actions
     openNovel, deleteNovel, renameNovel, togglePinNovel, prevPage, nextPage, searchInNovel, toggleBossMode,
     initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, resolveConfirmDialog,
-    generateUid, ensureDeviceId, saveInvitedBy, getInvitedBy, trackEvent, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
+    generateUid, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
+    checkInviteValidation,
+    _saveNovelsMeta, _syncNovelPage, devClearReadCount,
+
+    // Confirm Dialog State
     confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmDefaultValue, confirmPlaceholder,
-    toastVisible, toastMessage, toastType, toastHasIcon, toastActionText, previewTimer,
-    hasImportedFile, hasModifiedSettings, activeReadingSeconds, inviteValidated, checkInviteValidation,
-    _saveNovelsMeta, _syncNovelPage, devClearReadCount
+
+    // Toast State
+    toastVisible, toastMessage, toastType, toastHasIcon, toastActionText, previewTimer
   };
 });

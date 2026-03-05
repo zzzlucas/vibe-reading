@@ -379,7 +379,13 @@ function scrollToTop() {
   color: var(--text-primary);
   max-width: 85%;
   word-break: break-word;
-  white-space: pre-wrap;
+
+  :deep(p) {
+    margin: 0;
+  }
+  :deep(p:not(:last-child)) {
+    margin-bottom: 8px;
+  }
 }
 
 .ai-response {

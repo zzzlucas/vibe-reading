@@ -388,7 +388,7 @@ function handleInputSubmit() {
     return;
   }
 
-  if (!store.aiSettings.apiKey) {
+  if (!store.currentAiConfig?.apiKey) {
     store.showActionToast('尚未配置 API Key，无法使用 AI 问答能力', '立即设置', () => {
       store.showSettings = true;
       store.autoExpandAdvanced = true;
