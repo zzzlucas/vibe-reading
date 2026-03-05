@@ -28,11 +28,20 @@
             <div class="reasoning-body" v-text="streamingReasoning"></div>
           </details>
         </template>
-        <!-- Main response content (v-html) -->
-        <div class="html-wrapper" v-if="isActiveStreaming && isLast" v-html="formattedStreamingResponse"></div>
-        <div class="html-wrapper" v-else-if="isTypewriterActive" v-html="typewriterHtml"></div>
-        <div class="html-wrapper" v-else-if="isBossStreamActive" v-html="bossStreamHtml"></div>
-        <div class="html-wrapper" v-else v-html="formattedContent"></div>
+        <!-- Main response content (v-html) or edit input -->
+        <div v-if="isEditing" class="edit-wrapper">
+          <textarea v-model="editContentText" class="edit-textarea" :rows="10"></textarea>
+          <div class="edit-actions">
+            <button class="edit-btn cancel" @click="cancelEdit">取消</button>
+            <button class="edit-btn save" @click="saveEdit">保存</button>
+          </div>
+        </div>
+        <template v-else>
+          <div class="html-wrapper" v-if="isActiveStreaming && isLast" v-html="formattedStreamingResponse"></div>
+          <div class="html-wrapper" v-else-if="isTypewriterActive" v-html="typewriterHtml"></div>
+          <div class="html-wrapper" v-else-if="isBossStreamActive" v-html="bossStreamHtml"></div>
+          <div class="html-wrapper" v-else v-html="formattedContent"></div>
+        </template>
         <div v-if="showThinking" class="thinking-loading" :style="content ? 'margin-top: 4px;' : ''">
           <span></span><span></span><span></span>
         </div>
@@ -47,12 +56,22 @@
       <button class="action-btn" title="坏反馈" @click="store.showToast('感谢您的反馈')">
         <icon-material-symbols-thumb-down />
       </button>
+      <button class="action-btn" v-if="isDummyChat" @click="$emit('regenerate', index)" title="重新生成">
+        <icon-material-symbols-refresh />
+      </button>
       <button class="action-btn" @click="$emit('copy', index)" title="复制">
         <icon-material-symbols-content-copy />
       </button>
-      <button class="action-btn" title="更多" @click="store.showToast(store.comingSoonText)">
-        <icon-material-symbols-more-vert />
-      </button>
+      <div class="more-action-wrapper" v-click-outside="() => showMoreMenu = false">
+        <button class="action-btn" title="更多" @click="showMoreMenu = !showMoreMenu">
+          <icon-material-symbols-more-vert />
+        </button>
+        <div class="more-menu" v-if="showMoreMenu">
+          <div class="more-menu-item" @click="doExport('txt')">导出 TXT</div>
+          <div class="more-menu-item" @click="doExport('md')">导出 Markdown</div>
+          <div class="more-menu-item" @click="onEditClick">编辑回答</div>
+        </div>
+      </div>
     </div>
     
     <!-- Page navigation - Protected by safety reveal loop -->
@@ -241,11 +260,54 @@ const props = defineProps<{
   bossStreamPageIndex: number;
 }>();
 
-const emit = defineEmits(['copy', 'jump']);
+const emit = defineEmits(['copy', 'jump', 'regenerate', 'export', 'edit']);
 
 const store = useAppStore();
 const reasoningOpen = ref(false);
 const isFooterRevealed = ref(false);
+const showMoreMenu = ref(false);
+const isEditing = ref(false);
+const editContentText = ref('');
+
+const vClickOutside = {
+  mounted(el: any, binding: any) {
+    el._clickOutside = (event: Event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value();
+      }
+    };
+    document.addEventListener('mousedown', el._clickOutside);
+  },
+  unmounted(el: any) {
+    document.removeEventListener('mousedown', el._clickOutside);
+  }
+};
+
+function onEditClick() {
+  editContentText.value = aiResponseRaw.value;
+  isEditing.value = true;
+  showMoreMenu.value = false;
+}
+
+function saveEdit() {
+  isEditing.value = false;
+  let newFullContent = editContentText.value;
+  if (props.isDummyChat) {
+     const match = props.content.match(/^\[USER\]:\s*([\s\S]*?)\n\n/);
+     const prefix = match ? match[0] : '';
+     newFullContent = prefix + editContentText.value;
+  }
+  emit('edit', props.index, newFullContent);
+}
+
+function cancelEdit() {
+  isEditing.value = false;
+}
+
+function doExport(type: 'md' | 'txt') {
+  showMoreMenu.value = false;
+  emit('export', props.index, type, aiResponseRaw.value);
+}
 
 const currentStyle = computed(() => STYLE_CONFIG[store.style]);
 
@@ -714,6 +776,80 @@ function scrollToTop() {
 
   svg {
     font-size: 18px;
+  }
+}
+
+.edit-wrapper {
+  margin-top: 8px;
+  width: 100%;
+}
+.edit-textarea {
+  width: 100%;
+  padding: 12px;
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 150px;
+  outline: none;
+  &:focus {
+    border-color: var(--accent);
+  }
+}
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+.edit-btn {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  &.cancel {
+    background: transparent;
+    color: var(--text-secondary);
+    &:hover { background: var(--bg-surface-hover); }
+  }
+  &.save {
+    background: var(--accent);
+    color: white;
+    &:hover { opacity: 0.9; }
+  }
+}
+
+.more-action-wrapper {
+  position: relative;
+}
+.more-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-modal);
+  border: 1px solid rgba(128,128,128,0.15);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 100;
+  min-width: 140px;
+  padding: 4px;
+  backdrop-filter: blur(10px);
+}
+.more-menu-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+  &:hover {
+    background: rgba(128,128,128,0.1);
   }
 }
 

@@ -46,6 +46,9 @@
             :bossStreamPageIndex="bossStreamPageIndex"
             @copy="copyToClipboard"
             @jump="jumpPage"
+            @regenerate="handleRegenerate"
+            @export="handleExport"
+            @edit="handleEdit"
           />
         </div>
 
@@ -296,21 +299,81 @@ watch(() => store.triggerSystemFileSignal, () => {
     triggerFileInput();
 });
 
+// Methods exported to template
 async function jumpPage() {
-  const input = await store.promptDialog(
-    `跳转到第几页？(1 - ${store.totalPages})\n(当前第 ${store.currentPage + 1} 页)`,
-    '',
-    '输入数字...',
-    '页码跳转'
-  );
-  if (input === null) return;
-  const p = parseInt(input);
-  if (!isNaN(p) && p >= 1 && p <= store.totalPages) {
-    store.triggerTypewriter = true;
-    store.currentPage = p - 1;
-  } else {
-    store.showToast('无效页码，请输入 1 到 ' + store.totalPages + ' 之间的数字');
+  if (store.settings.readingMode === 'scroll') return;
+  const inputStr = await store.promptDialog(`请输入页码 (1 - ${store.totalPages})`, String(store.currentPage + 1), '页码数字...', '页码跳转');
+  if (inputStr) {
+    let pg = parseInt(inputStr.trim());
+    if (!isNaN(pg)) {
+      pg = pg - 1;
+      if (pg < 0) pg = 0;
+      if (pg >= store.totalPages) pg = store.totalPages - 1;
+      store.currentPage = pg;
+    }
   }
+}
+
+function handleExport(index: number, format: 'md' | 'txt', content: string) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const name = store.novels[store.activeNovelIndex!]?.displayName || 'export';
+  a.download = `${name}_round_${index + 1}.${format}`;
+  a.click();
+}
+
+async function handleEdit(index: number, newFullContent: string) {
+  store.pages[index] = newFullContent;
+  store._syncNovelPage();
+  if (store.activeNovelIndex !== null) {
+    const chatId = store.novels[store.activeNovelIndex].id;
+    const type = store.novels[store.activeNovelIndex].type;
+    const finalContent = store.pages.join('\n\n[PAGE_BREAK]\n\n');
+    const { ContentDB } = await import('@/utils/db');
+    await ContentDB.save(chatId, finalContent, type);
+    const novelInList = store.novels.find(n => n.id === chatId);
+    if (novelInList) novelInList.size = finalContent.length;
+    store._saveNovelsMeta();
+  }
+}
+
+async function handleRegenerate(index: number) {
+  if (!isDummyChat.value) return;
+  const content = store.pages[index] || '';
+  const match = content.match(/^\[USER\]:\s*([\s\S]*?)\n\n([\s\S]*)$/);
+  const fallbackMatch = content.match(/^\[USER\]:\s*([\s\S]*)$/);
+  let uMsg = match ? match[1] : (fallbackMatch ? fallbackMatch[1] : '');
+  
+  if (!uMsg) return;
+
+  if (index < store.pages.length - 1) {
+    const ok = await store.confirmDialog('重新生成将会丢弃此回合之后的对话记录，是否继续？', '重新生成');
+    if (!ok) return;
+  }
+  
+  store.pages = store.pages.slice(0, index);
+  store.totalPages = store.pages.length;
+  store.currentPage = Math.max(0, store.pages.length - 1);
+  store._syncNovelPage();
+  
+  stopAiGeneration();
+  inputValue.value = '';
+  // Strip images for regeneration payload (it's safe fallback)
+  const cleanUserMsg = uMsg.replace(/!\[.*?\]\(data:image\/.*?;base64,[^\)]+\)/g, '').trim();
+  handleAiChat(cleanUserMsg);
+}
+
+function copyToClipboard(index?: number) {
+  let text = '';
+  if (typeof index === 'number' && isDummyChat.value) {
+    text = store.pages[index] || '';
+  } else {
+    text = store.pages[store.currentPage] || '';
+  }
+  navigator.clipboard.writeText(text).then(() => {
+     store.showToast('已添加到剪贴板');
+  }).catch(() => store.showToast('复制失败'));
 }
 
 // Watchers
@@ -400,17 +463,6 @@ function handleInputSubmit() {
   handleAiChat(input);
 }
 
-function copyToClipboard(index?: number) {
-  let text = '';
-  if (typeof index === 'number' && isDummyChat.value) {
-    text = store.pages[index] || '';
-  } else {
-    text = store.pages[store.currentPage] || '';
-  }
-  navigator.clipboard.writeText(text).then(() => {
-     store.showToast('已添加到剪贴板');
-  }).catch(() => store.showToast('复制失败'));
-}
 
 async function handleKeydown(e: KeyboardEvent) {
   const isInput = (e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA';
@@ -569,7 +621,8 @@ watch(() => store.autoPreview, (newVal) => {
 });
 
 async function devClearData() {
-  if (confirm('⚠️ [DEV测试专属操作]\n是否要彻底清除本地域名下产生的所有缓存？\n将清除包括设备指纹(IdentityDB)、卡密记录及全部小说，相当于系统重装。')) {
+  const ok = await store.confirmDialog('⚠️ [DEV测试专属操作]\n是否要彻底清除本地域名下产生的所有缓存？\n将清除包括设备指纹(IdentityDB)、卡密记录及全部小说，相当于系统重装。', '[DEV] 彻底清理');
+  if (ok) {
     localStorage.clear();
     try {
       const { ContentDB, IdentityDB } = await import('@/utils/db');

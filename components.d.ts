@@ -97,6 +97,7 @@ declare module 'vue' {
     IconMaterialSymbolsPersonOutline: typeof import('~icons/material-symbols/person-outline')['default']
     IconMaterialSymbolsPhotoCamera: typeof import('~icons/material-symbols/photo-camera')['default']
     IconMaterialSymbolsPresentToAllOutline: typeof import('~icons/material-symbols/present-to-all-outline')['default']
+    IconMaterialSymbolsRefresh: typeof import('~icons/material-symbols/refresh')['default']
     IconMaterialSymbolsRestorePage: typeof import('~icons/material-symbols/restore-page')['default']
     IconMaterialSymbolsRocketLaunch: typeof import('~icons/material-symbols/rocket-launch')['default']
     IconMaterialSymbolsScheduleOutline: typeof import('~icons/material-symbols/schedule-outline')['default']

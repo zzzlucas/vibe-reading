@@ -14,6 +14,8 @@ export function useBossStream(chatArea: Ref<HTMLElement | null>, isDummyChat: Re
       clearInterval(bossStreamTimer);
       bossStreamTimer = null;
     }
+    bossStreamActive.value = false;
+    bossStreamHtml.value = '';
   }
 
   function startBossStream() {
