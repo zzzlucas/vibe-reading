@@ -312,10 +312,41 @@ function doExport(type: 'md' | 'txt') {
 const currentStyle = computed(() => STYLE_CONFIG[store.style]);
 
 const userImages = computed(() => getUserImages(props.content, props.isDummyChat));
-const userTextHtml = computed(() => getUserTextHtml(props.content, store, props.isDummyChat, props.chatTitle));
+const userTextHtml = computed(() => {
+  // 确保用户气泡内容在设置变更时立即响应
+  const _deps = [
+    store.settings.userBubbleMode,
+    store.settings.userBubbleTemplate,
+    store.settings.showNovelTitle,
+    store.currentPage,
+    store.totalPages
+  ];
+  return getUserTextHtml(props.content, store, props.isDummyChat, props.chatTitle);
+});
 const aiResponseRaw = computed(() => getAiResponseRaw(props.content, props.isDummyChat));
 
-const formattedContent = computed(() => formatContent(props.content, store, props.isDummyChat, props.chatTitle));
+const formattedContent = computed(() => {
+  // 显式声明所有影响排版渲染的设置项作为响应式依赖，
+  // 确保在一键排版等操作修改这些值时，Vue 立即将本 computed 标脏并触发重新计算，
+  // 而不需要等到翻页或刷新时因组件重建才生效。
+  const _deps = [
+    store.settings.showNovelTitle,
+    store.settings.showChapterName,
+    store.settings.secondaryRenderMergeParagraphs,
+    store.settings.secondaryRenderMergeCount,
+    store.settings.secondaryRenderIndent,
+    store.settings.secondaryRenderObfuscationMode,
+    store.settings.secondaryRenderEnablePunctuation,
+    store.settings.secondaryRenderRemovePunctuation,
+    store.settings.secondaryRenderEnableReplace,
+    store.settings.secondaryRenderReplaceDict,
+    store.settings.secondaryRenderContentBlocks,
+    store.settings.secondaryRenderContentBlocksRandom,
+    store.settings.readingMode,
+    store.currentPage
+  ];
+  return formatContent(props.content, store, props.isDummyChat, props.chatTitle);
+});
 
 const formattedStreamingResponse = computed(() => {
   const text = props.streamingMainResponse;
