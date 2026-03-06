@@ -464,9 +464,15 @@ function handleInputSubmit() {
   }
 
   if (!store.currentAiConfig?.apiKey) {
-    store.showActionToast('尚未配置 API Key，无法使用 AI 问答能力', '立即设置', () => {
+    store.showActionToast('尚未配置 API Key，无法使用 AI 问答能力', '立即配置', () => {
       store.showSettings = true;
       store.autoExpandAdvanced = true;
+      nextTick(() => {
+        setTimeout(() => {
+          const el = document.getElementById('ai-api-key-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 500);
+      });
     });
     return;
   }

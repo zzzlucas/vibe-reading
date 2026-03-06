@@ -235,10 +235,10 @@ async function handleToolClick() {
     store.showSettings = true;
     store.autoExpandReading = true;
   } else {
-    store.showActionToast(store.comingSoonText, '配置该按钮功能', async () => {
-      const val = await store.selectDialog('为节省界面空间，请绑定工具按钮的快捷跳转目标：', [
+    store.showActionToast(store.comingSoonText, '可配置为快捷按钮', async () => {
+      const val = await store.selectDialog('可绑定Gemini风格下工具按钮的快捷跳转目标：', [
         { label: '排版设置', value: 'settings' }
-      ], 'settings', '配置工具按钮');
+      ], 'settings', '配置快捷按钮');
       if (val === 'settings') {
         store.settings.toolShortcut = 'settings';
         store.showSettings = true;

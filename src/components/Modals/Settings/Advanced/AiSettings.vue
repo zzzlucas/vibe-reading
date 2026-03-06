@@ -1,5 +1,5 @@
 <template>
-  <div class="advanced-sub-group">
+  <div class="advanced-sub-group" id="ai-api-key-section">
     <div class="sub-group-title">
       <icon-material-symbols-smart-toy />
       <span>AI 接入</span>
