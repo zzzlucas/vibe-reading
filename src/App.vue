@@ -267,6 +267,9 @@ onBeforeUnmount(() => {
 });
 
 function _logVibeConsole() {
+  if ((window as any)._vibeLogged) return;
+  (window as any)._vibeLogged = true;
+
   const quotes = [
     "“18世纪的工人在砸纺织机，21世纪的我们在用 AI 写周报，用 FindDeep 阅读。”",
     "“AI 负责让老板觉得你产出惊人，FindDeep 负责让你在这个过程中保持灵魂有趣。”",
@@ -280,6 +283,7 @@ function _logVibeConsole() {
     'color: #8ab4f8; font-style: italic;'
   );
 }
+
 
 </script>
 

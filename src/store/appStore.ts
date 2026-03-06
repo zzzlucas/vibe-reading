@@ -81,6 +81,8 @@ export const useAppStore = defineStore('app', () => {
   const hasModifiedSettings = ref(false);
   const activeReadingSeconds = ref(0);
   const inviteValidated = ref(false);
+  const deviceId = ref<string>('');
+
   // Custom Modal States
   const confirmVisible = ref(false);
   const confirmMessage = ref('');
@@ -214,13 +216,16 @@ export const useAppStore = defineStore('app', () => {
         localStorage.setItem('find_deep_device_id', finalId);
       }
       
+      deviceId.value = finalId;
       return finalId;
     } catch(err) {
       if (!lsId) {
         lsId = generateUid() + generateUid();
         localStorage.setItem('find_deep_device_id', lsId);
       }
+      deviceId.value = lsId;
       return lsId;
+
     }
   }
 
@@ -1116,6 +1121,19 @@ export const useAppStore = defineStore('app', () => {
     showToast('阅读记录与限制状态已清零 (仅限快速开发者测试)', 'achievement');
   }
 
+  function trackEvent(event: string, p?: Record<string, any>) {
+    // Mapping string events to protocol codes defined in tracker.ts
+    const eventMap: Record<string, number> = {
+      'first_open': 3001,
+      'click_activate_pro': 1001,
+      'change_theme': 1004,
+      'start_ai_chat': 1005,
+      'apply_preset': 4001,
+    };
+    const code = eventMap[event] || 9999;
+    import('@/utils/tracker').then(m => m.emit(code, { event_name: event, ...p }));
+  }
+
   function scrollToUpgrade() {
     forceMainSettings.value = true;
     scrollToPro.value = true;
@@ -1126,7 +1144,7 @@ export const useAppStore = defineStore('app', () => {
     // State
     novels, activeId, activeNovelId, activeNovelIndex, currentPage, totalPages, pages, chapters, generatingContexts,
     sidebarOpen, showWasteland, isPro, hasNaggedPro, showHelp, showSettings, showProfileModal, showActivateModal, showToc, bossMode,
-    theme, style, encoding, settings,
+    theme, style, encoding, settings, deviceId,
     autoExpandAdvanced, autoExpandReading, forceMainSettings, scrollToPro, autoPreview, comingSoonText, isNewAchievement, skipNextTypewriter, triggerTypewriter, fakeSidebarRefreshSeed, triggerSystemFileSignal,
     hasImportedFile, hasModifiedSettings, activeReadingSeconds,
     inviteValidated,
@@ -1149,8 +1167,10 @@ export const useAppStore = defineStore('app', () => {
     initStore, showToast, showActionToast, handleToastAction, confirmDialog, promptDialog, selectDialog, resolveConfirmDialog,
     generateUid, markJustAdded, applyBasicVibe, applyAdvancedVibe, applyDeepVibe,
     checkInviteValidation,
+    trackEvent,
     scrollToUpgrade,
     _saveNovelsMeta, _syncNovelPage, devClearReadCount,
+
 
     // Confirm Dialog State
     confirmVisible, confirmMessage, confirmTitle, confirmIsPrompt, confirmIsSelect, confirmSelectOptions, confirmDefaultValue, confirmPlaceholder,
