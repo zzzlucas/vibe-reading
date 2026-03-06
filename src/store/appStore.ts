@@ -244,16 +244,7 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  async function trackEvent(eventName: string, meta: any = {}) {
-    try {
-      const deviceId = await ensureDeviceId();
-      apiFetch('/api/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: eventName, deviceId, meta })
-      }).catch(()=>{});
-    } catch (err) {}
-  }
+
 
   function _generateSecurityHash(chars: number, deviceId: string): string {
     return generateSecurityHash(chars, deviceId);
@@ -1144,7 +1135,6 @@ export const useAppStore = defineStore('app', () => {
     ensureDeviceId,
     getInvitedBy,
     saveInvitedBy,
-    trackEvent,
 
     // State Expose
     aiSettings,

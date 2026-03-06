@@ -83,7 +83,10 @@ app.use('/api', (req, res, next) => {
   }
 
   // Verify signature: hash of "timestamp:path" keyed by deviceId
-  const urlObj = new URL(req.url, 'http://localhost');
+  // IMPORTANT: Use req.originalUrl (not req.url) because Express strips the
+  // mount-path (/api) from req.url, which would cause a path mismatch with
+  // the frontend that signs using the full pathname (e.g. /api/invite/info).
+  const urlObj = new URL(req.originalUrl, 'http://localhost');
   const path = urlObj.pathname;
   const expectedSig = _apiSignatureHash(`${timestamp}:${path}`, deviceId);
   if (signature !== expectedSig) {
