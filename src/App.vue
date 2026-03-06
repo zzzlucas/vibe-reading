@@ -39,6 +39,7 @@ import { onMounted, watchEffect, nextTick, watch, ref, onBeforeUnmount } from 'v
 import { useRouter, useRoute } from 'vue-router';
 import { useAppStore } from '@/store/appStore';
 import { apiFetch } from '@/utils/request';
+import { initSecurityMonitor } from '@/utils/tracker';
 
 import SettingsModal from '@/components/Modals/SettingsModal.vue';
 import ProfileModal from '@/components/Modals/ProfileModal.vue';
@@ -195,6 +196,9 @@ onMounted(async () => {
   checkActivation(); // Background check, non-blocking
   
   await store.initStore();
+
+  // 初始化信号采集（安全监测 + 批量上报定时器）
+  initSecurityMonitor();
 
   const idFromUrl = route.params.id as string;
   if (idFromUrl) {

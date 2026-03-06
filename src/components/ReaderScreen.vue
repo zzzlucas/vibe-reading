@@ -125,6 +125,7 @@ import { useFileProcessor } from '@/composables/useFileProcessor';
 import { useTypewriter } from '@/composables/useTypewriter';
 import { useBossStream } from '@/composables/useBossStream';
 import { apiFetch } from '@/utils/request';
+import { emit as trackEmit } from '@/utils/tracker';
 
 const store = useAppStore();
 const isDev = (import.meta as any).env?.DEV;
@@ -478,6 +479,7 @@ function handleInputSubmit() {
   }
 
   inputValue.value = '';
+  trackEmit(1005); // 发起 AI 对话
   handleAiChat(input);
 }
 

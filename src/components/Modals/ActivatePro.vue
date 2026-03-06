@@ -44,9 +44,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onBeforeUnmount } from 'vue';
 import { useAppStore } from '@/store/appStore';
 import { apiFetch } from '@/utils/request';
+import { emit } from '@/utils/tracker';
 
 const store = useAppStore();
 
@@ -55,12 +56,26 @@ const loading = ref(false);
 const statusMsg = ref('');
 const statusType = ref('');
 
+// ── 弹窗停留计时器 (1002) ──
+let stayTimer: ReturnType<typeof setTimeout> | null = null;
+
 watch(() => store.showActivateModal, (val) => {
-  if (!val) {
+  if (val) {
+    // 弹窗打开，开始计时
+    stayTimer = setTimeout(() => {
+      emit(1002, { dur: 10 }); // 停留超过 10s
+    }, 10000);
+  } else {
+    // 弹窗关闭，清计时器和状态
+    if (stayTimer) { clearTimeout(stayTimer); stayTimer = null; }
     cardKey.value = '';
     statusMsg.value = '';
     statusType.value = '';
   }
+});
+
+onBeforeUnmount(() => {
+  if (stayTimer) clearTimeout(stayTimer);
 });
 
 function openProSettings() {
@@ -74,6 +89,7 @@ async function handleActivate() {
   store.trackEvent('click_activate_pro');
   const code = cardKey.value.trim();
   if (!code) {
+    emit(1003); // 空卡密尝试激活
     statusType.value = 'error';
     statusMsg.value = '请输入有效的卡密';
     return;

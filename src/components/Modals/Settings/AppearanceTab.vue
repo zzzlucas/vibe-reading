@@ -59,6 +59,7 @@
 import { ref, watch, onMounted } from 'vue';
 import { useAppStore } from '@/store/appStore';
 import { STYLE_CONFIG } from '@/config/constants';
+import { emit } from '@/utils/tracker';
 import type { StyleName } from '@/types';
 
 const store = useAppStore();
@@ -76,6 +77,9 @@ const betaStyles = Object.entries(STYLE_CONFIG).filter(([_, conf]) => conf.isBet
 
 function setStyle(style: StyleName) {
   const config = STYLE_CONFIG[style];
+
+  // 埋点：记录用户点击的目标风格（含未上线的）
+  emit(1004, { to: style });
 
   // Disable "Not Online" (未上线) styles
   const isNotOnline = config.isBeta && !config.betaText && config.tagType !== 'pro' && config.tagType !== 'free';

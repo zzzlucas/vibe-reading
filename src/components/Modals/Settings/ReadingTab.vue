@@ -50,7 +50,7 @@
           </div>
           <div v-show="!store.settings.vibeQuickConfigCollapsed" class="vibe-quick-config-wrap" style="padding: 10px 16px 16px;">
             <div class="vibe-btns-row">
-              <button class="vibe-btn quick" @click="store.applyBasicVibe()" title="快速优化基础排版">
+              <button class="vibe-btn quick" @click="onPresetClick('basic')" title="快速优化基础排版">
                 <template v-if="store.settings.coffeeVibeMode">
                   <div class="steam-wrapper steam-1">
                     <div class="steam-line s-mid"></div>
@@ -63,7 +63,7 @@
                   <span>基础氛围</span>
                 </template>
               </button>
-              <button class="vibe-btn advanced" @click="store.applyAdvancedVibe()" title="轻度代码装饰">
+              <button class="vibe-btn advanced" @click="onPresetClick('advanced')" title="轻度代码装饰">
                 <template v-if="store.settings.coffeeVibeMode">
                   <div class="steam-wrapper steam-2">
                     <div class="steam-line s-left"></div>
@@ -77,7 +77,7 @@
                   <span>进阶氛围</span>
                 </template>
               </button>
-              <button class="vibe-btn deep" @click="store.applyDeepVibe()" title="启用全方位深度装饰">
+              <button class="vibe-btn deep" @click="onPresetClick('deep')" title="启用全方位深度装饰">
                 <template v-if="store.settings.coffeeVibeMode">
                   <div class="steam-wrapper steam-3">
                     <div class="steam-line s-left"></div>
@@ -491,6 +491,7 @@ import PageNavKeySettings from './Advanced/PageNavKeySettings.vue';
 import EngineSettings from './Advanced/EngineSettings.vue';
 import BossKeySettings from './Advanced/BossKeySettings.vue';
 import SampleChatSettings from './Advanced/SampleChatSettings.vue';
+import { emit } from '@/utils/tracker';
 
 const store = useAppStore();
 
@@ -564,8 +565,28 @@ function toggleFakeSidebarType(type: string) {
 }
 
 function setReadingMode(mode: 'page' | 'scroll') {
+  emit(4002, { k: 'readingMode', v: mode });
   store.settings.readingMode = mode;
 }
+
+// ── 一键排版预设点击埋点 (4001) ──
+function onPresetClick(preset: string) {
+  emit(4001, { k: preset });
+  if (preset === 'basic') store.applyBasicVibe();
+  else if (preset === 'advanced') store.applyAdvancedVibe();
+  else if (preset === 'deep') store.applyDeepVibe();
+}
+
+// ── 单独排版选项变更埋点 (4002) ──
+watch(() => store.settings.secondaryRenderObfuscationMode, (v) => emit(4002, { k: 'obfuscation', v }));
+watch(() => store.settings.secondaryRenderMergeParagraphs, (v) => emit(4002, { k: 'merge', v }));
+watch(() => store.settings.secondaryRenderIndent, (v) => emit(4002, { k: 'indent', v }));
+watch(() => store.settings.secondaryRenderEnablePunctuation, (v) => emit(4002, { k: 'punctuation', v }));
+watch(() => store.settings.typewriterMode, (v) => emit(4002, { k: 'typewriter', v }));
+watch(() => store.settings.showNovelTitle, (v) => emit(4002, { k: 'showTitle', v }));
+watch(() => store.settings.showChapterName, (v) => emit(4002, { k: 'showChapter', v }));
+watch(() => store.settings.showFakeSidebar, (v) => emit(4002, { k: 'sidebar', v }));
+watch(() => store.settings.userBubbleMode, (v) => emit(4002, { k: 'bubble', v }));
 
 </script>
 

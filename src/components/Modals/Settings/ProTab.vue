@@ -45,6 +45,7 @@
 import { ref, watch, onMounted, nextTick } from 'vue';
 import { useAppStore } from '@/store/appStore';
 import { apiFetch } from '@/utils/request';
+import { emit } from '@/utils/tracker';
 
 const store = useAppStore();
 const isCollapsed = ref(false);
@@ -67,6 +68,7 @@ function toggleCollapse() {
 }
 
 function openPro() {
+  emit(1001); // 点击"卡密升级"入口
   store.showSettings = false;
   store.showActivateModal = true;
 }
