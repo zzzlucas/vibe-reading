@@ -87,6 +87,10 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true
+      },
+      '/collect': {
+        target: 'http://localhost:8090',
+        changeOrigin: true
       }
     }
   },
